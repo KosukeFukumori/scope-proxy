@@ -65,7 +65,7 @@ def test_user(session: Session) -> User:
 @pytest_asyncio.fixture
 async def logged_in_client(client: AsyncClient, test_user: User) -> AsyncClient:
     response = await client.post(
-        "/_admin/login",
+        "/_admin/api/login",
         json={"email": test_user.email, "password": "testpass123"},
     )
     assert response.status_code == 200

@@ -17,7 +17,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   })
 
-  if (response.status === 401 && !path.endsWith('/_admin/login')) {
+  if (response.status === 401 && !path.endsWith('/_admin/api/login')) {
     window.location.href = '/_admin/login'
     throw new ApiError(401, 'Not authenticated')
   }

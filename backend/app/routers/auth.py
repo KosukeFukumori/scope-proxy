@@ -6,7 +6,7 @@ from app.deps import CurrentUserDep, SessionDep
 from app.models.user import User
 from app.schemas.auth import LoginRequest, UserRead
 
-router = APIRouter(tags=["auth"])
+router = APIRouter(prefix="/api", tags=["auth"])
 
 
 @router.post("/login", response_model=UserRead)

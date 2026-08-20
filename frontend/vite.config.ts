@@ -7,8 +7,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/_admin/login': 'http://127.0.0.1:8000',
-      '/_admin/logout': 'http://127.0.0.1:8000',
       '/_admin/api': 'http://127.0.0.1:8000',
     },
   },

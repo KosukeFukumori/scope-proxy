@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, Response
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
@@ -48,7 +48,20 @@ app.include_router(operations.router, prefix="/_admin")
 app.include_router(schema_snapshots.router, prefix="/_admin")
 
 if FRONTEND_DIST.is_dir():
-    app.mount("/_admin", StaticFiles(directory=FRONTEND_DIST, html=True), name="admin-frontend")
+
+    @app.get("/_admin/{full_path:path}", include_in_schema=False)
+    async def serve_frontend(full_path: str) -> Response:
+        """フロントエンドのSPAを配信する。実ファイルが存在すればそれを返し、
+        それ以外(react-routerのクライアントサイドルート)はindex.htmlにフォールバックする。
+        """
+        candidate = (FRONTEND_DIST / full_path).resolve()
+        if full_path and candidate.is_file() and FRONTEND_DIST in candidate.parents:
+            return FileResponse(candidate)
+
+        index_file = FRONTEND_DIST / "index.html"
+        if not index_file.is_file():
+            raise HTTPException(status_code=404)
+        return FileResponse(index_file)
 
 # プロキシは全パスのcatch-allのため、必ず他のルーター・静的ファイルの登録後に最後へ追加する
 app.include_router(proxy.router)

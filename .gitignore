@@ -17,3 +17,6 @@ frontend/dist/
 .DS_Store
 .vscode/
 .idea/
+
+# playwright-cli scratch data
+.playwright-cli/
