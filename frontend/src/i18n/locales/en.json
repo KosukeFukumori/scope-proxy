@@ -10,7 +10,8 @@
       "dashboard": "Backend Config",
       "operations": "Operations",
       "snapshots": "History",
-      "tokens": "Tokens"
+      "tokens": "Tokens",
+      "usage": "Usage"
     },
     "logout": "Log out",
     "language": "Language"
@@ -142,7 +143,37 @@
     "title": "Token issued",
     "warning": "This token will never be shown again. Save it somewhere safe now.",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "usageTitle": "Usage",
+    "usageDescription": "For allowed operations, send the token in the Authorization header like this:",
+    "copyUsage": "Copy command"
+  },
+  "usage": {
+    "title": "Usage",
+    "description": "How to call your backend API through scope-proxy.",
+    "step1": {
+      "title": "1. Configure the backend",
+      "description": "On the \"Backend Config\" page, register the base URL of the proxied backend and the URL of the OpenAPI JSON used for per-operationId permission management."
+    },
+    "step2": {
+      "title": "2. Check the operations",
+      "description": "On the \"Operations\" page, you can see the list of operationIds fetched from the connected OpenAPI schema. Inactive operations can never be accessed by any token."
+    },
+    "step3": {
+      "title": "3. Issue a token",
+      "description": "From \"Issue new token\" on the \"Tokens\" page, specify a name, an optional expiration, and the allowed operations. Save the <code>raw_token</code> value shown right after issuing — it will never be shown again."
+    },
+    "step4": {
+      "title": "4. Call the API",
+      "description": "Send the token as a Bearer value in the Authorization header, and request the same path and method as the backend, against scope-proxy's own origin.",
+      "hint": "Use the path and method that correspond to an operationId allowed for that token. Requests to operations that aren't allowed return 403."
+    },
+    "errors": {
+      "title": "Error responses",
+      "unauthorized": "401: the token is missing, invalid, revoked, or expired",
+      "forbidden": "403: the operationId isn't allowed for the token, or the operation is inactive",
+      "notFound": "404: the path/method doesn't exist in the connected OpenAPI schema"
+    }
   },
   "ui": {
     "loading": "Loading..."

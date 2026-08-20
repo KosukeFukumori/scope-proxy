@@ -10,7 +10,8 @@
       "dashboard": "接続先設定",
       "operations": "オペレーション",
       "snapshots": "変更履歴",
-      "tokens": "トークン"
+      "tokens": "トークン",
+      "usage": "使い方"
     },
     "logout": "ログアウト",
     "language": "言語"
@@ -142,7 +143,37 @@
     "title": "トークンを発行しました",
     "warning": "このトークンは二度と表示されません。今のうちに安全な場所へ保存してください。",
     "copy": "コピー",
-    "copied": "コピーしました"
+    "copied": "コピーしました",
+    "usageTitle": "使い方",
+    "usageDescription": "許可したオペレーションに対して、次のように Authorization ヘッダーにトークンを付けてリクエストしてください。",
+    "copyUsage": "コマンドをコピー"
+  },
+  "usage": {
+    "title": "使い方",
+    "description": "scope-proxy 経由でバックエンドAPIを呼び出すまでの流れを説明します。",
+    "step1": {
+      "title": "1. 接続先を設定する",
+      "description": "「接続先設定」画面で、プロキシ先のバックエンドのベースURLと、operationId 単位の権限管理に使う OpenAPI JSON の取得元URLを登録します。"
+    },
+    "step2": {
+      "title": "2. オペレーションを確認する",
+      "description": "「オペレーション」画面で、接続先の OpenAPI スキーマから取得した operationId の一覧を確認できます。無効化したオペレーションはどのトークンからもアクセスできません。"
+    },
+    "step3": {
+      "title": "3. トークンを発行する",
+      "description": "「トークン」画面の「新規発行」から、名前・有効期限・許可するオペレーションを指定してトークンを発行します。発行直後のみ表示される <code>raw_token</code> の値を安全な場所に保存してください。"
+    },
+    "step4": {
+      "title": "4. APIを呼び出す",
+      "description": "発行したトークンを Authorization ヘッダーに Bearer 形式で付与し、scope-proxy 自身のオリジンに対して、バックエンドと同じパス・メソッドでリクエストしてください。",
+      "hint": "パスとメソッドは、そのトークンに許可した operationId に対応するものを使用してください。許可されていないオペレーションへのリクエストは 403 が返ります。"
+    },
+    "errors": {
+      "title": "エラーレスポンス",
+      "unauthorized": "401: トークンが未指定・無効・失効済み・期限切れの場合",
+      "forbidden": "403: トークンに許可されていない operationId、または無効化されたオペレーションへアクセスした場合",
+      "notFound": "404: 接続先の OpenAPI スキーマに存在しないパス・メソッドの場合"
+    }
   },
   "ui": {
     "loading": "読み込み中..."
