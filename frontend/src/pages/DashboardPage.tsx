@@ -1,25 +1,21 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
-import { ApiError } from '../api/client'
 import { Layout } from '../components/Layout'
+import { EmptyState, ErrorAlert, Loading, PageHeader } from '../components/ui'
+import { errorMessage, formatDateTime } from '../lib/format'
+import type { BackendConfig } from '../types/api'
 
-export function DashboardPage() {
+function ConfigForm({ config }: { config: BackendConfig | null }) {
   const queryClient = useQueryClient()
-  const configQuery = useQuery({ queryKey: ['backendConfig'], queryFn: getBackendConfig, retry: false })
-  const snapshotsQuery = useQuery({ queryKey: ['schemaSnapshots'], queryFn: listSchemaSnapshots })
-
-  const [endpointUrl, setEndpointUrl] = useState('')
-  const [openapiUrl, setOpenapiUrl] = useState('')
-
-  const config = configQuery.data
-  const formEndpointUrl = endpointUrl || config?.endpoint_url || ''
-  const formOpenapiUrl = openapiUrl || config?.openapi_url || ''
+  const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? '')
+  const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? '')
 
   const saveMutation = useMutation({
-    mutationFn: () => upsertBackendConfig(formEndpointUrl, formOpenapiUrl),
+    mutationFn: () => upsertBackendConfig(endpointUrl, openapiUrl),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
     },
@@ -40,92 +36,120 @@ export function DashboardPage() {
   }
 
   return (
-    <Layout>
-      <h1>接続先設定</h1>
-
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          background: '#fff',
-          padding: '1.5rem',
-          borderRadius: '8px',
-          maxWidth: '480px',
-        }}
-      >
-        <label>
-          エンドポイントURL
+    <form className="card" onSubmit={handleSubmit}>
+      <div className="card__body stack">
+        <div className="field">
+          <label className="field__label" htmlFor="endpoint-url">
+            エンドポイントURL
+          </label>
           <input
+            id="endpoint-url"
+            className="input"
             type="url"
-            value={formEndpointUrl}
+            value={endpointUrl}
             onChange={(e) => setEndpointUrl(e.target.value)}
             placeholder="https://api.example.com"
             required
-            style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
           />
-        </label>
-        <label>
-          OpenAPI JSON URL
+          <p className="field__hint">リクエストの転送先となるバックエンドのベースURL。</p>
+        </div>
+
+        <div className="field">
+          <label className="field__label" htmlFor="openapi-url">
+            OpenAPI JSON URL
+          </label>
           <input
+            id="openapi-url"
+            className="input"
             type="url"
-            value={formOpenapiUrl}
+            value={openapiUrl}
             onChange={(e) => setOpenapiUrl(e.target.value)}
             placeholder="https://api.example.com/openapi.json"
             required
-            style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
           />
-        </label>
-        {saveMutation.isError && (
-          <p style={{ color: '#dc2626', margin: 0 }}>
-            {saveMutation.error instanceof ApiError ? saveMutation.error.message : '保存に失敗しました'}
+          <p className="field__hint">operationId 単位の権限管理に使用するスキーマの取得元。</p>
+        </div>
+
+        {saveMutation.isError && <ErrorAlert>{errorMessage(saveMutation.error, '保存に失敗しました')}</ErrorAlert>}
+        {refreshMutation.isError && (
+          <ErrorAlert>{errorMessage(refreshMutation.error, 'スキーマの更新に失敗しました')}</ErrorAlert>
+        )}
+        {refreshMutation.isSuccess && (
+          <p className="muted" style={{ fontSize: '0.875rem' }}>
+            差分: <code>{refreshMutation.data.diff_summary}</code>
           </p>
         )}
-        <button type="submit" disabled={saveMutation.isPending} style={{ alignSelf: 'flex-start', padding: '0.5rem 1rem' }}>
-          保存
-        </button>
-      </form>
-
-      <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending || !config}>
-          {refreshMutation.isPending ? '更新中...' : '今すぐ更新'}
-        </button>
-        {config?.last_fetched_at && (
-          <span style={{ color: '#6b7280' }}>
-            最終取得: {new Date(config.last_fetched_at).toLocaleString()}
-          </span>
-        )}
       </div>
-      {refreshMutation.isError && (
-        <p style={{ color: '#dc2626' }}>
-          {refreshMutation.error instanceof ApiError ? refreshMutation.error.message : '更新に失敗しました'}
-        </p>
+
+      <div className="card__footer">
+        <button type="submit" className="btn btn--primary" disabled={saveMutation.isPending}>
+          {saveMutation.isPending ? '保存中...' : '保存'}
+        </button>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => refreshMutation.mutate()}
+          disabled={refreshMutation.isPending || !config}
+        >
+          {refreshMutation.isPending ? '更新中...' : 'スキーマを今すぐ更新'}
+        </button>
+        <span className="muted" style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>
+          最終取得: {formatDateTime(config?.last_fetched_at, '未取得')}
+        </span>
+      </div>
+    </form>
+  )
+}
+
+export function DashboardPage() {
+  const configQuery = useQuery({ queryKey: ['backendConfig'], queryFn: getBackendConfig, retry: false })
+  const snapshotsQuery = useQuery({ queryKey: ['schemaSnapshots'], queryFn: listSchemaSnapshots })
+  const recentSnapshots = snapshotsQuery.data?.slice(0, 5) ?? []
+
+  return (
+    <Layout>
+      <PageHeader title="接続先設定" description="プロキシ先のバックエンドと OpenAPI スキーマの取得元を設定します。" />
+
+      {configQuery.isLoading ? (
+        <Loading />
+      ) : (
+        <ConfigForm key={configQuery.data?.id ?? 'new'} config={configQuery.data ?? null} />
       )}
 
-      <h2 style={{ marginTop: '2rem' }}>直近の変更履歴</h2>
-      {snapshotsQuery.data && snapshotsQuery.data.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>取得日時</th>
-              <th>差分</th>
-            </tr>
-          </thead>
-          <tbody>
-            {snapshotsQuery.data.slice(0, 5).map((snapshot) => (
-              <tr key={snapshot.id}>
-                <td>{new Date(snapshot.fetched_at).toLocaleString()}</td>
-                <td>
-                  <code>{snapshot.diff_summary}</code>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p style={{ color: '#6b7280' }}>まだ更新履歴がありません。</p>
-      )}
+      <section className="section">
+        <div className="section__header">
+          <h2>直近の変更履歴</h2>
+          <Link to="/snapshots">すべて表示</Link>
+        </div>
+
+        {recentSnapshots.length === 0 ? (
+          <EmptyState
+            title="まだ更新履歴がありません"
+            description="「スキーマを今すぐ更新」を実行すると履歴が記録されます。"
+          />
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>取得日時</th>
+                  <th>差分</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentSnapshots.map((snapshot) => (
+                  <tr key={snapshot.id}>
+                    <td className="td--num">{formatDateTime(snapshot.fetched_at)}</td>
+                    <td>
+                      <code>{snapshot.diff_summary}</code>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </Layout>
   )
 }

@@ -3,7 +3,8 @@ import type { FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
-import { ApiError } from '../api/client'
+import { errorMessage } from '../lib/format'
+import { ErrorAlert } from '../components/ui'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,49 +26,55 @@ export function LoginPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          background: '#fff',
-          padding: '2rem',
-          borderRadius: '8px',
-          width: '320px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        }}
-      >
-        <h1 style={{ fontSize: '1.25rem', margin: 0 }}>scope-proxy ログイン</h1>
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
-        {loginMutation.isError && (
-          <p style={{ color: '#dc2626', margin: 0 }}>
-            {loginMutation.error instanceof ApiError ? loginMutation.error.message : 'ログインに失敗しました'}
-          </p>
-        )}
-        <button type="submit" disabled={loginMutation.isPending} style={{ padding: '0.6rem' }}>
-          {loginMutation.isPending ? 'ログイン中...' : 'ログイン'}
-        </button>
+    <div className="login-screen">
+      <form className="login-card" onSubmit={handleSubmit}>
+        <div className="login-card__head">
+          <span className="app-brand__mark" style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.9rem' }}>
+            SP
+          </span>
+          <h1>scope-proxy</h1>
+          <p className="page-header__description">管理画面にログイン</p>
+        </div>
+
+        <div className="stack">
+          <div className="field">
+            <label className="field__label" htmlFor="email">
+              メールアドレス
+            </label>
+            <input
+              id="email"
+              className="input"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="field">
+            <label className="field__label" htmlFor="password">
+              パスワード
+            </label>
+            <input
+              id="password"
+              className="input"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {loginMutation.isError && (
+            <ErrorAlert>{errorMessage(loginMutation.error, 'ログインに失敗しました')}</ErrorAlert>
+          )}
+
+          <button type="submit" className="btn btn--primary btn--block" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? 'ログイン中...' : 'ログイン'}
+          </button>
+        </div>
       </form>
     </div>
   )

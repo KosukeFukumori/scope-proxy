@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -7,58 +8,23 @@ import { TokensPage } from './pages/TokensPage'
 import { TokenEditPage } from './pages/TokenEditPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
+/** ログイン必須のページ一覧。 */
+const PROTECTED_ROUTES: { path: string; element: ReactNode }[] = [
+  { path: '/', element: <DashboardPage /> },
+  { path: '/operations', element: <OperationsPage /> },
+  { path: '/snapshots', element: <SnapshotsPage /> },
+  { path: '/tokens', element: <TokensPage /> },
+  { path: '/tokens/new', element: <TokenEditPage /> },
+  { path: '/tokens/:id', element: <TokenEditPage /> },
+]
+
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/operations"
-        element={
-          <ProtectedRoute>
-            <OperationsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/snapshots"
-        element={
-          <ProtectedRoute>
-            <SnapshotsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tokens"
-        element={
-          <ProtectedRoute>
-            <TokensPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tokens/new"
-        element={
-          <ProtectedRoute>
-            <TokenEditPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tokens/:id"
-        element={
-          <ProtectedRoute>
-            <TokenEditPage />
-          </ProtectedRoute>
-        }
-      />
+      {PROTECTED_ROUTES.map((route) => (
+        <Route key={route.path} path={route.path} element={<ProtectedRoute>{route.element}</ProtectedRoute>} />
+      ))}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
