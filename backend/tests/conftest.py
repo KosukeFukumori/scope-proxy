@@ -1,6 +1,7 @@
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
 
+import httpx
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -36,6 +37,13 @@ def override_get_session(engine):
     app.dependency_overrides[get_session] = _get_session_override
     yield
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def backend_http_client() -> AsyncGenerator[httpx.AsyncClient]:
+    async with httpx.AsyncClient() as http_client:
+        app.state.http_client = http_client
+        yield http_client
 
 
 @pytest_asyncio.fixture
