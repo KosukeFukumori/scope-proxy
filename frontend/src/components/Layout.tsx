@@ -25,6 +25,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: '/operations', label: t('layout.nav.operations'), end: false },
     { to: '/snapshots', label: t('layout.nav.snapshots'), end: false },
     { to: '/tokens', label: t('layout.nav.tokens'), end: false },
+    { to: '/usage', label: t('layout.nav.usage'), end: false },
   ]
 
   const logoutMutation = useMutation({

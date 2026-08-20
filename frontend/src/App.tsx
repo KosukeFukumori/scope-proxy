@@ -6,6 +6,7 @@ import { OperationsPage } from './pages/OperationsPage'
 import { SnapshotsPage } from './pages/SnapshotsPage'
 import { TokensPage } from './pages/TokensPage'
 import { TokenEditPage } from './pages/TokenEditPage'
+import { UsagePage } from './pages/UsagePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 /** ログイン必須のページ一覧。 */
@@ -16,6 +17,7 @@ const PROTECTED_ROUTES: { path: string; element: ReactNode }[] = [
   { path: '/tokens', element: <TokensPage /> },
   { path: '/tokens/new', element: <TokenEditPage /> },
   { path: '/tokens/:id', element: <TokenEditPage /> },
+  { path: '/usage', element: <UsagePage /> },
 ]
 
 function App() {
