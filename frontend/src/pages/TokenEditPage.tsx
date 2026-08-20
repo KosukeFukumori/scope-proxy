@@ -21,6 +21,7 @@ function TokenForm({
   initialToken: TokenDetail | null
   operations: Operation[]
 }) {
+  const operationById = new Map(operations.map((operation) => [operation.operation_id, operation]))
   const { t } = useTranslation()
   const isEditing = tokenId !== null
   const navigate = useNavigate()
@@ -133,6 +134,7 @@ function TokenForm({
       {issuedRawToken && (
         <TokenValueDialog
           rawToken={issuedRawToken}
+          sampleOperation={operationById.get([...selectedIds][0] ?? '') ?? null}
           onClose={() => {
             setIssuedRawToken(null)
             navigate('/tokens')
