@@ -39,3 +39,14 @@ async def test_logout_invalidates_session(logged_in_client: AsyncClient) -> None
 
     response = await logged_in_client.post("/_admin/logout")
     assert response.status_code == 401
+
+
+async def test_me_requires_authentication(client: AsyncClient) -> None:
+    response = await client.get("/_admin/me")
+    assert response.status_code == 401
+
+
+async def test_me_returns_current_user(logged_in_client: AsyncClient, test_user: User) -> None:
+    response = await logged_in_client.get("/_admin/me")
+    assert response.status_code == 200
+    assert response.json() == {"id": test_user.id, "email": test_user.email}

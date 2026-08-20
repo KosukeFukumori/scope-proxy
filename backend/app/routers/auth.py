@@ -22,3 +22,8 @@ def login(payload: LoginRequest, request: Request, session: SessionDep) -> User:
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(request: Request, current_user: CurrentUserDep) -> None:
     request.session.clear()
+
+
+@router.get("/me", response_model=UserRead)
+def me(current_user: CurrentUserDep) -> User:
+    return current_user
