@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { listTokens, revokeToken } from '../api/tokens'
 import { Layout } from '../components/Layout'
 import { Badge, EmptyState, Loading, PageHeader } from '../components/ui'
@@ -7,16 +8,18 @@ import { formatDateTime } from '../lib/format'
 import type { TokenSummary } from '../types/api'
 
 function StatusBadge({ token }: { token: TokenSummary }) {
+  const { t } = useTranslation()
   if (token.revoked_at !== null) {
-    return <Badge tone="danger">失効済み</Badge>
+    return <Badge tone="danger">{t('tokens.status.revoked')}</Badge>
   }
   if (token.expires_at !== null && new Date(token.expires_at) <= new Date()) {
-    return <Badge tone="warning">期限切れ</Badge>
+    return <Badge tone="warning">{t('tokens.status.expired')}</Badge>
   }
-  return <Badge tone="success">有効</Badge>
+  return <Badge tone="success">{t('tokens.status.active')}</Badge>
 }
 
 export function TokensPage() {
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const tokensQuery = useQuery({ queryKey: ['tokens'], queryFn: listTokens })
 
@@ -32,11 +35,11 @@ export function TokensPage() {
   return (
     <Layout>
       <PageHeader
-        title="トークン"
-        description="発行したトークンごとに、許可するオペレーションを設定できます。"
+        title={t('tokens.title')}
+        description={t('tokens.description')}
         actions={
           <Link to="/tokens/new" className="btn btn--primary">
-            新規発行
+            {t('tokens.newToken')}
           </Link>
         }
       />
@@ -45,11 +48,11 @@ export function TokensPage() {
 
       {!tokensQuery.isLoading && tokens.length === 0 && (
         <EmptyState
-          title="トークンがまだありません"
-          description="「新規発行」から最初のトークンを作成してください。"
+          title={t('tokens.empty.title')}
+          description={t('tokens.empty.description')}
           action={
             <Link to="/tokens/new" className="btn btn--primary">
-              新規発行
+              {t('tokens.newToken')}
             </Link>
           }
         />
@@ -60,11 +63,11 @@ export function TokensPage() {
           <table className="table">
             <thead>
               <tr>
-                <th>名前</th>
-                <th>状態</th>
-                <th>発行日時</th>
-                <th>有効期限</th>
-                <th>最終使用</th>
+                <th>{t('tokens.table.name')}</th>
+                <th>{t('tokens.table.status')}</th>
+                <th>{t('tokens.table.createdAt')}</th>
+                <th>{t('tokens.table.expiresAt')}</th>
+                <th>{t('tokens.table.lastUsedAt')}</th>
                 <th />
               </tr>
             </thead>
@@ -77,9 +80,13 @@ export function TokensPage() {
                   <td>
                     <StatusBadge token={token} />
                   </td>
-                  <td className="td--num">{formatDateTime(token.created_at)}</td>
-                  <td className="td--num">{formatDateTime(token.expires_at, '無期限')}</td>
-                  <td className="td--num">{formatDateTime(token.last_used_at, '未使用')}</td>
+                  <td className="td--num">{formatDateTime(token.created_at, undefined, i18n.resolvedLanguage)}</td>
+                  <td className="td--num">
+                    {formatDateTime(token.expires_at, t('tokens.noExpiry'), i18n.resolvedLanguage)}
+                  </td>
+                  <td className="td--num">
+                    {formatDateTime(token.last_used_at, t('tokens.notUsed'), i18n.resolvedLanguage)}
+                  </td>
                   <td className="td--actions">
                     {token.revoked_at === null && (
                       <button
@@ -88,7 +95,7 @@ export function TokensPage() {
                         onClick={() => revokeMutation.mutate(token.id)}
                         disabled={revokeMutation.isPending}
                       >
-                        失効
+                        {t('tokens.revoke')}
                       </button>
                     )}
                   </td>

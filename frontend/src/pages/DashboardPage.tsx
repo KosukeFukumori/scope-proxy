@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
 import { Layout } from '../components/Layout'
@@ -10,6 +11,7 @@ import { errorMessage, formatDateTime } from '../lib/format'
 import type { BackendConfig } from '../types/api'
 
 function ConfigForm({ config }: { config: BackendConfig | null }) {
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? '')
   const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? '')
@@ -40,7 +42,7 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
       <div className="card__body stack">
         <div className="field">
           <label className="field__label" htmlFor="endpoint-url">
-            エンドポイントURL
+            {t('dashboard.form.endpointUrlLabel')}
           </label>
           <input
             id="endpoint-url"
@@ -51,12 +53,12 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             placeholder="https://api.example.com"
             required
           />
-          <p className="field__hint">リクエストの転送先となるバックエンドのベースURL。</p>
+          <p className="field__hint">{t('dashboard.form.endpointUrlHint')}</p>
         </div>
 
         <div className="field">
           <label className="field__label" htmlFor="openapi-url">
-            OpenAPI JSON URL
+            {t('dashboard.form.openapiUrlLabel')}
           </label>
           <input
             id="openapi-url"
@@ -67,23 +69,25 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             placeholder="https://api.example.com/openapi.json"
             required
           />
-          <p className="field__hint">operationId 単位の権限管理に使用するスキーマの取得元。</p>
+          <p className="field__hint">{t('dashboard.form.openapiUrlHint')}</p>
         </div>
 
-        {saveMutation.isError && <ErrorAlert>{errorMessage(saveMutation.error, '保存に失敗しました')}</ErrorAlert>}
+        {saveMutation.isError && (
+          <ErrorAlert>{errorMessage(saveMutation.error, t('dashboard.form.saveError'))}</ErrorAlert>
+        )}
         {refreshMutation.isError && (
-          <ErrorAlert>{errorMessage(refreshMutation.error, 'スキーマの更新に失敗しました')}</ErrorAlert>
+          <ErrorAlert>{errorMessage(refreshMutation.error, t('dashboard.form.refreshError'))}</ErrorAlert>
         )}
         {refreshMutation.isSuccess && (
           <p className="muted" style={{ fontSize: '0.875rem' }}>
-            差分: <code>{refreshMutation.data.diff_summary}</code>
+            {t('dashboard.form.diffLabel')} <code>{refreshMutation.data.diff_summary}</code>
           </p>
         )}
       </div>
 
       <div className="card__footer">
         <button type="submit" className="btn btn--primary" disabled={saveMutation.isPending}>
-          {saveMutation.isPending ? '保存中...' : '保存'}
+          {saveMutation.isPending ? t('dashboard.form.saving') : t('dashboard.form.save')}
         </button>
         <button
           type="button"
@@ -91,10 +95,10 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
           onClick={() => refreshMutation.mutate()}
           disabled={refreshMutation.isPending || !config}
         >
-          {refreshMutation.isPending ? '更新中...' : 'スキーマを今すぐ更新'}
+          {refreshMutation.isPending ? t('dashboard.form.refreshing') : t('dashboard.form.refreshNow')}
         </button>
         <span className="muted" style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>
-          最終取得: {formatDateTime(config?.last_fetched_at, '未取得')}
+          {t('dashboard.form.lastFetched')} {formatDateTime(config?.last_fetched_at, t('dashboard.form.notFetched'), i18n.resolvedLanguage)}
         </span>
       </div>
     </form>
@@ -102,13 +106,14 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
 }
 
 export function DashboardPage() {
+  const { t, i18n } = useTranslation()
   const configQuery = useQuery({ queryKey: ['backendConfig'], queryFn: getBackendConfig, retry: false })
   const snapshotsQuery = useQuery({ queryKey: ['schemaSnapshots'], queryFn: listSchemaSnapshots })
   const recentSnapshots = snapshotsQuery.data?.slice(0, 5) ?? []
 
   return (
     <Layout>
-      <PageHeader title="接続先設定" description="プロキシ先のバックエンドと OpenAPI スキーマの取得元を設定します。" />
+      <PageHeader title={t('dashboard.title')} description={t('dashboard.description')} />
 
       {configQuery.isLoading ? (
         <Loading />
@@ -118,28 +123,28 @@ export function DashboardPage() {
 
       <section className="section">
         <div className="section__header">
-          <h2>直近の変更履歴</h2>
-          <Link to="/snapshots">すべて表示</Link>
+          <h2>{t('dashboard.recentSnapshots')}</h2>
+          <Link to="/snapshots">{t('dashboard.viewAll')}</Link>
         </div>
 
         {recentSnapshots.length === 0 ? (
           <EmptyState
-            title="まだ更新履歴がありません"
-            description="「スキーマを今すぐ更新」を実行すると履歴が記録されます。"
+            title={t('dashboard.emptySnapshots.title')}
+            description={t('dashboard.emptySnapshots.description')}
           />
         ) : (
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
-                  <th>取得日時</th>
-                  <th>差分</th>
+                  <th>{t('dashboard.table.fetchedAt')}</th>
+                  <th>{t('dashboard.table.diff')}</th>
                 </tr>
               </thead>
               <tbody>
                 {recentSnapshots.map((snapshot) => (
                   <tr key={snapshot.id}>
-                    <td className="td--num">{formatDateTime(snapshot.fetched_at)}</td>
+                    <td className="td--num">{formatDateTime(snapshot.fetched_at, undefined, i18n.resolvedLanguage)}</td>
                     <td>
                       <code>{snapshot.diff_summary}</code>
                     </td>

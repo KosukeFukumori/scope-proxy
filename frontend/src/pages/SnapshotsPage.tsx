@@ -1,27 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { listSchemaSnapshots } from '../api/operations'
 import { Layout } from '../components/Layout'
 import { EmptyState, Loading, PageHeader } from '../components/ui'
 import { formatDateTime } from '../lib/format'
 
 export function SnapshotsPage() {
+  const { t, i18n } = useTranslation()
   const snapshotsQuery = useQuery({ queryKey: ['schemaSnapshots'], queryFn: listSchemaSnapshots })
   const snapshots = snapshotsQuery.data ?? []
 
   return (
     <Layout>
-      <PageHeader
-        title="スキーマ変更履歴"
-        description="OpenAPI スキーマを取得するたびに、内容のハッシュと差分を記録します。"
-      />
+      <PageHeader title={t('snapshots.title')} description={t('snapshots.description')} />
 
       {snapshotsQuery.isLoading && <Loading />}
 
       {!snapshotsQuery.isLoading && snapshots.length === 0 && (
-        <EmptyState
-          title="まだ更新履歴がありません"
-          description="接続先設定から「スキーマを今すぐ更新」を実行してください。"
-        />
+        <EmptyState title={t('snapshots.empty.title')} description={t('snapshots.empty.description')} />
       )}
 
       {snapshots.length > 0 && (
@@ -29,15 +25,15 @@ export function SnapshotsPage() {
           <table className="table">
             <thead>
               <tr>
-                <th>取得日時</th>
-                <th>spec_hash</th>
-                <th>差分</th>
+                <th>{t('snapshots.table.fetchedAt')}</th>
+                <th>{t('snapshots.table.specHash')}</th>
+                <th>{t('snapshots.table.diff')}</th>
               </tr>
             </thead>
             <tbody>
               {snapshots.map((snapshot) => (
                 <tr key={snapshot.id}>
-                  <td className="td--num">{formatDateTime(snapshot.fetched_at)}</td>
+                  <td className="td--num">{formatDateTime(snapshot.fetched_at, undefined, i18n.resolvedLanguage)}</td>
                   <td className="mono muted" title={snapshot.spec_hash}>
                     {snapshot.spec_hash.slice(0, 12)}
                   </td>
