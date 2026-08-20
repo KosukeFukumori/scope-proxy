@@ -1,0 +1,64 @@
+from collections.abc import AsyncGenerator, Generator
+from pathlib import Path
+
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlmodel import Session, SQLModel, create_engine
+
+from app.auth.password import hash_password
+from app.db import get_session
+from app.main import app
+from app.models.user import User
+
+
+@pytest.fixture
+def engine(tmp_path: Path) -> Generator:
+    db_path = tmp_path / "test.db"
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    engine.dispose()
+
+
+@pytest.fixture
+def session(engine) -> Generator[Session]:
+    with Session(engine) as session:
+        yield session
+
+
+@pytest.fixture(autouse=True)
+def override_get_session(engine):
+    def _get_session_override() -> Generator[Session]:
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_session] = _get_session_override
+    yield
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def client() -> AsyncGenerator[AsyncClient]:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
+        yield ac
+
+
+@pytest.fixture
+def test_user(session: Session) -> User:
+    user = User(email="test@example.com", password_hash=hash_password("testpass123"))
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+@pytest_asyncio.fixture
+async def logged_in_client(client: AsyncClient, test_user: User) -> AsyncClient:
+    response = await client.post(
+        "/_admin/login",
+        json={"email": test_user.email, "password": "testpass123"},
+    )
+    assert response.status_code == 200
+    return client

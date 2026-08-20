@@ -1,0 +1,38 @@
+"""初回管理ユーザーを作成するCLI。
+
+使い方: uv run scripts/create_admin_user.py
+"""
+
+import getpass
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from sqlmodel import Session, select
+
+from app.auth.password import hash_password
+from app.db import create_db_and_tables, engine
+from app.models.user import User
+
+
+def main() -> None:
+    create_db_and_tables()
+
+    email = input("Email: ").strip()
+    password = getpass.getpass("Password: ")
+
+    with Session(engine) as session:
+        existing = session.exec(select(User).where(User.email == email)).first()
+        if existing is not None:
+            print(f"User {email} already exists.", file=sys.stderr)
+            sys.exit(1)
+
+        user = User(email=email, password_hash=hash_password(password))
+        session.add(user)
+        session.commit()
+        print(f"Created user {email}.")
+
+
+if __name__ == "__main__":
+    main()

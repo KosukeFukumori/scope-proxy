@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "scope-proxy backend (FastAPI wrapper server)"
 requires-python = ">=3.13"
 dependencies = [
+    "bcrypt<4.1",
+    "email-validator>=2.3.0",
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
     "itsdangerous>=2.2.0",
@@ -21,3 +23,6 @@ dev = [
     "respx>=0.23.1",
     "ruff>=0.16.3",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
