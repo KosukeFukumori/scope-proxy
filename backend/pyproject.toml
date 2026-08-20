@@ -1,0 +1,23 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "scope-proxy backend (FastAPI wrapper server)"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "itsdangerous>=2.2.0",
+    "openapi-core>=0.23.1",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.32",
+    "sqlmodel>=0.0.39",
+    "uvicorn[standard]>=0.52.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "respx>=0.23.1",
+    "ruff>=0.16.3",
+]
