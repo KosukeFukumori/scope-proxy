@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
 from app.db import create_db_and_tables
-from app.routers import auth, backend_config, tokens
+from app.routers import auth, backend_config, operations, schema_snapshots, tokens
 
 
 @asynccontextmanager
@@ -22,3 +22,5 @@ app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 app.include_router(auth.router, prefix="/_admin")
 app.include_router(backend_config.router, prefix="/_admin")
 app.include_router(tokens.router, prefix="/_admin")
+app.include_router(operations.router, prefix="/_admin")
+app.include_router(schema_snapshots.router, prefix="/_admin")
