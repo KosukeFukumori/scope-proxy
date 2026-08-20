@@ -2,11 +2,13 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { login } from '../api/auth'
 import { errorMessage } from '../lib/format'
 import { ErrorAlert } from '../components/ui'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
@@ -32,14 +34,14 @@ export function LoginPage() {
           <span className="app-brand__mark" style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.9rem' }}>
             SP
           </span>
-          <h1>scope-proxy</h1>
-          <p className="page-header__description">管理画面にログイン</p>
+          <h1>{t('common.appName')}</h1>
+          <p className="page-header__description">{t('login.subtitle')}</p>
         </div>
 
         <div className="stack">
           <div className="field">
             <label className="field__label" htmlFor="email">
-              メールアドレス
+              {t('login.email')}
             </label>
             <input
               id="email"
@@ -54,7 +56,7 @@ export function LoginPage() {
 
           <div className="field">
             <label className="field__label" htmlFor="password">
-              パスワード
+              {t('login.password')}
             </label>
             <input
               id="password"
@@ -68,11 +70,11 @@ export function LoginPage() {
           </div>
 
           {loginMutation.isError && (
-            <ErrorAlert>{errorMessage(loginMutation.error, 'ログインに失敗しました')}</ErrorAlert>
+            <ErrorAlert>{errorMessage(loginMutation.error, t('login.error'))}</ErrorAlert>
           )}
 
           <button type="submit" className="btn btn--primary btn--block" disabled={loginMutation.isPending}>
-            {loginMutation.isPending ? 'ログイン中...' : 'ログイン'}
+            {loginMutation.isPending ? t('login.submitting') : t('login.submit')}
           </button>
         </div>
       </form>

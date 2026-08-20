@@ -1,0 +1,150 @@
+{
+  "common": {
+    "appName": "scope-proxy",
+    "cancel": "取消",
+    "close": "关闭",
+    "unset": "—"
+  },
+  "layout": {
+    "nav": {
+      "dashboard": "后端配置",
+      "operations": "操作列表",
+      "snapshots": "变更历史",
+      "tokens": "令牌"
+    },
+    "logout": "退出登录",
+    "language": "语言"
+  },
+  "login": {
+    "subtitle": "登录管理后台",
+    "email": "电子邮箱",
+    "password": "密码",
+    "submit": "登录",
+    "submitting": "登录中...",
+    "error": "登录失败"
+  },
+  "dashboard": {
+    "title": "后端配置",
+    "description": "设置代理转发的后端及 OpenAPI 模式的获取来源。",
+    "form": {
+      "endpointUrlLabel": "端点 URL",
+      "endpointUrlHint": "请求转发目标后端的基础 URL。",
+      "openapiUrlLabel": "OpenAPI JSON URL",
+      "openapiUrlHint": "用于按 operationId 管理权限的模式获取来源。",
+      "saveError": "保存失败",
+      "refreshError": "更新模式失败",
+      "diffLabel": "差异:",
+      "save": "保存",
+      "saving": "保存中...",
+      "refreshNow": "立即更新模式",
+      "refreshing": "更新中...",
+      "lastFetched": "最近获取:",
+      "notFetched": "尚未获取"
+    },
+    "recentSnapshots": "最近的变更历史",
+    "viewAll": "查看全部",
+    "emptySnapshots": {
+      "title": "暂无变更历史",
+      "description": "执行「立即更新模式」后将记录历史。"
+    },
+    "table": {
+      "fetchedAt": "获取时间",
+      "diff": "差异"
+    }
+  },
+  "operations": {
+    "title": "操作列表",
+    "description": "从已连接的 OpenAPI 获取的 operationId 列表。无效的操作始终会被拒绝。",
+    "filters": {
+      "all": "全部",
+      "active": "仅有效",
+      "inactive": "仅无效"
+    },
+    "empty": {
+      "title": "暂无操作",
+      "description": "请在后端配置中获取 OpenAPI 模式。"
+    },
+    "table": {
+      "method": "Method",
+      "path": "Path",
+      "operationId": "operationId",
+      "summary": "Summary",
+      "status": "状态"
+    },
+    "active": "有效",
+    "inactive": "无效"
+  },
+  "snapshots": {
+    "title": "模式变更历史",
+    "description": "每次获取 OpenAPI 模式时，都会记录内容哈希与差异。",
+    "empty": {
+      "title": "暂无变更历史",
+      "description": "请在后端配置中执行「立即更新模式」。"
+    },
+    "table": {
+      "fetchedAt": "获取时间",
+      "specHash": "spec_hash",
+      "diff": "差异"
+    }
+  },
+  "tokens": {
+    "title": "令牌",
+    "description": "可为每个已发行的令牌设置允许的操作。",
+    "newToken": "新建令牌",
+    "empty": {
+      "title": "暂无令牌",
+      "description": "请通过「新建令牌」创建第一个令牌。"
+    },
+    "table": {
+      "name": "名称",
+      "status": "状态",
+      "createdAt": "发行时间",
+      "expiresAt": "有效期",
+      "lastUsedAt": "最后使用"
+    },
+    "noExpiry": "无限期",
+    "notUsed": "未使用",
+    "revoke": "作废",
+    "status": {
+      "revoked": "已作废",
+      "expired": "已过期",
+      "active": "有效"
+    }
+  },
+  "tokenEdit": {
+    "titleEdit": "编辑令牌",
+    "titleNew": "新建令牌",
+    "description": "仅勾选的 operationId 才允许通过代理访问。",
+    "form": {
+      "nameLabel": "名称",
+      "namePlaceholder": "例如: batch-job",
+      "expiresLabel": "有效期",
+      "expiresHint": "留空表示无限期。",
+      "permissionsTitle": "允许的操作",
+      "selectedCount": "已选择 {{count}} 项",
+      "saveError": "保存失败",
+      "save": "保存",
+      "issue": "发行",
+      "cancel": "取消"
+    }
+  },
+  "operationPermissionTable": {
+    "empty": {
+      "title": "暂无操作",
+      "description": "请在后端配置中获取 OpenAPI 模式。"
+    },
+    "selectedCount": "{{selected}} / {{total}}",
+    "selectAll": "全选",
+    "deselectAll": "全部取消",
+    "inactive": "无效"
+  },
+  "tokenValueDialog": {
+    "title": "令牌已发行",
+    "warning": "此令牌不会再次显示，请立即妥善保存。",
+    "copy": "复制",
+    "copied": "已复制"
+  },
+  "ui": {
+    "loading": "加载中..."
+  }
+}

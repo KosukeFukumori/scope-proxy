@@ -1,0 +1,150 @@
+{
+  "common": {
+    "appName": "scope-proxy",
+    "cancel": "Cancel",
+    "close": "Close",
+    "unset": "—"
+  },
+  "layout": {
+    "nav": {
+      "dashboard": "Backend Config",
+      "operations": "Operations",
+      "snapshots": "History",
+      "tokens": "Tokens"
+    },
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "login": {
+    "subtitle": "Sign in to the admin console",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in...",
+    "error": "Failed to log in"
+  },
+  "dashboard": {
+    "title": "Backend Config",
+    "description": "Configure the proxied backend and the source of the OpenAPI schema.",
+    "form": {
+      "endpointUrlLabel": "Endpoint URL",
+      "endpointUrlHint": "The base URL of the backend that requests are forwarded to.",
+      "openapiUrlLabel": "OpenAPI JSON URL",
+      "openapiUrlHint": "The source of the schema used for per-operationId permission management.",
+      "saveError": "Failed to save",
+      "refreshError": "Failed to refresh the schema",
+      "diffLabel": "Diff:",
+      "save": "Save",
+      "saving": "Saving...",
+      "refreshNow": "Refresh schema now",
+      "refreshing": "Refreshing...",
+      "lastFetched": "Last fetched:",
+      "notFetched": "Not fetched yet"
+    },
+    "recentSnapshots": "Recent history",
+    "viewAll": "View all",
+    "emptySnapshots": {
+      "title": "No history yet",
+      "description": "History is recorded once you run \"Refresh schema now\"."
+    },
+    "table": {
+      "fetchedAt": "Fetched at",
+      "diff": "Diff"
+    }
+  },
+  "operations": {
+    "title": "Operations",
+    "description": "operationIds retrieved from the connected OpenAPI schema. Inactive ones are always rejected.",
+    "filters": {
+      "all": "All",
+      "active": "Active only",
+      "inactive": "Inactive only"
+    },
+    "empty": {
+      "title": "No operations",
+      "description": "Fetch the OpenAPI schema from the backend config."
+    },
+    "table": {
+      "method": "Method",
+      "path": "Path",
+      "operationId": "operationId",
+      "summary": "Summary",
+      "status": "Status"
+    },
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "snapshots": {
+    "title": "Schema Change History",
+    "description": "Every time the OpenAPI schema is fetched, its content hash and diff are recorded.",
+    "empty": {
+      "title": "No history yet",
+      "description": "Run \"Refresh schema now\" from the backend config."
+    },
+    "table": {
+      "fetchedAt": "Fetched at",
+      "specHash": "spec_hash",
+      "diff": "Diff"
+    }
+  },
+  "tokens": {
+    "title": "Tokens",
+    "description": "Configure which operations are allowed for each issued token.",
+    "newToken": "Issue new token",
+    "empty": {
+      "title": "No tokens yet",
+      "description": "Create your first token from \"Issue new token\"."
+    },
+    "table": {
+      "name": "Name",
+      "status": "Status",
+      "createdAt": "Issued at",
+      "expiresAt": "Expires at",
+      "lastUsedAt": "Last used"
+    },
+    "noExpiry": "Never",
+    "notUsed": "Never used",
+    "revoke": "Revoke",
+    "status": {
+      "revoked": "Revoked",
+      "expired": "Expired",
+      "active": "Active"
+    }
+  },
+  "tokenEdit": {
+    "titleEdit": "Edit Token",
+    "titleNew": "Issue Token",
+    "description": "Only the checked operationIds are allowed to be accessed through the proxy.",
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. batch-job",
+      "expiresLabel": "Expires at",
+      "expiresHint": "Leave blank for no expiration.",
+      "permissionsTitle": "Allowed operations",
+      "selectedCount": "{{count}} selected",
+      "saveError": "Failed to save",
+      "save": "Save",
+      "issue": "Issue",
+      "cancel": "Cancel"
+    }
+  },
+  "operationPermissionTable": {
+    "empty": {
+      "title": "No operations",
+      "description": "Fetch the OpenAPI schema from the backend config."
+    },
+    "selectedCount": "{{selected}} / {{total}}",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "inactive": "Inactive"
+  },
+  "tokenValueDialog": {
+    "title": "Token issued",
+    "warning": "This token will never be shown again. Save it somewhere safe now.",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "ui": {
+    "loading": "Loading..."
+  }
+}
