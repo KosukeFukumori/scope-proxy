@@ -1,33 +1,35 @@
 # scope-proxy
 
-認証機能を持たない既存APIサーバー(OpenAPI JSONを公開)の手前に立ち、トークンベースの認可とプロキシ機能を提供するラッパーサーバーです。
+[日本語](./README.ja.md)
 
-## 特徴
+A wrapper server that sits in front of an existing API server (one that publishes an OpenAPI JSON but has no authentication of its own), providing token-based authorization and proxying.
 
-- 自前のセルフサービス方式によるトークンベース認可(OAuth三者間フローではない)
-- トークンごとに、接続先OpenAPIの `operationId` 単位で権限(許可するエンドポイント)を設定
-- 認可されたリクエストのみ接続先サーバーへ、**元のURL構造を維持したまま**転送するプロキシ機能
-- 接続先OpenAPIスキーマの変化を検知し、安全側(allowlist)に倒す形で権限に反映
-- ログイン後、ユーザー自身がトークンを発行・管理できるフロントエンド
+## Features
 
-## アーキテクチャ概要
+- Self-service, token-based authorization (not a three-legged OAuth flow)
+- Per-token permissions defined at the `operationId` level of the upstream OpenAPI schema
+- A proxy that forwards only authorized requests to the upstream server, **preserving the original URL structure**
+- Detects changes in the upstream OpenAPI schema and reflects them into permissions on the safe side (allowlist)
+- A frontend where logged-in users can issue and manage their own tokens
 
-- ラッパーサーバーのルート `/` 以下は、接続先バックエンドと**完全に同一のURL構造**でプロキシされます(例: バックエンドの `GET /users/1` は `GET /users/1` としてそのまま転送)。
-- 管理系API・管理画面はすべて `/_admin/*` に予約されています。接続先のOpenAPIに `/_admin` で始まるオペレーションがある場合は、スキーマ同期時に警告のうえプロキシ対象から除外されます。
-- トークンはランダムな不透明文字列で発行され、DBにはSHA-256ハッシュのみが保存されます。生の値は発行時に一度しか表示されません。
+## Architecture overview
 
-## セットアップ
+- Everything under the wrapper server's root `/` is proxied to the upstream backend using **exactly the same URL structure** (e.g. the backend's `GET /users/1` is forwarded as-is as `GET /users/1`).
+- All admin APIs and the admin UI are reserved under `/_admin/*`. If the upstream OpenAPI schema contains operations starting with `/_admin`, they are excluded from proxying (with a warning) during schema sync.
+- Tokens are issued as random opaque strings; only their SHA-256 hash is stored in the database. The raw value is shown only once, at issuance time.
 
-### バックエンド
+## Setup
+
+### Backend
 
 ```bash
 cd backend
 uv sync
-uv run scripts/create_admin_user.py  # 初回管理ユーザー作成
+uv run scripts/create_admin_user.py  # create the initial admin user
 uv run uvicorn app.main:app --reload
 ```
 
-### フロントエンド
+### Frontend
 
 ```bash
 cd frontend
@@ -35,15 +37,17 @@ npm install
 npm run dev
 ```
 
-開発時、フロントエンドの `/_admin/api/*` へのリクエストは `vite.config.ts` の設定によりバックエンド(`http://127.0.0.1:8000`)へプロキシされます。バックエンドを先に起動してから `npm run dev` を実行してください。
+The admin UI follows the OS color scheme setting and supports both light and dark modes.
 
-本番ビルド (`npm run build`) の成果物は `backend/app/main.py` から `/_admin/` 配下で配信されます(SPAのため、実ファイルが存在しないパスは `index.html` にフォールバックします)。
+During development, frontend requests to `/_admin/api/*` are proxied to the backend (`http://127.0.0.1:8000`) via the `vite.config.ts` configuration. Start the backend before running `npm run dev`.
 
-## 環境変数 (backend/.env)
+The production build (`npm run build`) output is served from `/_admin/` by `backend/app/main.py` (as an SPA, any path without a matching file falls back to `index.html`).
 
-`backend/.env.example` を参照してください。
+## Environment variables (backend/.env)
 
-## テスト
+See `backend/.env.example`.
+
+## Tests
 
 ```bash
 cd backend
@@ -57,12 +61,12 @@ npm run lint
 npm run build
 ```
 
-## セキュリティ上の注意
+## Security notes
 
-- 未マッチのpath/methodへのリクエストはデフォルトで拒否されます(404)。
-- 新規追加されたオペレーションはデフォルトで無権限です(allowlist)。
-- 削除されたオペレーションは論理削除(`is_active=false`)され、常に拒否されます。
+- Requests to unmatched paths/methods are denied by default (404).
+- Newly added operations have no permissions by default (allowlist).
+- Removed operations are soft-deleted (`is_active=false`) and are always denied.
 
-## ライセンス
+## License
 
 [MIT](./LICENSE)

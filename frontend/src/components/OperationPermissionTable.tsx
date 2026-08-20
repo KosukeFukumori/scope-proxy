@@ -1,4 +1,5 @@
 import type { Operation } from '../types/api'
+import { Badge, EmptyState, MethodBadge } from './ui'
 
 function groupKey(path: string): string {
   const segment = path.split('/').filter(Boolean)[0]
@@ -14,6 +15,15 @@ export function OperationPermissionTable({
   selectedIds: Set<string>
   onToggle: (operationId: string) => void
 }) {
+  if (operations.length === 0) {
+    return (
+      <EmptyState
+        title="オペレーションがありません"
+        description="接続先設定から OpenAPI スキーマを取得してください。"
+      />
+    )
+  }
+
   const groups = new Map<string, Operation[]>()
   for (const op of operations) {
     const key = groupKey(op.path)
@@ -22,39 +32,57 @@ export function OperationPermissionTable({
     groups.set(key, list)
   }
 
+  /** グループ内をまとめて選択/解除する。 */
+  function toggleGroup(ops: Operation[], select: boolean) {
+    for (const op of ops) {
+      if (selectedIds.has(op.operation_id) !== select) {
+        onToggle(op.operation_id)
+      }
+    }
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {[...groups.entries()].map(([group, ops]) => (
-        <fieldset key={group} style={{ border: '1px solid #e5e7eb', borderRadius: '6px' }}>
-          <legend style={{ padding: '0 0.5rem' }}>
-            <code>{group}</code>
-          </legend>
-          {ops.map((op) => (
-            <label
-              key={op.operation_id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.25rem 0',
-                opacity: op.is_active ? 1 : 0.5,
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={selectedIds.has(op.operation_id)}
-                onChange={() => onToggle(op.operation_id)}
-              />
-              <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: '0.85rem' }}>
-                {op.method} {op.path}
+    <div className="stack">
+      {[...groups.entries()].map(([group, ops]) => {
+        const selectedCount = ops.filter((op) => selectedIds.has(op.operation_id)).length
+        const allSelected = selectedCount === ops.length
+
+        return (
+          <section key={group} className="permission-group">
+            <div className="permission-group__head">
+              <span className="permission-group__title">{group}</span>
+              <span className="row" style={{ gap: '0.5rem' }}>
+                <span className="muted" style={{ fontSize: '0.8rem' }}>
+                  {selectedCount} / {ops.length}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn--sm btn--ghost"
+                  onClick={() => toggleGroup(ops, !allSelected)}
+                >
+                  {allSelected ? 'すべて解除' : 'すべて選択'}
+                </button>
               </span>
-              <span style={{ color: '#6b7280' }}>{op.operation_id}</span>
-              {!op.is_active && <span style={{ color: '#dc2626' }}>(無効)</span>}
-            </label>
-          ))}
-        </fieldset>
-      ))}
-      {operations.length === 0 && <p style={{ color: '#6b7280' }}>オペレーションがありません。</p>}
+            </div>
+            {ops.map((op) => (
+              <label
+                key={op.operation_id}
+                className={op.is_active ? 'permission-item' : 'permission-item is-inactive'}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(op.operation_id)}
+                  onChange={() => onToggle(op.operation_id)}
+                />
+                <MethodBadge method={op.method} />
+                <span className="permission-item__path">{op.path}</span>
+                {!op.is_active && <Badge tone="danger">無効</Badge>}
+                <span className="permission-item__id">{op.operation_id}</span>
+              </label>
+            ))}
+          </section>
+        )
+      })}
     </div>
   )
 }
