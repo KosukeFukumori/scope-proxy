@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { createToken, getToken, updateToken } from '../api/tokens'
 import { listOperations } from '../api/operations'
-import { ApiError } from '../api/client'
 import { Layout } from '../components/Layout'
 import { OperationPermissionTable } from '../components/OperationPermissionTable'
 import { TokenValueDialog } from '../components/TokenValueDialog'
+import { ErrorAlert, Loading, PageHeader } from '../components/ui'
+import { errorMessage } from '../lib/format'
 import type { Operation, TokenDetail } from '../types/api'
 
 function TokenForm({
@@ -40,13 +41,14 @@ function TokenForm({
     })
   }
 
+  const payload = () => ({
+    name,
+    expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+    operation_ids: [...selectedIds],
+  })
+
   const createMutation = useMutation({
-    mutationFn: () =>
-      createToken({
-        name,
-        expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
-        operation_ids: [...selectedIds],
-      }),
+    mutationFn: () => createToken(payload()),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['tokens'] })
       setIssuedRawToken(result.raw_token)
@@ -54,12 +56,7 @@ function TokenForm({
   })
 
   const updateMutation = useMutation({
-    mutationFn: () =>
-      updateToken(tokenId!, {
-        name,
-        expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
-        operation_ids: [...selectedIds],
-      }),
+    mutationFn: () => updateToken(tokenId!, payload()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tokens'] })
       navigate('/tokens')
@@ -75,41 +72,60 @@ function TokenForm({
 
   return (
     <>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '640px' }}>
-        <label>
-          名前
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
-        <label>
-          有効期限(任意)
-          <input
-            type="datetime-local"
-            value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
+      <form className="stack" onSubmit={handleSubmit}>
+        <div className="card">
+          <div className="card__body stack">
+            <div className="field">
+              <label className="field__label" htmlFor="token-name">
+                名前
+              </label>
+              <input
+                id="token-name"
+                className="input"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="例: batch-job"
+                required
+              />
+            </div>
 
-        <div>
-          <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>許可するオペレーション</p>
-          <OperationPermissionTable operations={operations} selectedIds={selectedIds} onToggle={toggleOperation} />
+            <div className="field">
+              <label className="field__label" htmlFor="token-expires">
+                有効期限
+              </label>
+              <input
+                id="token-expires"
+                className="input"
+                type="datetime-local"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+              />
+              <p className="field__hint">未入力の場合は無期限になります。</p>
+            </div>
+          </div>
         </div>
 
-        {mutation.isError && (
-          <p style={{ color: '#dc2626' }}>
-            {mutation.error instanceof ApiError ? mutation.error.message : '保存に失敗しました'}
-          </p>
-        )}
+        <section className="stack stack--tight">
+          <div className="section__header">
+            <h2>許可するオペレーション</h2>
+            <span className="muted" style={{ fontSize: '0.8rem' }}>
+              {selectedIds.size} 件を選択中
+            </span>
+          </div>
+          <OperationPermissionTable operations={operations} selectedIds={selectedIds} onToggle={toggleOperation} />
+        </section>
 
-        <button type="submit" disabled={mutation.isPending} style={{ alignSelf: 'flex-start', padding: '0.5rem 1rem' }}>
-          {isEditing ? '保存' : '発行'}
-        </button>
+        {mutation.isError && <ErrorAlert>{errorMessage(mutation.error, '保存に失敗しました')}</ErrorAlert>}
+
+        <div className="row">
+          <button type="submit" className="btn btn--primary" disabled={mutation.isPending}>
+            {isEditing ? '保存' : '発行'}
+          </button>
+          <button type="button" className="btn" onClick={() => navigate('/tokens')}>
+            キャンセル
+          </button>
+        </div>
       </form>
 
       {issuedRawToken && (
@@ -142,10 +158,13 @@ export function TokenEditPage() {
 
   return (
     <Layout>
-      <h1>{isEditing ? 'トークン編集' : 'トークン発行'}</h1>
+      <PageHeader
+        title={isEditing ? 'トークン編集' : 'トークン発行'}
+        description="チェックを入れた operationId のみ、プロキシ経由でのアクセスが許可されます。"
+      />
 
       {isLoading ? (
-        <p>読み込み中...</p>
+        <Loading />
       ) : (
         <TokenForm
           key={tokenId ?? 'new'}
