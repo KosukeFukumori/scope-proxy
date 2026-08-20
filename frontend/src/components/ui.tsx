@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /** HTTPメソッドを色分けして表示する。 */
 export function MethodBadge({ method }: { method: string }) {
@@ -19,11 +20,12 @@ export function Spinner() {
   return <span className="spinner" aria-hidden="true" />
 }
 
-export function Loading({ label = '読み込み中...' }: { label?: string }) {
+export function Loading({ label }: { label?: string }) {
+  const { t } = useTranslation()
   return (
     <div className="loading" role="status">
       <Spinner />
-      {label}
+      {label ?? t('ui.loading')}
     </div>
   )
 }

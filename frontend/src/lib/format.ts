@@ -1,5 +1,5 @@
 /** ISO文字列を人間が読める日時表記へ。null の場合は fallback を返す。 */
-export function formatDateTime(value: string | null | undefined, fallback = '—'): string {
+export function formatDateTime(value: string | null | undefined, fallback = '—', locale?: string): string {
   if (!value) {
     return fallback
   }
@@ -7,7 +7,7 @@ export function formatDateTime(value: string | null | undefined, fallback = '—
   if (Number.isNaN(date.getTime())) {
     return fallback
   }
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
