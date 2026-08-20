@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { listOperations } from '../api/operations'
 import { Layout } from '../components/Layout'
 import { Badge, EmptyState, Loading, MethodBadge, PageHeader } from '../components/ui'
 
 type Filter = 'all' | 'active' | 'inactive'
 
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'all', label: 'すべて' },
-  { value: 'active', label: '有効のみ' },
-  { value: 'inactive', label: '無効のみ' },
-]
-
 export function OperationsPage() {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<Filter>('all')
+
+  const FILTERS: { value: Filter; label: string }[] = [
+    { value: 'all', label: t('operations.filters.all') },
+    { value: 'active', label: t('operations.filters.active') },
+    { value: 'inactive', label: t('operations.filters.inactive') },
+  ]
 
   const operationsQuery = useQuery({
     queryKey: ['operations', filter],
@@ -25,8 +27,8 @@ export function OperationsPage() {
   return (
     <Layout>
       <PageHeader
-        title="オペレーション一覧"
-        description="接続先 OpenAPI から取得した operationId の一覧です。無効なものは常に拒否されます。"
+        title={t('operations.title')}
+        description={t('operations.description')}
         actions={
           <div className="segmented">
             {FILTERS.map((item) => (
@@ -46,10 +48,7 @@ export function OperationsPage() {
       {operationsQuery.isLoading && <Loading />}
 
       {!operationsQuery.isLoading && operations.length === 0 && (
-        <EmptyState
-          title="オペレーションがありません"
-          description="接続先設定から OpenAPI スキーマを取得してください。"
-        />
+        <EmptyState title={t('operations.empty.title')} description={t('operations.empty.description')} />
       )}
 
       {operations.length > 0 && (
@@ -57,11 +56,11 @@ export function OperationsPage() {
           <table className="table">
             <thead>
               <tr>
-                <th>Method</th>
-                <th>Path</th>
-                <th>operationId</th>
-                <th>Summary</th>
-                <th>状態</th>
+                <th>{t('operations.table.method')}</th>
+                <th>{t('operations.table.path')}</th>
+                <th>{t('operations.table.operationId')}</th>
+                <th>{t('operations.table.summary')}</th>
+                <th>{t('operations.table.status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -74,7 +73,11 @@ export function OperationsPage() {
                   <td>{op.operation_id}</td>
                   <td className="muted">{op.summary ?? '—'}</td>
                   <td>
-                    {op.is_active ? <Badge tone="success">有効</Badge> : <Badge tone="danger">無効</Badge>}
+                    {op.is_active ? (
+                      <Badge tone="success">{t('operations.active')}</Badge>
+                    ) : (
+                      <Badge tone="danger">{t('operations.inactive')}</Badge>
+                    )}
                   </td>
                 </tr>
               ))}

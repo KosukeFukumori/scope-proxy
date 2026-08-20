@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { createToken, getToken, updateToken } from '../api/tokens'
 import { listOperations } from '../api/operations'
 import { Layout } from '../components/Layout'
@@ -20,6 +21,7 @@ function TokenForm({
   initialToken: TokenDetail | null
   operations: Operation[]
 }) {
+  const { t } = useTranslation()
   const isEditing = tokenId !== null
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -77,7 +79,7 @@ function TokenForm({
           <div className="card__body stack">
             <div className="field">
               <label className="field__label" htmlFor="token-name">
-                名前
+                {t('tokenEdit.form.nameLabel')}
               </label>
               <input
                 id="token-name"
@@ -85,14 +87,14 @@ function TokenForm({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例: batch-job"
+                placeholder={t('tokenEdit.form.namePlaceholder')}
                 required
               />
             </div>
 
             <div className="field">
               <label className="field__label" htmlFor="token-expires">
-                有効期限
+                {t('tokenEdit.form.expiresLabel')}
               </label>
               <input
                 id="token-expires"
@@ -101,29 +103,29 @@ function TokenForm({
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
               />
-              <p className="field__hint">未入力の場合は無期限になります。</p>
+              <p className="field__hint">{t('tokenEdit.form.expiresHint')}</p>
             </div>
           </div>
         </div>
 
         <section className="stack stack--tight">
           <div className="section__header">
-            <h2>許可するオペレーション</h2>
+            <h2>{t('tokenEdit.form.permissionsTitle')}</h2>
             <span className="muted" style={{ fontSize: '0.8rem' }}>
-              {selectedIds.size} 件を選択中
+              {t('tokenEdit.form.selectedCount', { count: selectedIds.size })}
             </span>
           </div>
           <OperationPermissionTable operations={operations} selectedIds={selectedIds} onToggle={toggleOperation} />
         </section>
 
-        {mutation.isError && <ErrorAlert>{errorMessage(mutation.error, '保存に失敗しました')}</ErrorAlert>}
+        {mutation.isError && <ErrorAlert>{errorMessage(mutation.error, t('tokenEdit.form.saveError'))}</ErrorAlert>}
 
         <div className="row">
           <button type="submit" className="btn btn--primary" disabled={mutation.isPending}>
-            {isEditing ? '保存' : '発行'}
+            {isEditing ? t('tokenEdit.form.save') : t('tokenEdit.form.issue')}
           </button>
           <button type="button" className="btn" onClick={() => navigate('/tokens')}>
-            キャンセル
+            {t('tokenEdit.form.cancel')}
           </button>
         </div>
       </form>
@@ -142,6 +144,7 @@ function TokenForm({
 }
 
 export function TokenEditPage() {
+  const { t } = useTranslation()
   const params = useParams<{ id: string }>()
   const tokenId = params.id ? Number(params.id) : null
   const isEditing = tokenId !== null
@@ -159,8 +162,8 @@ export function TokenEditPage() {
   return (
     <Layout>
       <PageHeader
-        title={isEditing ? 'トークン編集' : 'トークン発行'}
-        description="チェックを入れた operationId のみ、プロキシ経由でのアクセスが許可されます。"
+        title={isEditing ? t('tokenEdit.titleEdit') : t('tokenEdit.titleNew')}
+        description={t('tokenEdit.description')}
       />
 
       {isLoading ? (

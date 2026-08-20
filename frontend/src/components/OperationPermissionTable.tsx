@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Operation } from '../types/api'
 import { Badge, EmptyState, MethodBadge } from './ui'
 
@@ -15,11 +16,13 @@ export function OperationPermissionTable({
   selectedIds: Set<string>
   onToggle: (operationId: string) => void
 }) {
+  const { t } = useTranslation()
+
   if (operations.length === 0) {
     return (
       <EmptyState
-        title="オペレーションがありません"
-        description="接続先設定から OpenAPI スキーマを取得してください。"
+        title={t('operationPermissionTable.empty.title')}
+        description={t('operationPermissionTable.empty.description')}
       />
     )
   }
@@ -53,14 +56,16 @@ export function OperationPermissionTable({
               <span className="permission-group__title">{group}</span>
               <span className="row" style={{ gap: '0.5rem' }}>
                 <span className="muted" style={{ fontSize: '0.8rem' }}>
-                  {selectedCount} / {ops.length}
+                  {t('operationPermissionTable.selectedCount', { selected: selectedCount, total: ops.length })}
                 </span>
                 <button
                   type="button"
                   className="btn btn--sm btn--ghost"
                   onClick={() => toggleGroup(ops, !allSelected)}
                 >
-                  {allSelected ? 'すべて解除' : 'すべて選択'}
+                  {allSelected
+                    ? t('operationPermissionTable.deselectAll')
+                    : t('operationPermissionTable.selectAll')}
                 </button>
               </span>
             </div>
@@ -76,7 +81,7 @@ export function OperationPermissionTable({
                 />
                 <MethodBadge method={op.method} />
                 <span className="permission-item__path">{op.path}</span>
-                {!op.is_active && <Badge tone="danger">無効</Badge>}
+                {!op.is_active && <Badge tone="danger">{t('operationPermissionTable.inactive')}</Badge>}
                 <span className="permission-item__id">{op.operation_id}</span>
               </label>
             ))}

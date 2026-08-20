@@ -1,0 +1,150 @@
+{
+  "common": {
+    "appName": "scope-proxy",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "unset": "—"
+  },
+  "layout": {
+    "nav": {
+      "dashboard": "接続先設定",
+      "operations": "オペレーション",
+      "snapshots": "変更履歴",
+      "tokens": "トークン"
+    },
+    "logout": "ログアウト",
+    "language": "言語"
+  },
+  "login": {
+    "subtitle": "管理画面にログイン",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "submit": "ログイン",
+    "submitting": "ログイン中...",
+    "error": "ログインに失敗しました"
+  },
+  "dashboard": {
+    "title": "接続先設定",
+    "description": "プロキシ先のバックエンドと OpenAPI スキーマの取得元を設定します。",
+    "form": {
+      "endpointUrlLabel": "エンドポイントURL",
+      "endpointUrlHint": "リクエストの転送先となるバックエンドのベースURL。",
+      "openapiUrlLabel": "OpenAPI JSON URL",
+      "openapiUrlHint": "operationId 単位の権限管理に使用するスキーマの取得元。",
+      "saveError": "保存に失敗しました",
+      "refreshError": "スキーマの更新に失敗しました",
+      "diffLabel": "差分:",
+      "save": "保存",
+      "saving": "保存中...",
+      "refreshNow": "スキーマを今すぐ更新",
+      "refreshing": "更新中...",
+      "lastFetched": "最終取得:",
+      "notFetched": "未取得"
+    },
+    "recentSnapshots": "直近の変更履歴",
+    "viewAll": "すべて表示",
+    "emptySnapshots": {
+      "title": "まだ更新履歴がありません",
+      "description": "「スキーマを今すぐ更新」を実行すると履歴が記録されます。"
+    },
+    "table": {
+      "fetchedAt": "取得日時",
+      "diff": "差分"
+    }
+  },
+  "operations": {
+    "title": "オペレーション一覧",
+    "description": "接続先 OpenAPI から取得した operationId の一覧です。無効なものは常に拒否されます。",
+    "filters": {
+      "all": "すべて",
+      "active": "有効のみ",
+      "inactive": "無効のみ"
+    },
+    "empty": {
+      "title": "オペレーションがありません",
+      "description": "接続先設定から OpenAPI スキーマを取得してください。"
+    },
+    "table": {
+      "method": "Method",
+      "path": "Path",
+      "operationId": "operationId",
+      "summary": "Summary",
+      "status": "状態"
+    },
+    "active": "有効",
+    "inactive": "無効"
+  },
+  "snapshots": {
+    "title": "スキーマ変更履歴",
+    "description": "OpenAPI スキーマを取得するたびに、内容のハッシュと差分を記録します。",
+    "empty": {
+      "title": "まだ更新履歴がありません",
+      "description": "接続先設定から「スキーマを今すぐ更新」を実行してください。"
+    },
+    "table": {
+      "fetchedAt": "取得日時",
+      "specHash": "spec_hash",
+      "diff": "差分"
+    }
+  },
+  "tokens": {
+    "title": "トークン",
+    "description": "発行したトークンごとに、許可するオペレーションを設定できます。",
+    "newToken": "新規発行",
+    "empty": {
+      "title": "トークンがまだありません",
+      "description": "「新規発行」から最初のトークンを作成してください。"
+    },
+    "table": {
+      "name": "名前",
+      "status": "状態",
+      "createdAt": "発行日時",
+      "expiresAt": "有効期限",
+      "lastUsedAt": "最終使用"
+    },
+    "noExpiry": "無期限",
+    "notUsed": "未使用",
+    "revoke": "失効",
+    "status": {
+      "revoked": "失効済み",
+      "expired": "期限切れ",
+      "active": "有効"
+    }
+  },
+  "tokenEdit": {
+    "titleEdit": "トークン編集",
+    "titleNew": "トークン発行",
+    "description": "チェックを入れた operationId のみ、プロキシ経由でのアクセスが許可されます。",
+    "form": {
+      "nameLabel": "名前",
+      "namePlaceholder": "例: batch-job",
+      "expiresLabel": "有効期限",
+      "expiresHint": "未入力の場合は無期限になります。",
+      "permissionsTitle": "許可するオペレーション",
+      "selectedCount": "{{count}} 件を選択中",
+      "saveError": "保存に失敗しました",
+      "save": "保存",
+      "issue": "発行",
+      "cancel": "キャンセル"
+    }
+  },
+  "operationPermissionTable": {
+    "empty": {
+      "title": "オペレーションがありません",
+      "description": "接続先設定から OpenAPI スキーマを取得してください。"
+    },
+    "selectedCount": "{{selected}} / {{total}}",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて解除",
+    "inactive": "無効"
+  },
+  "tokenValueDialog": {
+    "title": "トークンを発行しました",
+    "warning": "このトークンは二度と表示されません。今のうちに安全な場所へ保存してください。",
+    "copy": "コピー",
+    "copied": "コピーしました"
+  },
+  "ui": {
+    "loading": "読み込み中..."
+  }
+}
