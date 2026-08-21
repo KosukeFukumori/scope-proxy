@@ -20,7 +20,25 @@ A wrapper server that sits in front of an existing API server (one that publishe
 
 ## Setup
 
-### Backend
+### Docker Compose (quickest way to try it out)
+
+For a single-port setup, build the frontend into the backend image and run it with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQLite database is persisted in the `scope_proxy_db` named volume. To create the initial admin user:
+
+```bash
+docker compose exec app .venv/bin/python scripts/create_admin_user.py
+```
+
+Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
+
+### Development
+
+#### Backend
 
 ```bash
 cd backend
@@ -31,7 +49,7 @@ uv run uvicorn app.main:app --reload
 
 Database schema migrations run automatically on startup (see [Database migrations](#database-migrations) below).
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend

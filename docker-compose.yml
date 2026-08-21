@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - scope_proxy_db:/app/backend/data
+    environment:
+      # Store the SQLite file on the persistent volume above.
+      DATABASE_URL: sqlite:////app/backend/data/scope_proxy.db
+      # Uncomment and set a fixed value for production; otherwise a random
+      # SECRET_KEY is generated on every restart and sessions are invalidated
+      # each time the container restarts.
+      # SECRET_KEY: change-me-to-a-random-secret
+
+volumes:
+  scope_proxy_db:
