@@ -10,4 +10,4 @@ class SchemaSnapshot(SQLModel, table=True):
     fetched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     spec_hash: str
     diff_summary: str
-    """追加/削除/更新されたoperationIdの一覧をJSON文字列として保存する。"""
+    """Stores the list of added/removed/updated operationIds as a JSON string."""

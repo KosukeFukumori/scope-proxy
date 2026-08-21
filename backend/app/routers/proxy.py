@@ -37,7 +37,7 @@ def strip_hop_by_hop(headers: Headers, extra: set[str]) -> list[tuple[str, str]]
 
 
 def _as_aware_utc(value: datetime) -> datetime:
-    """SQLiteはtzinfoを保持しないため、naiveな値はUTCとして扱う。"""
+    """SQLite doesn't preserve tzinfo, so treat naive values as UTC."""
     return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
 
 

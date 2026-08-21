@@ -4,7 +4,7 @@ from sqlmodel import Field, SQLModel
 
 
 class BackendConfig(SQLModel, table=True):
-    """接続先サーバーの設定。単一レコードのみ運用する(スコープ外: 複数バックエンド管理)。"""
+    """Configuration for the upstream server. Only a single record is used (managing multiple backends is out of scope)."""
 
     __tablename__ = "backend_config"
 

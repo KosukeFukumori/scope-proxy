@@ -9,7 +9,7 @@ import { TokenEditPage } from './pages/TokenEditPage'
 import { UsagePage } from './pages/UsagePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
-/** ログイン必須のページ一覧。 */
+/** List of pages that require login. */
 const PROTECTED_ROUTES: { path: string; element: ReactNode }[] = [
   { path: '/', element: <DashboardPage /> },
   { path: '/operations', element: <OperationsPage /> },

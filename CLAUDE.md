@@ -1,16 +1,23 @@
-# scope-proxy 向け指示
+# Instructions for scope-proxy
 
-## 公開リポジトリであることへの留意
+## Language of code comments
 
-- 本リポジトリは **GitHub 上で public 公開** されています。コード・コミットメッセージ・ドキュメントを変更する際は、以下を必ず意識してください。
-  - APIキー・パスワード・トークン・秘密鍵などの機密情報を、コード・設定ファイル・コミットメッセージ・コミット履歴に含めないこと。
-  - 実在する個人情報(メールアドレス、氏名、社内システムのURLなど)を含めないこと。テスト等でメールアドレスが必要な場合は `example.com` などのダミードメインを使うこと。
-  - `.env` や DB ファイルなど、`.gitignore` で除外されている機密性のあるファイルを誤って `git add` しないこと。
-  - 変更が「公開しても問題ないか」判断に迷う場合は、コミット・プッシュ前にユーザーに確認すること。
+- This repository is public, so **write comments in source code in English**.
+  - Chat responses, commit messages, and `README.ja.md` should still be in Japanese.
+  - Only comments inside code (`//`, `#`, docstrings, etc.) need to be in English.
+- If you come across existing Japanese comments, feel free to rewrite them in English while making other edits.
 
-## README の運用
+## Being mindful that this is a public repository
 
-- `README.md` は **英語** を正本とする(public リポジトリのため)。
-- `README.ja.md` に同じ内容の **日本語版** を維持する。
-- `README.md` を更新した場合は、`README.ja.md` にも同じ変更を反映すること(内容を同期させる)。逆も同様。
-- 両ファイルの冒頭には、互いへのリンク(`[English](./README.md)` / `[日本語](./README.ja.md)`)を維持すること。
+- This repository is **published publicly on GitHub**. When changing code, commit messages, or documentation, always keep the following in mind:
+  - Never include sensitive information such as API keys, passwords, tokens, or private keys in code, config files, commit messages, or commit history.
+  - Never include real personal information (email addresses, names, internal system URLs, etc.). Use a dummy domain such as `example.com` when a test needs an email address.
+  - Be careful not to accidentally `git add` sensitive files that are excluded via `.gitignore`, such as `.env` or DB files.
+  - If you're unsure whether a change is safe to publish, confirm with the user before committing or pushing.
+
+## Managing the README
+
+- `README.md` is the **source of truth** in **English** (since this is a public repository).
+- Keep `README.ja.md` as the **Japanese translation** with the same content.
+- When `README.md` is updated, reflect the same change in `README.ja.md` (and vice versa) to keep them in sync.
+- Keep the mutual links (`[English](./README.md)` / `[日本語](./README.ja.md)`) at the top of both files.
