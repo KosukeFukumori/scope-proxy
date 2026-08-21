@@ -1,9 +1,12 @@
 from collections.abc import Generator
 
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, create_engine
 
-from app import models  # noqa: F401  テーブルメタデータ登録のため必要
+from app import (
+    models,  # noqa: F401  SQLModel.metadata へのテーブル登録のため必要（テストで使用）
+)
 from app.config import settings
+from app.migration_runner import run_migrations
 
 engine = create_engine(
     settings.database_url,
@@ -11,8 +14,9 @@ engine = create_engine(
 )
 
 
-def create_db_and_tables() -> None:
-    SQLModel.metadata.create_all(engine)
+def init_db() -> None:
+    """マイグレーションを実行してDBスキーマを最新化する。"""
+    run_migrations(engine)
 
 
 def get_session() -> Generator[Session]:

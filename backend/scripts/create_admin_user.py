@@ -12,12 +12,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from sqlmodel import Session, select
 
 from app.auth.password import hash_password
-from app.db import create_db_and_tables, engine
+from app.db import engine, init_db
 from app.models.user import User
 
 
 def main() -> None:
-    create_db_and_tables()
+    init_db()
 
     email = input("Email: ").strip()
     password = getpass.getpass("Password: ")
