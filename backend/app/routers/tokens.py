@@ -17,19 +17,19 @@ from app.services.token_service import generate_token
 router = APIRouter(prefix="/api/tokens", tags=["tokens"])
 
 
-def _get_owned_token(session: SessionDep, current_user: CurrentUserDep, token_id: int) -> Token:
+def _get_owned_token(session: SessionDep, current_user: CurrentUserDep, token_id: str) -> Token:
     token = session.get(Token, token_id)
     if token is None or token.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token not found")
     return token
 
 
-def _operation_ids(session: SessionDep, token_id: int) -> list[str]:
+def _operation_ids(session: SessionDep, token_id: str) -> list[str]:
     rows = session.exec(select(TokenPermission.operation_id).where(TokenPermission.token_id == token_id)).all()
     return list(rows)
 
 
-def _set_permissions(session: SessionDep, token_id: int, operation_ids: list[str]) -> None:
+def _set_permissions(session: SessionDep, token_id: str, operation_ids: list[str]) -> None:
     existing = session.exec(select(TokenPermission).where(TokenPermission.token_id == token_id)).all()
     for row in existing:
         session.delete(row)
@@ -71,7 +71,7 @@ def create_token(payload: TokenCreate, session: SessionDep, current_user: Curren
 
 
 @router.get("/{token_id}", response_model=TokenDetailRead)
-def get_token(token_id: int, session: SessionDep, current_user: CurrentUserDep) -> TokenDetailRead:
+def get_token(token_id: str, session: SessionDep, current_user: CurrentUserDep) -> TokenDetailRead:
     token = _get_owned_token(session, current_user, token_id)
     return TokenDetailRead(
         id=token.id,
@@ -86,7 +86,7 @@ def get_token(token_id: int, session: SessionDep, current_user: CurrentUserDep) 
 
 @router.patch("/{token_id}", response_model=TokenDetailRead)
 def update_token(
-    token_id: int, payload: TokenUpdate, session: SessionDep, current_user: CurrentUserDep
+    token_id: str, payload: TokenUpdate, session: SessionDep, current_user: CurrentUserDep
 ) -> TokenDetailRead:
     token = _get_owned_token(session, current_user, token_id)
 
@@ -113,7 +113,7 @@ def update_token(
 
 
 @router.post("/{token_id}/revoke", response_model=TokenRead)
-def revoke_token(token_id: int, session: SessionDep, current_user: CurrentUserDep) -> Token:
+def revoke_token(token_id: str, session: SessionDep, current_user: CurrentUserDep) -> Token:
     token = _get_owned_token(session, current_user, token_id)
     if token.revoked_at is None:
         token.revoked_at = datetime.now(UTC)

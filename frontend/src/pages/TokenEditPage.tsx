@@ -17,7 +17,7 @@ function TokenForm({
   initialToken,
   operations,
 }: {
-  tokenId: number | null
+  tokenId: string | null
   initialToken: TokenDetail | null
   operations: Operation[]
 }) {
@@ -148,7 +148,7 @@ function TokenForm({
 export function TokenEditPage() {
   const { t } = useTranslation()
   const params = useParams<{ id: string }>()
-  const tokenId = params.id ? Number(params.id) : null
+  const tokenId = params.id ?? null
   const isEditing = tokenId !== null
 
   const operationsQuery = useQuery({ queryKey: ['operations', 'all'], queryFn: () => listOperations() })

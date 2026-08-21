@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from uuid import uuid4
 
 from sqlmodel import Field, SQLModel
 
@@ -6,7 +7,7 @@ from sqlmodel import Field, SQLModel
 class Token(SQLModel, table=True):
     __tablename__ = "tokens"
 
-    id: int | None = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     user_id: int = Field(foreign_key="users.id")
     name: str
     token_hash: str = Field(unique=True, index=True)
@@ -23,5 +24,5 @@ class TokenPermission(SQLModel, table=True):
     __tablename__ = "token_permissions"
 
     id: int | None = Field(default=None, primary_key=True)
-    token_id: int = Field(foreign_key="tokens.id", index=True)
+    token_id: str = Field(foreign_key="tokens.id", index=True)
     operation_id: str = Field(foreign_key="operations.operation_id", index=True)

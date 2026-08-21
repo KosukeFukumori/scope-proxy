@@ -24,7 +24,7 @@ export function TokensPage() {
   const tokensQuery = useQuery({ queryKey: ['tokens'], queryFn: listTokens })
 
   const revokeMutation = useMutation({
-    mutationFn: (id: number) => revokeToken(id),
+    mutationFn: (id: string) => revokeToken(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tokens'] })
     },
