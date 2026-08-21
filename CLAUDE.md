@@ -15,6 +15,18 @@
   - Be careful not to accidentally `git add` sensitive files that are excluded via `.gitignore`, such as `.env` or DB files.
   - If you're unsure whether a change is safe to publish, confirm with the user before committing or pushing.
 
+## DB schema migrations
+
+- DB schema changes must always go through a migration file — never edit `backend/migrations/0001_initial.sql` or another already-applied file to change the schema.
+- Add a new sequential, idempotent SQL file under `backend/migrations/` (e.g. `0002_xxx.sql`). It is applied automatically on the next app startup via `app.migration_runner.run_migrations`; there is no manual migration command.
+- Keep each migration file idempotent (e.g. `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN` guarded appropriately) since `schema_migrations` only tracks which files have been applied, not their content.
+
+## UI localization
+
+- The frontend uses i18next with locale files under `frontend/src/i18n/locales/` (`ja.json`, `en.json`, `zh.json`), listed in `SUPPORTED_LANGUAGES` in `frontend/src/i18n/index.ts`.
+- When adding or changing UI text, add the key to **all** locale files (`ja.json`, `en.json`, `zh.json`) — never hardcode user-facing strings directly in components.
+- Use the existing `useTranslation` pattern already used across `frontend/src/pages/` and `frontend/src/components/` for any new UI text.
+
 ## Managing the README
 
 - `README.md` is the **source of truth** in **English** (since this is a public repository).
