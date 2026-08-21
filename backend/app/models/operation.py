@@ -2,10 +2,11 @@ from sqlmodel import Field, SQLModel
 
 
 class Operation(SQLModel, table=True):
-    """OpenAPIのoperationId単位のエンドポイント定義。
+    """Endpoint definition keyed by OpenAPI operationId.
 
-    権限はpath文字列ではなくoperation_idをキーにする
-    (スキーマ変更でpath/methodが別エンドポイントに再利用された場合の権限誤継承を避けるため)。
+    Permissions are keyed on operation_id rather than the path string, to avoid
+    incorrectly inheriting permissions if a schema change reuses a path/method
+    for a different endpoint.
     """
 
     __tablename__ = "operations"

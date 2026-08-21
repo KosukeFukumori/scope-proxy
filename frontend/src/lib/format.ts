@@ -1,4 +1,4 @@
-/** ISO文字列を人間が読める日時表記へ。null の場合は fallback を返す。 */
+/** Formats an ISO string into a human-readable date/time. Returns fallback when value is null. */
 export function formatDateTime(value: string | null | undefined, fallback = '—', locale?: string): string {
   if (!value) {
     return fallback
@@ -16,7 +16,7 @@ export function formatDateTime(value: string | null | undefined, fallback = '—
   })
 }
 
-/** API エラーからユーザー向けメッセージを取り出す。 */
+/** Extracts a user-facing message from an API error. */
 export function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback
 }

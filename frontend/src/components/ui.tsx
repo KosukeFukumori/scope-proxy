@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-/** HTTPメソッドを色分けして表示する。 */
+/** Displays an HTTP method with color coding. */
 export function MethodBadge({ method }: { method: string }) {
   const key = method.toLowerCase()
   const known = ['get', 'post', 'put', 'patch', 'delete']

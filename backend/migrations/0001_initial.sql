@@ -1,5 +1,5 @@
--- 初期スキーマ: 全テーブルを CREATE TABLE IF NOT EXISTS で定義（べき等）
--- SQLModel.metadata.create_all() が生成していたスキーマと同一の内容にしている
+-- Initial schema: defines all tables with CREATE TABLE IF NOT EXISTS (idempotent)
+-- Matches the schema that SQLModel.metadata.create_all() used to generate
 
 CREATE TABLE IF NOT EXISTS backend_config (
     id INTEGER NOT NULL,

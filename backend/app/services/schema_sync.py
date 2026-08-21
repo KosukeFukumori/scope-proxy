@@ -71,12 +71,12 @@ async def fetch_openapi_spec(openapi_url: str) -> dict:
 
 
 def sync_operations(session: Session, spec: dict) -> SyncResult:
-    """取得済みのOpenAPI specとoperationsテーブルの差分を反映する。
+    """Reconcile the operations table with the fetched OpenAPI spec.
 
-    - 新規operationId -> is_active=Trueで追加。権限は自動付与しない
-    - 継続 -> method/path/summaryを更新、is_active=Trueに戻す
-    - 消滅 -> is_active=Falseに変更(token_permissionsは削除しない)
-    - /_adminで始まるpathは管理画面と衝突するためプロキシ対象から除外する
+    - New operationId -> added with is_active=True. Permissions are not granted automatically
+    - Still present -> method/path/summary updated, is_active reset to True
+    - No longer present -> is_active set to False (token_permissions are not deleted)
+    - Paths starting with /_admin are excluded from proxying since they'd conflict with the admin UI
     """
     extracted = _extract_operations(spec)
     result = SyncResult()
