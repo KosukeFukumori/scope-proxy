@@ -3,7 +3,7 @@ import secrets
 
 
 def generate_token() -> tuple[str, str]:
-    """(生のトークン値, SHA-256ハッシュ) を返す。生の値はこの場でしか得られない。"""
+    """Returns (raw token value, SHA-256 hash). The raw value is only available here."""
     raw = secrets.token_urlsafe(32)
     return raw, hash_token(raw)
 

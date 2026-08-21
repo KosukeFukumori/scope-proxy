@@ -51,8 +51,8 @@ if FRONTEND_DIST.is_dir():
 
     @app.get("/_admin/{full_path:path}", include_in_schema=False)
     async def serve_frontend(full_path: str) -> Response:
-        """フロントエンドのSPAを配信する。実ファイルが存在すればそれを返し、
-        それ以外(react-routerのクライアントサイドルート)はindex.htmlにフォールバックする。
+        """Serve the frontend SPA. Returns the actual file if it exists,
+        otherwise falls back to index.html (for react-router client-side routes).
         """
         candidate = (FRONTEND_DIST / full_path).resolve()
         if full_path and candidate.is_file() and FRONTEND_DIST in candidate.parents:
@@ -63,5 +63,7 @@ if FRONTEND_DIST.is_dir():
             raise HTTPException(status_code=404)
         return FileResponse(index_file)
 
-# プロキシは全パスのcatch-allのため、必ず他のルーター・静的ファイルの登録後に最後へ追加する
+
+# The proxy is a catch-all for every path, so it must always be registered last,
+# after all other routers and static files.
 app.include_router(proxy.router)
