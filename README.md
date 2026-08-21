@@ -20,32 +20,7 @@ A wrapper server that sits in front of an existing API server (one that publishe
 
 ## Setup
 
-### Backend
-
-```bash
-cd backend
-uv sync
-uv run scripts/create_admin_user.py  # create the initial admin user
-uv run uvicorn app.main:app --reload
-```
-
-Database schema migrations run automatically on startup (see [Database migrations](#database-migrations) below).
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The admin UI follows the OS color scheme setting and supports both light and dark modes.
-
-During development, frontend requests to `/_admin/api/*` are proxied to the backend (`http://127.0.0.1:8000`) via the `vite.config.ts` configuration. Start the backend before running `npm run dev`.
-
-The production build (`npm run build`) output is served from `/_admin/` by `backend/app/main.py` (as an SPA, any path without a matching file falls back to `index.html`).
-
-### Docker Compose
+### Docker Compose (quickest way to try it out)
 
 For a single-port setup, build the frontend into the backend image and run it with Docker Compose:
 
@@ -60,6 +35,33 @@ docker compose exec app .venv/bin/python scripts/create_admin_user.py
 ```
 
 Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
+
+### Development
+
+#### Backend
+
+```bash
+cd backend
+uv sync
+uv run scripts/create_admin_user.py  # create the initial admin user
+uv run uvicorn app.main:app --reload
+```
+
+Database schema migrations run automatically on startup (see [Database migrations](#database-migrations) below).
+
+#### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The admin UI follows the OS color scheme setting and supports both light and dark modes.
+
+During development, frontend requests to `/_admin/api/*` are proxied to the backend (`http://127.0.0.1:8000`) via the `vite.config.ts` configuration. Start the backend before running `npm run dev`.
+
+The production build (`npm run build`) output is served from `/_admin/` by `backend/app/main.py` (as an SPA, any path without a matching file falls back to `index.html`).
 
 ## Database migrations
 

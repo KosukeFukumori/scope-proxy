@@ -20,32 +20,7 @@
 
 ## セットアップ
 
-### バックエンド
-
-```bash
-cd backend
-uv sync
-uv run scripts/create_admin_user.py  # 初回管理ユーザー作成
-uv run uvicorn app.main:app --reload
-```
-
-DBスキーマのマイグレーションは起動時に自動実行されます(詳細は下記の[DBマイグレーション](#dbマイグレーション)を参照)。
-
-### フロントエンド
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-管理画面は OS のカラースキーム設定に追従し、ライト/ダークの両方に対応しています。
-
-開発時、フロントエンドの `/_admin/api/*` へのリクエストは `vite.config.ts` の設定によりバックエンド(`http://127.0.0.1:8000`)へプロキシされます。バックエンドを先に起動してから `npm run dev` を実行してください。
-
-本番ビルド (`npm run build`) の成果物は `backend/app/main.py` から `/_admin/` 配下で配信されます(SPAのため、実ファイルが存在しないパスは `index.html` にフォールバックします)。
-
-### Docker Compose
+### Docker Compose(お手軽に試す場合)
 
 ポートを1つにまとめたい場合、フロントエンドをビルドしてbackendイメージに同梱し、Docker Composeで起動できます。
 
@@ -60,6 +35,33 @@ docker compose exec app .venv/bin/python scripts/create_admin_user.py
 ```
 
 本番運用では `docker-compose.yml` 内で `SECRET_KEY` を固定値に設定してください。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
+
+### 開発実行
+
+#### バックエンド
+
+```bash
+cd backend
+uv sync
+uv run scripts/create_admin_user.py  # 初回管理ユーザー作成
+uv run uvicorn app.main:app --reload
+```
+
+DBスキーマのマイグレーションは起動時に自動実行されます(詳細は下記の[DBマイグレーション](#dbマイグレーション)を参照)。
+
+#### フロントエンド
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+管理画面は OS のカラースキーム設定に追従し、ライト/ダークの両方に対応しています。
+
+開発時、フロントエンドの `/_admin/api/*` へのリクエストは `vite.config.ts` の設定によりバックエンド(`http://127.0.0.1:8000`)へプロキシされます。バックエンドを先に起動してから `npm run dev` を実行してください。
+
+本番ビルド (`npm run build`) の成果物は `backend/app/main.py` から `/_admin/` 配下で配信されます(SPAのため、実ファイルが存在しないパスは `index.html` にフォールバックします)。
 
 ## DBマイグレーション
 
