@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, Response
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
-from app.db import create_db_and_tables
+from app.db import init_db
 from app.routers import (
     auth,
     backend_config,
@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             "SECRET_KEY is not set; a random key was generated for this process. "
             "Sessions will be invalidated on every restart. Set SECRET_KEY in .env for production use."
         )
-    create_db_and_tables()
+    init_db()
     async with httpx.AsyncClient() as http_client:
         app.state.http_client = http_client
         yield
