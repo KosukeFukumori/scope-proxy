@@ -16,7 +16,7 @@ class TokenUpdate(BaseModel):
 
 
 class TokenRead(BaseModel):
-    id: int
+    id: str
     name: str
     created_at: datetime
     expires_at: datetime | None

@@ -26,7 +26,7 @@ export interface SchemaSnapshot {
 }
 
 export interface TokenSummary {
-  id: number
+  id: string
   name: string
   created_at: string
   expires_at: string | null
