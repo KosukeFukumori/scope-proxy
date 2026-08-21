@@ -1,6 +1,6 @@
-"""初回管理ユーザーを作成するCLI。
+"""CLI to create the initial admin user.
 
-使い方: uv run scripts/create_admin_user.py
+Usage: uv run scripts/create_admin_user.py
 """
 
 import getpass

@@ -36,7 +36,7 @@ def test_no_match_for_unknown_method_on_known_path() -> None:
 
 
 def test_matches_inactive_operation_too() -> None:
-    """is_activeチェックは呼び出し側の責務。matcherはpath/methodの照合のみ行う。"""
+    """The is_active check is the caller's responsibility; the matcher only matches path/method."""
     matcher = build_operation_matcher(OPERATIONS)
     assert matcher.match("GET", "/legacy/1") == "oldGetUser"
 

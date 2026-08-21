@@ -16,14 +16,19 @@ _PATH_PARAM_RE = re.compile(r"\{(\w+)\}")
 
 
 def _build_minimal_spec(operations: list[Operation]) -> dict:
-    """activeなOperationからopenapi-coreでのpathマッチングにのみ使う最小限のOpenAPI specを組み立てる。"""
+    """Build a minimal OpenAPI spec from active Operations, used only for path matching via openapi-core."""
     paths: dict[str, dict] = {}
     for op in operations:
         path_item = paths.setdefault(op.path, {})
         param_names = _PATH_PARAM_RE.findall(op.path)
         if param_names:
             path_item["parameters"] = [
-                {"name": name, "in": "path", "required": True, "schema": {"type": "string"}}
+                {
+                    "name": name,
+                    "in": "path",
+                    "required": True,
+                    "schema": {"type": "string"},
+                }
                 for name in param_names
             ]
         path_item[op.method.lower()] = {

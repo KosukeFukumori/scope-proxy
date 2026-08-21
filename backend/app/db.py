@@ -3,19 +3,21 @@ from collections.abc import Generator
 from sqlmodel import Session, create_engine
 
 from app import (
-    models,  # noqa: F401  SQLModel.metadata へのテーブル登録のため必要（テストで使用）
+    models,  # noqa: F401  needed to register tables on SQLModel.metadata (used in tests)
 )
 from app.config import settings
 from app.migration_runner import run_migrations
 
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False} if settings.database_url.startswith("sqlite") else {},
+    connect_args={"check_same_thread": False}
+    if settings.database_url.startswith("sqlite")
+    else {},
 )
 
 
 def init_db() -> None:
-    """マイグレーションを実行してDBスキーマを最新化する。"""
+    """Run migrations to bring the DB schema up to date."""
     run_migrations(engine)
 
 

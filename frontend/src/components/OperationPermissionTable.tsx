@@ -35,7 +35,7 @@ export function OperationPermissionTable({
     groups.set(key, list)
   }
 
-  /** グループ内をまとめて選択/解除する。 */
+  /** Selects/deselects all operations within a group. */
   function toggleGroup(ops: Operation[], select: boolean) {
     for (const op of ops) {
       if (selectedIds.has(op.operation_id) !== select) {
