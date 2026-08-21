@@ -29,6 +29,8 @@ uv run scripts/create_admin_user.py  # create the initial admin user
 uv run uvicorn app.main:app --reload
 ```
 
+Database schema migrations run automatically on startup (see [Database migrations](#database-migrations) below).
+
 ### Frontend
 
 ```bash
@@ -42,6 +44,10 @@ The admin UI follows the OS color scheme setting and supports both light and dar
 During development, frontend requests to `/_admin/api/*` are proxied to the backend (`http://127.0.0.1:8000`) via the `vite.config.ts` configuration. Start the backend before running `npm run dev`.
 
 The production build (`npm run build`) output is served from `/_admin/` by `backend/app/main.py` (as an SPA, any path without a matching file falls back to `index.html`).
+
+## Database migrations
+
+`backend/migrations/` holds numbered, idempotent SQL files (`0001_initial.sql`, `0002_xxx.sql`, ...). On every startup (`app.main.lifespan` → `app.db.init_db`), `app.migration_runner.run_migrations` applies any files not yet recorded in the `schema_migrations` table, in filename order. There is no separate migration command to run manually — adding a new numbered `.sql` file under `backend/migrations/` is enough; it gets applied automatically the next time the app starts.
 
 ## Environment variables (backend/.env)
 
