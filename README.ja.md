@@ -45,6 +45,22 @@ npm run dev
 
 本番ビルド (`npm run build`) の成果物は `backend/app/main.py` から `/_admin/` 配下で配信されます(SPAのため、実ファイルが存在しないパスは `index.html` にフォールバックします)。
 
+### Docker Compose
+
+ポートを1つにまとめたい場合、フロントエンドをビルドしてbackendイメージに同梱し、Docker Composeで起動できます。
+
+```bash
+docker compose up --build
+```
+
+これで管理画面とプロキシの両方が `http://localhost:8000` の1ポートで動作します。SQLiteのDBファイルは `scope_proxy_db` という名前付きボリュームに永続化されます。初回管理ユーザーの作成は次のコマンドで行います。
+
+```bash
+docker compose exec app .venv/bin/python scripts/create_admin_user.py
+```
+
+本番運用では `docker-compose.yml` 内で `SECRET_KEY` を固定値に設定してください。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
+
 ## DBマイグレーション
 
 `backend/migrations/` には連番の冪等なSQLファイル(`0001_initial.sql`, `0002_xxx.sql`, ...)を置きます。起動のたびに(`app.main.lifespan` → `app.db.init_db`)、`app.migration_runner.run_migrations` が `schema_migrations` テーブルに未記録のファイルをファイル名順に適用します。手動で実行するマイグレーションコマンドは無く、`backend/migrations/` に新しい連番の `.sql` ファイルを追加するだけで、次回アプリ起動時に自動適用されます。

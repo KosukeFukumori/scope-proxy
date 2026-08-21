@@ -45,6 +45,22 @@ During development, frontend requests to `/_admin/api/*` are proxied to the back
 
 The production build (`npm run build`) output is served from `/_admin/` by `backend/app/main.py` (as an SPA, any path without a matching file falls back to `index.html`).
 
+### Docker Compose
+
+For a single-port setup, build the frontend into the backend image and run it with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQLite database is persisted in the `scope_proxy_db` named volume. To create the initial admin user:
+
+```bash
+docker compose exec app .venv/bin/python scripts/create_admin_user.py
+```
+
+Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
+
 ## Database migrations
 
 `backend/migrations/` holds numbered, idempotent SQL files (`0001_initial.sql`, `0002_xxx.sql`, ...). On every startup (`app.main.lifespan` → `app.db.init_db`), `app.migration_runner.run_migrations` applies any files not yet recorded in the `schema_migrations` table, in filename order. There is no separate migration command to run manually — adding a new numbered `.sql` file under `backend/migrations/` is enough; it gets applied automatically the next time the app starts.
