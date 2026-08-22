@@ -20,6 +20,7 @@ from app.routers import (
     proxy,
     schema_snapshots,
     tokens,
+    usage,
     users,
 )
 
@@ -90,6 +91,7 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
     app.include_router(tokens.router, prefix="/_admin")
     app.include_router(operations.router, prefix="/_admin")
     app.include_router(schema_snapshots.router, prefix="/_admin")
+    app.include_router(usage.router, prefix="/_admin")
     app.include_router(users.router, prefix="/_admin")
 
     if FRONTEND_DIST.is_dir():

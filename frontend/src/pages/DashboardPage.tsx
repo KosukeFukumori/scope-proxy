@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
+import { getUsageSummary } from '../api/usage'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { DiffSummary } from '../components/DiffSummary'
 import { Layout } from '../components/Layout'
@@ -12,6 +13,56 @@ import { EmptyState, ErrorAlert, Loading, PageHeader, SuccessAlert } from '../co
 import { diffSummaryHasChanges } from '../lib/diffSummary'
 import { errorMessage, formatDateTime } from '../lib/format'
 import type { BackendConfig } from '../types/api'
+
+const USAGE_SUMMARY_DAYS = 7
+
+function UsageSummaryCard() {
+  const { t } = useTranslation()
+  const usageQuery = useQuery({
+    queryKey: ['usageSummary', USAGE_SUMMARY_DAYS],
+    queryFn: () => getUsageSummary(USAGE_SUMMARY_DAYS),
+  })
+
+  if (usageQuery.isLoading || !usageQuery.data) {
+    return null
+  }
+
+  const summary = usageQuery.data
+
+  return (
+    <section className="section">
+      <div className="section__header">
+        <h2>{t('dashboard.usage.title', { days: summary.period_days })}</h2>
+      </div>
+      <div className="stat-row">
+        <div className="card">
+          <div className="card__body">
+            <p className="muted" style={{ fontSize: '0.8rem' }}>
+              {t('dashboard.usage.totalRequests')}
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>{summary.total_requests}</p>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card__body">
+            <p className="muted" style={{ fontSize: '0.8rem' }}>
+              {t('dashboard.usage.forwardedRequests')}
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>{summary.forwarded_requests}</p>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card__body">
+            <p className="muted" style={{ fontSize: '0.8rem' }}>
+              {t('dashboard.usage.deniedRequests')}
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>{summary.denied_requests}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 /** Notice modal shown after a schema refresh detected changes. */
 function SchemaChangeModal({ diffSummary, onClose }: { diffSummary: string; onClose: () => void }) {
@@ -184,6 +235,8 @@ export function DashboardPage() {
       ) : (
         <ConfigForm key={configQuery.data?.id ?? 'new'} config={configQuery.data ?? null} />
       )}
+
+      <UsageSummaryCard />
 
       <section className="section">
         <div className="section__header">

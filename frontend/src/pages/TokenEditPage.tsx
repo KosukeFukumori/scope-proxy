@@ -3,14 +3,71 @@ import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { createToken, getToken, updateToken } from '../api/tokens'
+import { createToken, getToken, listTokenLogs, updateToken } from '../api/tokens'
 import { listOperations } from '../api/operations'
 import { Layout } from '../components/Layout'
 import { OperationPermissionTable } from '../components/OperationPermissionTable'
 import { TokenValueDialog } from '../components/TokenValueDialog'
-import { ErrorAlert, Loading, PageHeader } from '../components/ui'
-import { errorMessage } from '../lib/format'
+import { Badge, EmptyState, ErrorAlert, Loading, PageHeader } from '../components/ui'
+import { errorMessage, formatDateTime } from '../lib/format'
 import type { Operation, TokenDetail } from '../types/api'
+
+function StatusBadge({ status }: { status: number }) {
+  if (status >= 500) {
+    return <Badge tone="danger">{status}</Badge>
+  }
+  if (status >= 400) {
+    return <Badge tone="warning">{status}</Badge>
+  }
+  return <Badge tone="success">{status}</Badge>
+}
+
+function TokenLogsSection({ tokenId }: { tokenId: string }) {
+  const { t, i18n } = useTranslation()
+  const logsQuery = useQuery({ queryKey: ['tokenLogs', tokenId], queryFn: () => listTokenLogs(tokenId) })
+  const logs = logsQuery.data ?? []
+
+  return (
+    <section className="section">
+      <div className="section__header">
+        <h2>{t('tokenEdit.logs.title')}</h2>
+      </div>
+
+      {logsQuery.isLoading && <Loading />}
+
+      {!logsQuery.isLoading && logs.length === 0 && <EmptyState title={t('tokenEdit.logs.empty')} />}
+
+      {logs.length > 0 && (
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>{t('tokenEdit.logs.table.time')}</th>
+                <th>{t('tokenEdit.logs.table.method')}</th>
+                <th>{t('tokenEdit.logs.table.path')}</th>
+                <th>{t('tokenEdit.logs.table.status')}</th>
+                <th>{t('tokenEdit.logs.table.latency')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((log) => (
+                <tr key={log.id}>
+                  <td className="td--num">{formatDateTime(log.created_at, undefined, i18n.resolvedLanguage)}</td>
+                  <td>{log.method}</td>
+                  <td>{log.path}</td>
+                  <td>
+                    <StatusBadge status={log.status} />
+                  </td>
+                  <td className="td--num">{log.latency_ms} ms</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
 
 function TokenForm({
   tokenId,
@@ -178,6 +235,8 @@ export function TokenEditPage() {
           operations={operations}
         />
       )}
+
+      {tokenId && !isLoading && <TokenLogsSection tokenId={tokenId} />}
     </Layout>
   )
 }

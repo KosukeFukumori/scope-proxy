@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./scope_proxy.db"
     secret_key: str | None = None
     session_cookie_name: str = "scope_proxy_session"
+    request_log_retention_days: int = 30
+    """How long request_logs rows are kept before opportunistic pruning removes them."""
+
     # Whether the session cookie requires HTTPS (Secure attribute). Default to True
     # since this app is meant to be deployed behind HTTPS; set to False only for
     # local HTTP development.
