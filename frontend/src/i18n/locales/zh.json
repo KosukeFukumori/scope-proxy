@@ -116,6 +116,16 @@
       "title": "暂无令牌",
       "description": "请通过「新建令牌」创建第一个令牌。"
     },
+    "filterEmpty": {
+      "title": "没有符合条件的令牌",
+      "description": "请更改筛选条件。"
+    },
+    "filters": {
+      "all": "全部",
+      "active": "仅有效",
+      "revoked": "仅已作废",
+      "expired": "仅已过期"
+    },
     "table": {
       "name": "名称",
       "status": "状态",
@@ -126,6 +136,8 @@
     "noExpiry": "无限期",
     "notUsed": "未使用",
     "revoke": "作废",
+    "delete": "删除",
+    "confirmDelete": "确定要删除此令牌吗？此操作无法撤销。",
     "status": {
       "revoked": "已作废",
       "expired": "已过期",
