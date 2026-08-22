@@ -2,7 +2,22 @@
 
 [English](./README.md)
 
+[![CI](https://github.com/KosukeFukumori/scope-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/KosukeFukumori/scope-proxy/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](./backend/pyproject.toml)
+[![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![React 19](https://img.shields.io/badge/frontend-React%2019-61DAFB.svg)](./frontend/package.json)
+
 認証機能を持たない既存APIサーバー(OpenAPI JSONを公開)の手前に立ち、トークンベースの認可とプロキシ機能を提供するラッパーサーバーです。
+
+**認可サーバー不要、OAuthのやり取り不要、接続先APIへのコード変更も不要。** OpenAPIスキーマを指定するだけで、接続先の各オペレーションに対しトークンごとに付与・剥奪できる権限が自動的に用意されます。認証を持たない社内APIを、数分でアクセス制御されたAPIに変えられます。
+
+## なぜ scope-proxy か
+
+- **接続先APIの変更が一切不要** — 接続先は認可の存在を意識する必要がありません。scope-proxyが手前に立ち、まったく同じURL構造で応答します。
+- **OAuthサーバーの構築が不要** — トークンはセルフサービスで発行される不透明な文字列で、接続先自身のOpenAPIスキーマから取得した `operationId` 単位でスコープされます。クライアント登録もリダイレクトURIも、IdPも不要です。
+- **スキーマの変化を安全に扱う** — 接続先のOpenAPIが変化すると、新規オペレーションは無権限(allowlist)から始まるため、意図せず公開されることがありません。
+- **フットプリントが小さい** — FastAPI 1サービス + SQLiteのみで構成され、`docker compose up` でコンテナ1つとしてデプロイできます。
 
 ## 特徴
 
