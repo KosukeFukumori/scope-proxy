@@ -7,6 +7,8 @@ import { SnapshotsPage } from './pages/SnapshotsPage'
 import { TokensPage } from './pages/TokensPage'
 import { TokenEditPage } from './pages/TokenEditPage'
 import { UsagePage } from './pages/UsagePage'
+import { AccountPage } from './pages/AccountPage'
+import { UsersPage } from './pages/UsersPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 /** List of pages that require login. */
@@ -18,6 +20,8 @@ const PROTECTED_ROUTES: { path: string; element: ReactNode }[] = [
   { path: '/tokens/new', element: <TokenEditPage /> },
   { path: '/tokens/:id', element: <TokenEditPage /> },
   { path: '/usage', element: <UsagePage /> },
+  { path: '/account', element: <AccountPage /> },
+  { path: '/users', element: <UsersPage /> },
 ]
 
 function App() {

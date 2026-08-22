@@ -11,10 +11,12 @@
       "operations": "オペレーション",
       "snapshots": "変更履歴",
       "tokens": "トークン",
+      "users": "ユーザー",
       "usage": "使い方"
     },
     "logout": "ログアウト",
-    "language": "言語"
+    "language": "言語",
+    "account": "アカウント"
   },
   "login": {
     "subtitle": "管理画面にログイン",
@@ -174,6 +176,37 @@
       "forbidden": "403: トークンに許可されていない operationId、または無効化されたオペレーションへアクセスした場合",
       "notFound": "404: 接続先の OpenAPI スキーマに存在しないパス・メソッドの場合"
     }
+  },
+  "account": {
+    "title": "アカウント",
+    "description": "現在ログイン中のアカウントのパスワードを変更します。",
+    "form": {
+      "currentPasswordLabel": "現在のパスワード",
+      "newPasswordLabel": "新しいパスワード",
+      "newPasswordHint": "8文字以上で入力してください。",
+      "confirmPasswordLabel": "新しいパスワード(確認)",
+      "confirmMismatch": "新しいパスワードと確認用の入力が一致しません。",
+      "saveError": "パスワードの変更に失敗しました",
+      "saveSuccess": "パスワードを変更しました。",
+      "save": "パスワードを変更"
+    }
+  },
+  "users": {
+    "title": "ユーザー",
+    "description": "管理画面にログインできるアカウントを管理します。",
+    "form": {
+      "title": "ユーザーを追加",
+      "emailLabel": "メールアドレス",
+      "passwordLabel": "パスワード",
+      "saveError": "ユーザーの作成に失敗しました",
+      "create": "作成"
+    },
+    "table": {
+      "email": "メールアドレス",
+      "createdAt": "作成日時"
+    },
+    "delete": "削除",
+    "deleteError": "ユーザーの削除に失敗しました"
   },
   "ui": {
     "loading": "読み込み中..."

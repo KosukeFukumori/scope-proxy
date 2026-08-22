@@ -12,3 +12,12 @@ export function logout(): Promise<void> {
 export function getCurrentUser(): Promise<User> {
   return apiClient.get<User>('/_admin/api/me')
 }
+
+export interface ChangePasswordInput {
+  current_password: string
+  new_password: string
+}
+
+export function changePassword(input: ChangePasswordInput): Promise<void> {
+  return apiClient.patch<void>('/_admin/api/me/password', input)
+}

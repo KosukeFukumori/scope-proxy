@@ -11,10 +11,12 @@
       "operations": "Operations",
       "snapshots": "History",
       "tokens": "Tokens",
+      "users": "Users",
       "usage": "Usage"
     },
     "logout": "Log out",
-    "language": "Language"
+    "language": "Language",
+    "account": "Account"
   },
   "login": {
     "subtitle": "Sign in to the admin console",
@@ -174,6 +176,37 @@
       "forbidden": "403: the operationId isn't allowed for the token, or the operation is inactive",
       "notFound": "404: the path/method doesn't exist in the connected OpenAPI schema"
     }
+  },
+  "account": {
+    "title": "Account",
+    "description": "Change the password for the currently logged-in account.",
+    "form": {
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "newPasswordHint": "Must be at least 8 characters.",
+      "confirmPasswordLabel": "Confirm new password",
+      "confirmMismatch": "The new password and confirmation do not match.",
+      "saveError": "Failed to change password",
+      "saveSuccess": "Password changed successfully.",
+      "save": "Change password"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "description": "Manage the accounts that can sign in to the admin console.",
+    "form": {
+      "title": "Add a new user",
+      "emailLabel": "Email address",
+      "passwordLabel": "Password",
+      "saveError": "Failed to create user",
+      "create": "Create"
+    },
+    "table": {
+      "email": "Email",
+      "createdAt": "Created at"
+    },
+    "delete": "Delete",
+    "deleteError": "Failed to delete user"
   },
   "ui": {
     "loading": "Loading..."

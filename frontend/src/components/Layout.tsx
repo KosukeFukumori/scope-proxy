@@ -25,6 +25,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: '/operations', label: t('layout.nav.operations'), end: false },
     { to: '/snapshots', label: t('layout.nav.snapshots'), end: false },
     { to: '/tokens', label: t('layout.nav.tokens'), end: false },
+    { to: '/users', label: t('layout.nav.users'), end: false },
     { to: '/usage', label: t('layout.nav.usage'), end: false },
   ]
 
@@ -63,6 +64,9 @@ export function Layout({ children }: { children: ReactNode }) {
             </option>
           ))}
         </select>
+        <NavLink to="/account" className={navClass}>
+          {t('layout.account')}
+        </NavLink>
         <button
           type="button"
           className="btn btn--sm"

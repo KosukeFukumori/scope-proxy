@@ -566,6 +566,12 @@ pre {
   border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
 }
 
+.alert--success {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  border-color: color-mix(in srgb, var(--color-success) 25%, transparent);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
