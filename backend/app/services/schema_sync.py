@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 import httpx
-from sqlalchemy import Engine
+from sqlalchemy import Engine, desc
 from sqlmodel import Session, select
 
 from app.models.backend_config import BackendConfig
@@ -126,6 +126,13 @@ def sync_operations(session: Session, spec: dict) -> SyncResult:
     return result
 
 
+def _get_latest_snapshot(session: Session) -> SchemaSnapshot | None:
+    # sqlmodel field access is statically typed as `datetime`, not a Column, so pyright
+    # cannot see that this is actually a SQLAlchemy InstrumentedAttribute at runtime.
+    statement = select(SchemaSnapshot).order_by(desc(SchemaSnapshot.fetched_at)).limit(1)  # type: ignore[arg-type]
+    return session.exec(statement).first()
+
+
 async def refresh_backend_schema(session: Session, backend_config: BackendConfig) -> SchemaSnapshot:
     """Fetch the upstream OpenAPI spec, reconcile operations, and record a snapshot.
 
@@ -143,6 +150,14 @@ async def refresh_backend_schema(session: Session, backend_config: BackendConfig
         backend_config.last_sync_status = "success"
         backend_config.last_sync_error = None
         session.add(backend_config)
+
+        latest_snapshot = _get_latest_snapshot(session)
+        if latest_snapshot is not None and latest_snapshot.spec_hash == spec_hash:
+            # Spec is unchanged since the last snapshot: avoid piling up "no change" rows,
+            # which would otherwise flood the history once periodic sync is introduced.
+            session.commit()
+            session.refresh(latest_snapshot)
+            return latest_snapshot
 
         snapshot = SchemaSnapshot(spec_hash=spec_hash, diff_summary=result.to_diff_summary())
         session.add(snapshot)

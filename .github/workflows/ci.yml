@@ -23,6 +23,8 @@ jobs:
         run: uv sync
       - name: Lint
         run: uv run ruff check .
+      - name: Type check
+        run: uv run pyright app tests scripts
       - name: Test
         run: uv run pytest
 
@@ -42,5 +44,7 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Check locale key consistency
+        run: npm run check-locales
       - name: Build
         run: npm run build

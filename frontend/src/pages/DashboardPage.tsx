@@ -5,8 +5,9 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
+import { DiffSummary } from '../components/DiffSummary'
 import { Layout } from '../components/Layout'
-import { EmptyState, ErrorAlert, Loading, PageHeader } from '../components/ui'
+import { EmptyState, ErrorAlert, Loading, PageHeader, SuccessAlert } from '../components/ui'
 import { errorMessage, formatDateTime } from '../lib/format'
 import type { BackendConfig } from '../types/api'
 
@@ -75,13 +76,15 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
         {saveMutation.isError && (
           <ErrorAlert>{errorMessage(saveMutation.error, t('dashboard.form.saveError'))}</ErrorAlert>
         )}
+        {saveMutation.isSuccess && <SuccessAlert>{t('dashboard.form.saveSuccess')}</SuccessAlert>}
         {refreshMutation.isError && (
           <ErrorAlert>{errorMessage(refreshMutation.error, t('dashboard.form.refreshError'))}</ErrorAlert>
         )}
         {refreshMutation.isSuccess && (
-          <p className="muted" style={{ fontSize: '0.875rem' }}>
-            {t('dashboard.form.diffLabel')} <code>{refreshMutation.data.diff_summary}</code>
-          </p>
+          <div className="muted" style={{ fontSize: '0.875rem' }}>
+            <p style={{ margin: '0 0 0.3rem' }}>{t('dashboard.form.diffLabel')}</p>
+            <DiffSummary diffSummary={refreshMutation.data.diff_summary} />
+          </div>
         )}
         {config?.last_sync_status === 'error' && (
           <ErrorAlert>
@@ -161,7 +164,7 @@ export function DashboardPage() {
                   <tr key={snapshot.id}>
                     <td className="td--num">{formatDateTime(snapshot.fetched_at, undefined, i18n.resolvedLanguage)}</td>
                     <td>
-                      <code>{snapshot.diff_summary}</code>
+                      <DiffSummary diffSummary={snapshot.diff_summary} />
                     </td>
                   </tr>
                 ))}

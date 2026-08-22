@@ -17,11 +17,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   })
 
-  if (response.status === 401 && !path.endsWith('/_admin/api/login')) {
-    window.location.href = '/_admin/login'
-    throw new ApiError(401, 'Not authenticated')
-  }
-
   if (!response.ok) {
     const body = await response.json().catch(() => ({ detail: response.statusText }))
     throw new ApiError(response.status, body.detail ?? response.statusText)

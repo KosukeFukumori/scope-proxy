@@ -1,10 +1,12 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { listTokens, revokeToken } from '../api/tokens'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { Layout } from '../components/Layout'
 import { Badge, EmptyState, Loading, PageHeader } from '../components/ui'
-import { formatDateTime } from '../lib/format'
+import { errorMessage, formatDateTime } from '../lib/format'
 import type { TokenSummary } from '../types/api'
 
 function StatusBadge({ token }: { token: TokenSummary }) {
@@ -22,11 +24,13 @@ export function TokensPage() {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const tokensQuery = useQuery({ queryKey: ['tokens'], queryFn: listTokens })
+  const [confirmTarget, setConfirmTarget] = useState<TokenSummary | null>(null)
 
   const revokeMutation = useMutation({
     mutationFn: (id: string) => revokeToken(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tokens'] })
+      setConfirmTarget(null)
     },
   })
 
@@ -92,8 +96,8 @@ export function TokensPage() {
                       <button
                         type="button"
                         className="btn btn--sm btn--danger"
-                        onClick={() => revokeMutation.mutate(token.id)}
-                        disabled={revokeMutation.isPending}
+                        onClick={() => setConfirmTarget(token)}
+                        disabled={revokeMutation.isPending && revokeMutation.variables === token.id}
                       >
                         {t('tokens.revoke')}
                       </button>
@@ -104,6 +108,26 @@ export function TokensPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {confirmTarget && (
+        <ConfirmDialog
+          title={t('tokens.revokeConfirm.title')}
+          message={t('tokens.revokeConfirm.message', { name: confirmTarget.name })}
+          confirmLabel={
+            revokeMutation.isPending && revokeMutation.variables === confirmTarget.id
+              ? t('tokens.revokeConfirm.revoking')
+              : t('tokens.revokeConfirm.confirm')
+          }
+          confirmDisabled={revokeMutation.isPending && revokeMutation.variables === confirmTarget.id}
+          errorMessage={
+            revokeMutation.isError && revokeMutation.variables === confirmTarget.id
+              ? errorMessage(revokeMutation.error, t('tokens.revokeConfirm.error'))
+              : undefined
+          }
+          onConfirm={() => revokeMutation.mutate(confirmTarget.id)}
+          onCancel={() => setConfirmTarget(null)}
+        />
       )}
     </Layout>
   )

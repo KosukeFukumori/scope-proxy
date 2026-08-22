@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.deps import CurrentUserDep, SessionDep
 from app.models.backend_config import BackendConfig
+from app.models.schema_snapshot import SchemaSnapshot
 from app.schemas.backend_config import BackendConfigRead, BackendConfigUpsert
 from app.schemas.schema_snapshot import SchemaSnapshotRead
 from app.services.schema_sync import refresh_backend_schema
@@ -39,10 +40,9 @@ def upsert_backend_config(
 
 
 @router.post("/refresh", response_model=SchemaSnapshotRead)
-async def refresh_backend_config(session: SessionDep, current_user: CurrentUserDep) -> SchemaSnapshotRead:
+async def refresh_backend_config(session: SessionDep, current_user: CurrentUserDep) -> SchemaSnapshot:
     config = _get_singleton(session)
     if config is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backend config not set")
 
-    snapshot = await refresh_backend_schema(session, config)
-    return snapshot
+    return await refresh_backend_schema(session, config)

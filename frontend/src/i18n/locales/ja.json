@@ -5,6 +5,13 @@
     "close": "閉じる",
     "unset": "—"
   },
+  "diffSummary": {
+    "noChanges": "変更なし",
+    "added": "追加",
+    "updated": "更新",
+    "removed": "削除",
+    "skippedAdminConflict": "管理画面と競合のためスキップ"
+  },
   "layout": {
     "nav": {
       "dashboard": "接続先設定",
@@ -33,6 +40,7 @@
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "operationId 単位の権限管理に使用するスキーマの取得元。",
       "saveError": "保存に失敗しました",
+      "saveSuccess": "保存しました",
       "refreshError": "スキーマの更新に失敗しました",
       "diffLabel": "差分:",
       "save": "保存",
@@ -64,9 +72,19 @@
       "active": "有効のみ",
       "inactive": "無効のみ"
     },
+    "search": {
+      "placeholder": "パス・operationId・summary で検索"
+    },
+    "methodFilter": {
+      "all": "すべてのメソッド"
+    },
     "empty": {
       "title": "オペレーションがありません",
       "description": "接続先設定から OpenAPI スキーマを取得してください。"
+    },
+    "searchEmpty": {
+      "title": "該当するオペレーションがありません",
+      "description": "検索条件やメソッドフィルタを見直してください。"
     },
     "table": {
       "method": "Method",
@@ -113,6 +131,13 @@
       "revoked": "失効済み",
       "expired": "期限切れ",
       "active": "有効"
+    },
+    "revokeConfirm": {
+      "title": "トークンを失効しますか？",
+      "message": "「{{name}}」を失効します。この操作は取り消せません。このトークンを使用しているクライアントは即座にアクセスできなくなります。",
+      "confirm": "失効する",
+      "revoking": "失効中...",
+      "error": "失効に失敗しました"
     }
   },
   "tokenEdit": {
@@ -133,13 +158,25 @@
     }
   },
   "operationPermissionTable": {
+    "search": {
+      "placeholder": "パス・operationId・summary で検索"
+    },
+    "methodFilter": {
+      "all": "すべてのメソッド"
+    },
     "empty": {
       "title": "オペレーションがありません",
       "description": "接続先設定から OpenAPI スキーマを取得してください。"
     },
+    "searchEmpty": {
+      "title": "該当するオペレーションがありません",
+      "description": "検索条件やメソッドフィルタを見直してください。"
+    },
     "selectedCount": "{{selected}} / {{total}}",
     "selectAll": "すべて選択",
     "deselectAll": "すべて解除",
+    "collapseGroup": "グループを折りたたむ",
+    "expandGroup": "グループを展開する",
     "inactive": "無効"
   },
   "tokenValueDialog": {

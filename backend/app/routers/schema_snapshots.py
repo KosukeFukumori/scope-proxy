@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from sqlalchemy import desc
 from sqlmodel import select
 
 from app.deps import CurrentUserDep, SessionDep
@@ -10,5 +11,7 @@ router = APIRouter(prefix="/api/schema-snapshots", tags=["schema-snapshots"])
 
 @router.get("", response_model=list[SchemaSnapshotRead])
 def list_schema_snapshots(session: SessionDep, current_user: CurrentUserDep) -> list[SchemaSnapshot]:
-    statement = select(SchemaSnapshot).order_by(SchemaSnapshot.fetched_at.desc())
+    # sqlmodel field access is statically typed as `datetime`, not a Column, so pyright
+    # cannot see that this is actually a SQLAlchemy InstrumentedAttribute at runtime.
+    statement = select(SchemaSnapshot).order_by(desc(SchemaSnapshot.fetched_at))  # type: ignore[arg-type]
     return list(session.exec(statement).all())

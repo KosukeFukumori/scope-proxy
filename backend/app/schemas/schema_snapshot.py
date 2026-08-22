@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from app.schemas.common import AwareDatetimeModel
 
 
-class SchemaSnapshotRead(BaseModel):
+class SchemaSnapshotRead(AwareDatetimeModel):
     id: int
     fetched_at: datetime
     spec_hash: str

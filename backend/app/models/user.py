@@ -4,7 +4,8 @@ from sqlmodel import Field, SQLModel
 
 
 class User(SQLModel, table=True):
-    __tablename__ = "users"
+    # sqlmodel declares __tablename__ as declared_attr; pyright cannot narrow a plain str assignment.
+    __tablename__ = "users"  # type: ignore[assignment]
 
     id: int | None = Field(default=None, primary_key=True)
     email: str = Field(unique=True, index=True)

@@ -14,6 +14,13 @@ services:
       # SECRET_KEY is generated on every restart and sessions are invalidated
       # each time the container restarts.
       # SECRET_KEY: change-me-to-a-random-secret
+    healthcheck:
+      # Use the stdlib instead of curl since the image doesn't ship curl.
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/_admin/api/health', timeout=2)"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
 
 volumes:
   scope_proxy_db:

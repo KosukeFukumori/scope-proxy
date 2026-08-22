@@ -15,6 +15,7 @@ from app.db import engine, init_db
 from app.routers import (
     auth,
     backend_config,
+    health,
     operations,
     proxy,
     schema_snapshots,
@@ -42,7 +43,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             schema_sync_loop(engine, settings.schema_sync_interval_seconds)
         )
 
-    async with httpx.AsyncClient() as http_client:
+    async with httpx.AsyncClient(timeout=settings.proxy_timeout_seconds) as http_client:
         app.state.http_client = http_client
         yield
 
@@ -54,8 +55,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
 app = FastAPI(title="scope-proxy", lifespan=lifespan)
 
+assert settings.secret_key is not None  # generated in app.config if not set via env
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
+app.include_router(health.router, prefix="/_admin")
 app.include_router(auth.router, prefix="/_admin")
 app.include_router(backend_config.router, prefix="/_admin")
 app.include_router(tokens.router, prefix="/_admin")

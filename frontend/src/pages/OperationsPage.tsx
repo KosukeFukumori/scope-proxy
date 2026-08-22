@@ -6,10 +6,13 @@ import { Layout } from '../components/Layout'
 import { Badge, EmptyState, Loading, MethodBadge, PageHeader } from '../components/ui'
 
 type Filter = 'all' | 'active' | 'inactive'
+const METHOD_FILTER_ALL = 'all'
 
 export function OperationsPage() {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<Filter>('all')
+  const [search, setSearch] = useState('')
+  const [methodFilter, setMethodFilter] = useState(METHOD_FILTER_ALL)
 
   const FILTERS: { value: Filter; label: string }[] = [
     { value: 'all', label: t('operations.filters.all') },
@@ -22,7 +25,19 @@ export function OperationsPage() {
     queryFn: () => listOperations(filter === 'all' ? undefined : filter === 'active'),
   })
 
-  const operations = operationsQuery.data ?? []
+  const allOperations = operationsQuery.data ?? []
+  const methods = [...new Set(allOperations.map((op) => op.method))].sort()
+
+  const normalizedSearch = search.trim().toLowerCase()
+  const operations = allOperations.filter((op) => {
+    const matchesMethod = methodFilter === METHOD_FILTER_ALL || op.method === methodFilter
+    const matchesSearch =
+      normalizedSearch === '' ||
+      op.path.toLowerCase().includes(normalizedSearch) ||
+      op.operation_id.toLowerCase().includes(normalizedSearch) ||
+      (op.summary ?? '').toLowerCase().includes(normalizedSearch)
+    return matchesMethod && matchesSearch
+  })
 
   return (
     <Layout>
@@ -45,10 +60,43 @@ export function OperationsPage() {
         }
       />
 
+      {!operationsQuery.isLoading && allOperations.length > 0 && (
+        <div className="row" style={{ marginBottom: '0.75rem' }}>
+          <input
+            type="text"
+            className="input"
+            style={{ maxWidth: '20rem' }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('operations.search.placeholder')}
+          />
+          <select
+            className="input"
+            style={{ width: 'auto' }}
+            value={methodFilter}
+            onChange={(e) => setMethodFilter(e.target.value)}
+          >
+            <option value={METHOD_FILTER_ALL}>{t('operations.methodFilter.all')}</option>
+            {methods.map((method) => (
+              <option key={method} value={method}>
+                {method}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {operationsQuery.isLoading && <Loading />}
 
-      {!operationsQuery.isLoading && operations.length === 0 && (
+      {!operationsQuery.isLoading && allOperations.length === 0 && (
         <EmptyState title={t('operations.empty.title')} description={t('operations.empty.description')} />
+      )}
+
+      {!operationsQuery.isLoading && allOperations.length > 0 && operations.length === 0 && (
+        <EmptyState
+          title={t('operations.searchEmpty.title')}
+          description={t('operations.searchEmpty.description')}
+        />
       )}
 
       {operations.length > 0 && (
