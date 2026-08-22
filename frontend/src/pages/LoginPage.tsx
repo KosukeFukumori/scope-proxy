@@ -7,6 +7,10 @@ import { login } from '../api/auth'
 import { errorMessage } from '../lib/format'
 import { sanitizeReturnTo } from '../lib/returnTo'
 import { ErrorAlert } from '../components/ui'
+import { DemoBanner } from '../demo/DemoBanner'
+import { DEMO_CREDENTIALS } from '../demo/mockApi'
+
+const IS_DEMO = import.meta.env.MODE === 'demo'
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -32,6 +36,7 @@ export function LoginPage() {
 
   return (
     <div className="login-screen">
+      <DemoBanner />
       <form className="login-card" onSubmit={handleSubmit}>
         <div className="login-card__head">
           <span className="app-brand__mark" style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.9rem' }}>
@@ -39,6 +44,14 @@ export function LoginPage() {
           </span>
           <h1>{t('common.appName')}</h1>
           <p className="page-header__description">{t('login.subtitle')}</p>
+          {IS_DEMO && (
+            <p className="page-header__description">
+              {t('demo.credentialsHint', {
+                email: DEMO_CREDENTIALS.email,
+                password: DEMO_CREDENTIALS.password,
+              })}
+            </p>
+          )}
         </div>
 
         <div className="stack">

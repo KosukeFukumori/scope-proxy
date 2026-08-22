@@ -12,6 +12,12 @@ A wrapper server that sits in front of an existing API server (one that publishe
 
 **No auth server, no OAuth dance, no code changes to the upstream API.** Point scope-proxy at an OpenAPI schema, and it gives every upstream operation a permission you can grant or revoke per token — turning any unauthenticated internal API into a properly access-controlled one in minutes.
 
+## Demo
+
+**[Try the admin UI demo](https://kosukefukumori.github.io/scope-proxy/)** — login: `admin@example.com` / `demo-password`
+
+This is a static build of the admin UI hosted on GitHub Pages, with all API calls answered by mock data in the browser (see `frontend/src/demo/mockApi.ts`). There is no real backend behind it — nothing you do there is persisted beyond your browser tab, and it exists only to let you click through the screens. To try scope-proxy itself, use the [Docker Compose setup](#setup) below.
+
 ## Why scope-proxy?
 
 - **Zero changes to the upstream API** — it doesn't need to know auth exists. scope-proxy sits in front and speaks the exact same URL structure.

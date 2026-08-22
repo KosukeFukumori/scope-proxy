@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:demo": "tsc -b && vite build --mode demo --config vite.demo.config.ts && cp dist-demo/index.html dist-demo/404.html",
     "lint": "oxlint",
     "check-locales": "node scripts/check-locales.mjs",
     "preview": "vite preview"

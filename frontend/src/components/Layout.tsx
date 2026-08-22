@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { logout } from '../api/auth'
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../i18n'
+import { DemoBanner } from '../demo/DemoBanner'
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   ja: '日本語',
@@ -40,6 +41,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="app-shell">
+      <DemoBanner />
       <header className="app-header">
         <NavLink to="/" className="app-brand">
           <span className="app-brand__mark">SP</span>
