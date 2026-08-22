@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 import respx
 from httpx import AsyncClient, Response
@@ -6,6 +7,13 @@ from sqlmodel import Session, select
 
 from app.models.operation import Operation
 from app.models.token import TokenPermission
+
+
+def _assert_utc_aware(value: str) -> None:
+    """Assert a serialized datetime string carries a UTC offset (`+00:00` / `Z`)."""
+    parsed = datetime.fromisoformat(value)
+    assert parsed.tzinfo is not None
+    assert parsed.utcoffset() == timedelta(0)
 
 OPENAPI_URL = "https://api.example.com/openapi.json"
 
@@ -62,6 +70,10 @@ async def test_refresh_adds_new_operations(logged_in_client: AsyncClient, sessio
 
     diff = json.loads(response.json()["diff_summary"])
     assert sorted(diff["added"]) == ["getUser", "listUsers"]
+    _assert_utc_aware(response.json()["fetched_at"])
+
+    config_response = await logged_in_client.get("/_admin/api/backend-config")
+    _assert_utc_aware(config_response.json()["last_fetched_at"])
 
 
 @respx.mock
@@ -133,3 +145,17 @@ async def test_schema_snapshots_history(logged_in_client: AsyncClient) -> None:
     response = await logged_in_client.get("/_admin/api/schema-snapshots")
     assert response.status_code == 200
     assert len(response.json()) == 1
+
+
+@respx.mock
+async def test_refresh_skips_snapshot_when_spec_unchanged(logged_in_client: AsyncClient, session: Session) -> None:
+    await _set_backend_config(logged_in_client)
+    respx.get(OPENAPI_URL).mock(return_value=Response(200, json=SPEC_V1))
+
+    first_response = await logged_in_client.post("/_admin/api/backend-config/refresh")
+    second_response = await logged_in_client.post("/_admin/api/backend-config/refresh")
+
+    assert first_response.json()["id"] == second_response.json()["id"]
+
+    snapshots_response = await logged_in_client.get("/_admin/api/schema-snapshots")
+    assert len(snapshots_response.json()) == 1

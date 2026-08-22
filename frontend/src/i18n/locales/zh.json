@@ -5,6 +5,13 @@
     "close": "关闭",
     "unset": "—"
   },
+  "diffSummary": {
+    "noChanges": "无变更",
+    "added": "新增",
+    "updated": "更新",
+    "removed": "删除",
+    "skippedAdminConflict": "因与管理界面冲突而跳过"
+  },
   "layout": {
     "nav": {
       "dashboard": "后端配置",
@@ -35,6 +42,7 @@
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "用于按 operationId 管理权限的模式获取来源。",
       "saveError": "保存失败",
+      "saveSuccess": "已保存",
       "refreshError": "更新模式失败",
       "diffLabel": "差异:",
       "save": "保存",
@@ -63,9 +71,19 @@
       "active": "仅有效",
       "inactive": "仅无效"
     },
+    "search": {
+      "placeholder": "按路径、operationId 或 summary 搜索"
+    },
+    "methodFilter": {
+      "all": "所有方法"
+    },
     "empty": {
       "title": "暂无操作",
       "description": "请在后端配置中获取 OpenAPI 模式。"
+    },
+    "searchEmpty": {
+      "title": "没有匹配的操作",
+      "description": "请调整搜索条件或方法筛选。"
     },
     "table": {
       "method": "Method",
@@ -112,6 +130,13 @@
       "revoked": "已作废",
       "expired": "已过期",
       "active": "有效"
+    },
+    "revokeConfirm": {
+      "title": "确定要作废该令牌吗？",
+      "message": "即将作废「{{name}}」。此操作无法撤销，使用该令牌的客户端将立即失去访问权限。",
+      "confirm": "作废",
+      "revoking": "作废中...",
+      "error": "作废失败"
     }
   },
   "tokenEdit": {
@@ -132,13 +157,25 @@
     }
   },
   "operationPermissionTable": {
+    "search": {
+      "placeholder": "按路径、operationId 或 summary 搜索"
+    },
+    "methodFilter": {
+      "all": "所有方法"
+    },
     "empty": {
       "title": "暂无操作",
       "description": "请在后端配置中获取 OpenAPI 模式。"
     },
+    "searchEmpty": {
+      "title": "没有匹配的操作",
+      "description": "请调整搜索条件或方法筛选。"
+    },
     "selectedCount": "{{selected}} / {{total}}",
     "selectAll": "全选",
     "deselectAll": "全部取消",
+    "collapseGroup": "折叠分组",
+    "expandGroup": "展开分组",
     "inactive": "无效"
   },
   "tokenValueDialog": {

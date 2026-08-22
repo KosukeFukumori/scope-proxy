@@ -1,5 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
+import httpx
 import respx
 from httpx import AsyncClient, Response
 from sqlmodel import Session, select
@@ -107,6 +108,7 @@ async def test_authorized_request_is_forwarded(client: AsyncClient, session: Ses
     assert upstream_request.headers["x-client"] == "test"
 
     token = session.exec(select(Token)).first()
+    assert token is not None
     assert token.last_used_at is not None
 
 
@@ -130,3 +132,25 @@ async def test_backend_not_configured_returns_503(client: AsyncClient, session: 
 
     response = await client.get("/users/1", headers={"Authorization": f"Bearer {raw}"})
     assert response.status_code == 503
+
+
+@respx.mock
+async def test_upstream_connect_error_returns_502(client: AsyncClient, session: Session) -> None:
+    _setup_backend(session)
+    raw = _create_token(session, operation_ids=["getUser"])
+
+    respx.get(f"{BACKEND_URL}/users/1").mock(side_effect=httpx.ConnectError("connection refused"))
+
+    response = await client.get("/users/1", headers={"Authorization": f"Bearer {raw}"})
+    assert response.status_code == 502
+
+
+@respx.mock
+async def test_upstream_timeout_returns_504(client: AsyncClient, session: Session) -> None:
+    _setup_backend(session)
+    raw = _create_token(session, operation_ids=["getUser"])
+
+    respx.get(f"{BACKEND_URL}/users/1").mock(side_effect=httpx.ReadTimeout("read timed out"))
+
+    response = await client.get("/users/1", headers={"Authorization": f"Bearer {raw}"})
+    assert response.status_code == 504

@@ -1,5 +1,10 @@
 from app.models.operation import Operation
-from app.services.operation_matcher import build_operation_matcher
+from app.services.operation_matcher import (
+    build_operation_matcher,
+    get_cached_operation_matcher,
+    operations_cache_key,
+    reset_operation_matcher_cache,
+)
 
 OPERATIONS = [
     Operation(operation_id="listUsers", method="GET", path="/users", is_active=True),
@@ -44,3 +49,35 @@ def test_matches_inactive_operation_too() -> None:
 def test_empty_operations() -> None:
     matcher = build_operation_matcher([])
     assert matcher.match("GET", "/anything") is None
+
+
+def test_cached_matcher_reuses_instance_for_same_fingerprint() -> None:
+    reset_operation_matcher_cache()
+    matcher_1 = get_cached_operation_matcher(OPERATIONS)
+    matcher_2 = get_cached_operation_matcher(list(OPERATIONS))  # different list, same content
+    assert matcher_1 is matcher_2
+
+
+def test_cached_matcher_rebuilds_when_operations_change() -> None:
+    reset_operation_matcher_cache()
+    matcher_1 = get_cached_operation_matcher(OPERATIONS)
+
+    changed_operations = [
+        *OPERATIONS,
+        Operation(operation_id="deleteUser", method="DELETE", path="/users/{id}", is_active=True),
+    ]
+    matcher_2 = get_cached_operation_matcher(changed_operations)
+
+    assert matcher_1 is not matcher_2
+    # The stale matcher must not still be served for the new fingerprint.
+    assert matcher_2.match("DELETE", "/users/1") == "deleteUser"
+    assert matcher_1.match("DELETE", "/users/1") is None
+
+
+def test_operations_cache_key_is_order_independent() -> None:
+    assert operations_cache_key(OPERATIONS) == operations_cache_key(list(reversed(OPERATIONS)))
+
+
+def test_operations_cache_key_changes_with_content() -> None:
+    other = [*OPERATIONS, Operation(operation_id="extra", method="GET", path="/extra", is_active=True)]
+    assert operations_cache_key(OPERATIONS) != operations_cache_key(other)
