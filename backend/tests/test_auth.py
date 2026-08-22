@@ -7,24 +7,24 @@ from app.models.user import User
 async def test_login_success(client: AsyncClient, test_user: User) -> None:
     response = await client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "testpass123"},
+        json={"username": test_user.username, "password": "testpass123"},
     )
     assert response.status_code == 200
-    assert response.json() == {"id": test_user.id, "email": test_user.email}
+    assert response.json() == {"id": test_user.id, "username": test_user.username}
 
 
 async def test_login_wrong_password(client: AsyncClient, test_user: User) -> None:
     response = await client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "wrong-password"},
+        json={"username": test_user.username, "password": "wrong-password"},
     )
     assert response.status_code == 401
 
 
-async def test_login_unknown_email(client: AsyncClient) -> None:
+async def test_login_unknown_username(client: AsyncClient) -> None:
     response = await client.post(
         "/_admin/api/login",
-        json={"email": "nobody@example.com", "password": "whatever"},
+        json={"username": "nobody", "password": "whatever"},
     )
     assert response.status_code == 401
 
@@ -50,7 +50,7 @@ async def test_me_requires_authentication(client: AsyncClient) -> None:
 async def test_me_returns_current_user(logged_in_client: AsyncClient, test_user: User) -> None:
     response = await logged_in_client.get("/_admin/api/me")
     assert response.status_code == 200
-    assert response.json() == {"id": test_user.id, "email": test_user.email}
+    assert response.json() == {"id": test_user.id, "username": test_user.username}
 
 
 async def test_change_password_requires_authentication(client: AsyncClient) -> None:
@@ -81,13 +81,44 @@ async def test_change_password_success_allows_login_with_new_password(
     # The old session should no longer be able to log in with the old password.
     old_login = await logged_in_client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "testpass123"},
+        json={"username": test_user.username, "password": "testpass123"},
     )
     assert old_login.status_code == 401
 
     new_login = await logged_in_client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "newpass456"},
+        json={"username": test_user.username, "password": "newpass456"},
+    )
+    assert new_login.status_code == 200
+
+
+async def test_change_username_requires_authentication(client: AsyncClient) -> None:
+    response = await client.patch(
+        "/_admin/api/me/username",
+        json={"username": "newname"},
+    )
+    assert response.status_code == 401
+
+
+async def test_change_username_success_allows_login_with_new_username(
+    logged_in_client: AsyncClient, test_user: User
+) -> None:
+    response = await logged_in_client.patch(
+        "/_admin/api/me/username",
+        json={"username": "newname"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"id": test_user.id, "username": "newname"}
+
+    old_login = await logged_in_client.post(
+        "/_admin/api/login",
+        json={"username": test_user.username, "password": "testpass123"},
+    )
+    assert old_login.status_code == 401
+
+    new_login = await logged_in_client.post(
+        "/_admin/api/login",
+        json={"username": "newname", "password": "testpass123"},
     )
     assert new_login.status_code == 200
 
@@ -99,19 +130,19 @@ async def test_login_blocked_after_repeated_failures(client: AsyncClient, test_u
     for _ in range(settings.login_rate_limit_max_attempts):
         response = await client.post(
             "/_admin/api/login",
-            json={"email": test_user.email, "password": "wrong-password"},
+            json={"username": test_user.username, "password": "wrong-password"},
         )
         assert response.status_code == 401
 
     response = await client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "wrong-password"},
+        json={"username": test_user.username, "password": "wrong-password"},
     )
     assert response.status_code == 429
 
     # Even the correct password should be blocked while the rate limit is active.
     response = await client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "testpass123"},
+        json={"username": test_user.username, "password": "testpass123"},
     )
     assert response.status_code == 429

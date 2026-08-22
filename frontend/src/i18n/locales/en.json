@@ -8,7 +8,7 @@
   "demo": {
     "banner": "Demo mode — this UI is backed by mock data only, no real backend is called.",
     "reset": "Reset demo data",
-    "credentialsHint": "Demo login: {{email}} / {{password}}"
+    "credentialsHint": "Demo login: {{username}} / {{password}}"
   },
   "diffSummary": {
     "noChanges": "No changes",
@@ -23,7 +23,6 @@
       "operations": "Operations",
       "snapshots": "History",
       "tokens": "Tokens",
-      "users": "Users",
       "usage": "Usage",
       "account": "Account"
     },
@@ -32,11 +31,11 @@
   },
   "login": {
     "subtitle": "Sign in to the admin console",
-    "email": "Email address",
+    "username": "Username",
     "password": "Password",
     "submit": "Log in",
     "submitting": "Logging in...",
-    "error": "Failed to log in"
+    "error": "Invalid username or password"
   },
   "dashboard": {
     "title": "Backend Config",
@@ -273,7 +272,14 @@
   },
   "account": {
     "title": "Account",
-    "description": "Change the password for the currently logged-in account.",
+    "description": "Change the username and password for the currently logged-in account.",
+    "usernameForm": {
+      "label": "Username",
+      "saveError": "Failed to change the username",
+      "save": "Change username",
+      "saving": "Changing...",
+      "success": "Username changed."
+    },
     "form": {
       "currentPasswordLabel": "Current password",
       "newPasswordLabel": "New password",
@@ -284,22 +290,5 @@
       "saving": "Changing...",
       "success": "Password changed."
     }
-  },
-  "users": {
-    "title": "Users",
-    "description": "List, add, and remove users who can log in to the admin console.",
-    "form": {
-      "emailLabel": "Email address",
-      "passwordLabel": "Password",
-      "saveError": "Failed to create the user",
-      "create": "Add user",
-      "saving": "Creating..."
-    },
-    "table": {
-      "email": "Email",
-      "createdAt": "Created at"
-    },
-    "delete": "Delete",
-    "deleteError": "Failed to delete the user"
   }
 }

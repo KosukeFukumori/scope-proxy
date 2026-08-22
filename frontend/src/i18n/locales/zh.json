@@ -8,7 +8,7 @@
   "demo": {
     "banner": "演示模式 — 此界面仅使用模拟数据，不会调用真实后端。",
     "reset": "重置演示数据",
-    "credentialsHint": "演示登录信息：{{email}} / {{password}}"
+    "credentialsHint": "演示登录信息：{{username}} / {{password}}"
   },
   "diffSummary": {
     "noChanges": "无变更",
@@ -23,7 +23,6 @@
       "operations": "操作列表",
       "snapshots": "变更历史",
       "tokens": "令牌",
-      "users": "用户",
       "usage": "使用说明",
       "account": "账户"
     },
@@ -32,11 +31,11 @@
   },
   "login": {
     "subtitle": "登录管理后台",
-    "email": "电子邮箱",
+    "username": "用户名",
     "password": "密码",
     "submit": "登录",
     "submitting": "登录中...",
-    "error": "登录失败"
+    "error": "用户名或密码错误"
   },
   "dashboard": {
     "title": "后端配置",
@@ -273,7 +272,14 @@
   },
   "account": {
     "title": "账户",
-    "description": "修改当前登录账户的密码。",
+    "description": "修改当前登录账户的用户名和密码。",
+    "usernameForm": {
+      "label": "用户名",
+      "saveError": "修改用户名失败",
+      "save": "修改用户名",
+      "saving": "修改中...",
+      "success": "用户名已修改。"
+    },
     "form": {
       "currentPasswordLabel": "当前密码",
       "newPasswordLabel": "新密码",
@@ -284,22 +290,5 @@
       "saving": "修改中...",
       "success": "密码已修改。"
     }
-  },
-  "users": {
-    "title": "用户",
-    "description": "查看、添加和删除可登录管理后台的用户。",
-    "form": {
-      "emailLabel": "电子邮箱",
-      "passwordLabel": "密码",
-      "saveError": "创建用户失败",
-      "create": "添加用户",
-      "saving": "创建中..."
-    },
-    "table": {
-      "email": "电子邮箱",
-      "createdAt": "创建时间"
-    },
-    "delete": "删除",
-    "deleteError": "删除用户失败"
   }
 }

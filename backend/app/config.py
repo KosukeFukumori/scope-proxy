@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     session_cookie_max_age: int | None = 14 * 24 * 60 * 60
 
     # Login brute-force protection (in-process, single-worker only; see
-    # app/auth/rate_limiter.py). A key (IP address or email) is blocked once it
+    # app/auth/rate_limiter.py). A key (IP address or username) is blocked once it
     # accumulates this many failed attempts within the window.
     login_rate_limit_max_attempts: int = 20
     login_rate_limit_window_seconds: float = 60.0

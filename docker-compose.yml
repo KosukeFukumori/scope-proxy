@@ -16,7 +16,7 @@ services:
       # SECRET_KEY: change-me-to-a-random-secret
       # Uncomment both to have `create_admin_user.py` create the initial admin
       # user non-interactively (e.g. from an init container or entrypoint).
-      # ADMIN_EMAIL: admin@example.com
+      # ADMIN_USERNAME: admin
       # ADMIN_PASSWORD: change-me
     healthcheck:
       # Use the stdlib instead of curl since the image doesn't ship curl.

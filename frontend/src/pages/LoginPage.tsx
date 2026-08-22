@@ -14,7 +14,7 @@ const IS_DEMO = import.meta.env.MODE === 'demo'
 
 export function LoginPage() {
   const { t } = useTranslation()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -22,7 +22,7 @@ export function LoginPage() {
   const returnTo = sanitizeReturnTo(searchParams.get('returnTo'))
 
   const loginMutation = useMutation({
-    mutationFn: () => login(email, password),
+    mutationFn: () => login(username, password),
     onSuccess: (user) => {
       queryClient.setQueryData(['currentUser'], user)
       navigate(returnTo, { replace: true })
@@ -51,7 +51,7 @@ export function LoginPage() {
             {IS_DEMO && (
               <p className="page-header__description">
                 {t('demo.credentialsHint', {
-                  email: DEMO_CREDENTIALS.email,
+                  username: DEMO_CREDENTIALS.username,
                   password: DEMO_CREDENTIALS.password,
                 })}
               </p>
@@ -60,16 +60,16 @@ export function LoginPage() {
 
           <div className="stack">
             <div className="field">
-              <label className="field__label" htmlFor="email">
-                {t('login.email')}
+              <label className="field__label" htmlFor="username">
+                {t('login.username')}
               </label>
               <input
-                id="email"
+                id="username"
                 className="input"
-                type="email"
+                type="text"
                 autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>

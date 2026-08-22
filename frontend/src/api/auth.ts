@@ -1,8 +1,8 @@
 import { apiClient } from './client'
 import type { User } from '../types/api'
 
-export function login(email: string, password: string): Promise<User> {
-  return apiClient.post<User>('/_admin/api/login', { email, password })
+export function login(username: string, password: string): Promise<User> {
+  return apiClient.post<User>('/_admin/api/login', { username, password })
 }
 
 export function logout(): Promise<void> {
@@ -18,4 +18,8 @@ export function changePassword(currentPassword: string, newPassword: string): Pr
     current_password: currentPassword,
     new_password: newPassword,
   })
+}
+
+export function changeUsername(username: string): Promise<User> {
+  return apiClient.patch<User>('/_admin/api/me/username', { username })
 }

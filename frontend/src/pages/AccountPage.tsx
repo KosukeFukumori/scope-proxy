@@ -1,14 +1,65 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { changePassword } from '../api/auth'
+import { changePassword, changeUsername, getCurrentUser } from '../api/auth'
 import { Layout } from '../components/Layout'
-import { ErrorAlert, PageHeader } from '../components/ui'
+import { ErrorAlert, Loading, PageHeader } from '../components/ui'
 import { errorMessage } from '../lib/format'
+
+function ChangeUsernameForm({ initialUsername }: { initialUsername: string }) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const [username, setUsername] = useState(initialUsername)
+
+  const changeUsernameMutation = useMutation({
+    mutationFn: () => changeUsername(username),
+    onSuccess: (user) => {
+      queryClient.setQueryData(['currentUser'], user)
+    },
+  })
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    changeUsernameMutation.mutate()
+  }
+
+  return (
+    <form className="card" onSubmit={handleSubmit}>
+      <div className="card__body stack">
+        <div className="field">
+          <label className="field__label" htmlFor="username">
+            {t('account.usernameForm.label')}
+          </label>
+          <input
+            id="username"
+            className="input"
+            type="text"
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        {changeUsernameMutation.isError && (
+          <ErrorAlert>{errorMessage(changeUsernameMutation.error, t('account.usernameForm.saveError'))}</ErrorAlert>
+        )}
+        {changeUsernameMutation.isSuccess && <p className="muted">{t('account.usernameForm.success')}</p>}
+      </div>
+
+      <div className="card__footer">
+        <button type="submit" className="btn btn--primary" disabled={changeUsernameMutation.isPending}>
+          {changeUsernameMutation.isPending ? t('account.usernameForm.saving') : t('account.usernameForm.save')}
+        </button>
+      </div>
+    </form>
+  )
+}
 
 export function AccountPage() {
   const { t } = useTranslation()
+  const currentUserQuery = useQuery({ queryKey: ['currentUser'], queryFn: getCurrentUser })
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -36,6 +87,15 @@ export function AccountPage() {
   return (
     <Layout>
       <PageHeader title={t('account.title')} description={t('account.description')} />
+
+      {currentUserQuery.isLoading ? (
+        <Loading />
+      ) : (
+        <ChangeUsernameForm
+          key={currentUserQuery.data?.id}
+          initialUsername={currentUserQuery.data?.username ?? ''}
+        />
+      )}
 
       <form className="card" onSubmit={handleSubmit}>
         <div className="card__body stack">
