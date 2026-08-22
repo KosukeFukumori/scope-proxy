@@ -45,6 +45,7 @@
       "endpointUrlHint": "リクエストの転送先となるバックエンドのベースURL。",
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "オペレーション単位の権限管理に使用するスキーマの取得元。",
+      "lockedByEnvHint": "環境変数で指定されているため、この画面からは変更できません。",
       "syncIntervalLabel": "自動同期間隔(秒)",
       "syncIntervalHint": "空欄でサーバー側の初期値を使用します。0で自動同期を無効化します。",
       "syncIntervalActive": "自動同期: {{seconds}}秒ごと",

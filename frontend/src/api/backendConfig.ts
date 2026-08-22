@@ -1,8 +1,12 @@
 import { apiClient } from './client'
-import type { BackendConfig, SchemaRefreshResult } from '../types/api'
+import type { BackendConfig, BackendConfigEnvPreset, SchemaRefreshResult } from '../types/api'
 
 export function getBackendConfig(): Promise<BackendConfig> {
   return apiClient.get<BackendConfig>('/_admin/api/backend-config')
+}
+
+export function getBackendConfigEnvPreset(): Promise<BackendConfigEnvPreset> {
+  return apiClient.get<BackendConfigEnvPreset>('/_admin/api/backend-config/env-preset')
 }
 
 export function upsertBackendConfig(

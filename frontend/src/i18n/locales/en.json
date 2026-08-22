@@ -45,6 +45,7 @@
       "endpointUrlHint": "The base URL of the backend that requests are forwarded to.",
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "The source of the schema used for per-operation permission management.",
+      "lockedByEnvHint": "This value is set by an environment variable and cannot be changed here.",
       "syncIntervalLabel": "Auto sync interval (seconds)",
       "syncIntervalHint": "Leave blank to use the server-side default. Set to 0 to disable auto sync.",
       "syncIntervalActive": "Auto sync: every {{seconds}}s",

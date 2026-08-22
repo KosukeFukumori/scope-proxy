@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
+import { getBackendConfig, getBackendConfigEnvPreset, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
 import { getUsageSummary } from '../api/usage'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -12,7 +12,7 @@ import { Layout } from '../components/Layout'
 import { EmptyState, ErrorAlert, Loading, PageHeader, SuccessAlert } from '../components/ui'
 import { diffSummaryHasChanges } from '../lib/diffSummary'
 import { errorMessage, formatDateTime } from '../lib/format'
-import type { BackendConfig } from '../types/api'
+import type { BackendConfig, BackendConfigEnvPreset } from '../types/api'
 
 const USAGE_SUMMARY_DAYS = 7
 
@@ -86,11 +86,13 @@ function SchemaChangeModal({ diffSummary, onClose }: { diffSummary: string; onCl
   )
 }
 
-function ConfigForm({ config }: { config: BackendConfig | null }) {
+function ConfigForm({ config, envPreset }: { config: BackendConfig | null; envPreset: BackendConfigEnvPreset }) {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
-  const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? '')
-  const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? '')
+  const endpointUrlLocked = envPreset.endpoint_url !== null
+  const openapiUrlLocked = envPreset.openapi_url !== null
+  const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? envPreset.endpoint_url ?? '')
+  const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? envPreset.openapi_url ?? '')
   // Empty string means "no override": the SCHEMA_SYNC_INTERVAL_SECONDS env var default is used.
   const [syncIntervalInput, setSyncIntervalInput] = useState(
     config?.schema_sync_interval_seconds != null ? String(config.schema_sync_interval_seconds) : '',
@@ -153,8 +155,11 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             onChange={(e) => setEndpointUrl(e.target.value)}
             placeholder="https://api.example.com"
             required
+            disabled={endpointUrlLocked}
           />
-          <p className="field__hint">{t('dashboard.form.endpointUrlHint')}</p>
+          <p className="field__hint">
+            {endpointUrlLocked ? t('dashboard.form.lockedByEnvHint') : t('dashboard.form.endpointUrlHint')}
+          </p>
         </div>
 
         <div className="field">
@@ -169,8 +174,11 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             onChange={(e) => setOpenapiUrl(e.target.value)}
             placeholder="https://api.example.com/openapi.json"
             required
+            disabled={openapiUrlLocked}
           />
-          <p className="field__hint">{t('dashboard.form.openapiUrlHint')}</p>
+          <p className="field__hint">
+            {openapiUrlLocked ? t('dashboard.form.lockedByEnvHint') : t('dashboard.form.openapiUrlHint')}
+          </p>
         </div>
 
         <div className="field">
@@ -269,6 +277,7 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
 export function DashboardPage() {
   const { t, i18n } = useTranslation()
   const configQuery = useQuery({ queryKey: ['backendConfig'], queryFn: getBackendConfig, retry: false })
+  const envPresetQuery = useQuery({ queryKey: ['backendConfigEnvPreset'], queryFn: getBackendConfigEnvPreset })
   const snapshotsQuery = useQuery({ queryKey: ['schemaSnapshots'], queryFn: listSchemaSnapshots })
   const recentSnapshots = snapshotsQuery.data?.slice(0, 5) ?? []
 
@@ -276,10 +285,14 @@ export function DashboardPage() {
     <Layout>
       <PageHeader title={t('dashboard.title')} description={t('dashboard.description')} />
 
-      {configQuery.isLoading ? (
+      {configQuery.isLoading || envPresetQuery.isLoading ? (
         <Loading />
       ) : (
-        <ConfigForm key={configQuery.data?.id ?? 'new'} config={configQuery.data ?? null} />
+        <ConfigForm
+          key={configQuery.data?.id ?? 'new'}
+          config={configQuery.data ?? null}
+          envPreset={envPresetQuery.data ?? { endpoint_url: null, openapi_url: null }}
+        />
       )}
 
       <UsageSummaryCard />
