@@ -14,6 +14,20 @@ function groupKey(path: string): string {
   return segment ? `/${segment}` : '/'
 }
 
+// Conventional REST ordering (GET first, DELETE last) instead of alphabetical.
+const METHOD_ORDER = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+
+function sortMethods(methods: string[]): string[] {
+  return [...methods].sort((a, b) => {
+    const rankA = METHOD_ORDER.indexOf(a.toUpperCase())
+    const rankB = METHOD_ORDER.indexOf(b.toUpperCase())
+    if (rankA === -1 && rankB === -1) return a.localeCompare(b)
+    if (rankA === -1) return 1
+    if (rankB === -1) return -1
+    return rankA - rankB
+  })
+}
+
 /** Method-first view: pick a method tab, then bulk-select every operation under it. */
 function OperationPermissionByMethod({
   operations,
@@ -127,7 +141,7 @@ export function OperationPermissionTable({
     )
   }
 
-  const methods = [...new Set(operations.map((op) => op.method))].sort()
+  const methods = sortMethods([...new Set(operations.map((op) => op.method))])
   const activeMethodTab = methodTab && methods.includes(methodTab) ? methodTab : methods[0]
 
   const normalizedSearch = search.trim().toLowerCase()
