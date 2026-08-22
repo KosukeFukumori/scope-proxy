@@ -61,6 +61,16 @@ docker compose exec app .venv/bin/python scripts/create_admin_user.py
 
 ログイン後は、管理画面の「アカウント」ページから自分のパスワードを変更でき、「ユーザー」ページから他のユーザーの追加・削除もできます。上記のCLIスクリプトは最初の1人目のユーザーを作成する場合にのみ必要です。
 
+### ビルド済みイメージを使う
+
+タグ付きリリースのたびに、`.github/workflows/docker-publish.yml` によってマルチアーキ(`linux/amd64`, `linux/arm64`)対応のイメージがGHCRに公開されます。
+
+```bash
+docker pull ghcr.io/kosukefukumori/scope-proxy:latest
+```
+
+Docker Composeでローカルビルドの代わりにこのイメージを使う場合は、`docker-compose.yml` の `build:` ブロックを `image: ghcr.io/kosukefukumori/scope-proxy:latest` に置き換えてください。
+
 ### 開発実行
 
 #### バックエンド

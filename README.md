@@ -61,6 +61,16 @@ Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a
 
 Once logged in, users can manage their own password from the "Account" page, and add or remove other users from the "Users" page in the admin UI — the CLI script above is only needed to bootstrap the very first user.
 
+### Using the pre-built image
+
+Multi-arch (`linux/amd64`, `linux/arm64`) images are published to GHCR on every tagged release via `.github/workflows/docker-publish.yml`:
+
+```bash
+docker pull ghcr.io/kosukefukumori/scope-proxy:latest
+```
+
+To use it with Docker Compose instead of building locally, replace the `build:` block in `docker-compose.yml` with `image: ghcr.io/kosukefukumori/scope-proxy:latest`.
+
 ### Development
 
 #### Backend
