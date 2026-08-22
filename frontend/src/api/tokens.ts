@@ -32,3 +32,7 @@ export function updateToken(id: string, input: UpdateTokenInput): Promise<TokenD
 export function revokeToken(id: string): Promise<TokenSummary> {
   return apiClient.post<TokenSummary>(`/_admin/api/tokens/${id}/revoke`)
 }
+
+export function deleteToken(id: string): Promise<void> {
+  return apiClient.delete<void>(`/_admin/api/tokens/${id}`)
+}
