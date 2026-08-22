@@ -27,6 +27,10 @@
 - When adding or changing UI text, add the key to **all** locale files (`ja.json`, `en.json`, `zh.json`) — never hardcode user-facing strings directly in components.
 - Use the existing `useTranslation` pattern already used across `frontend/src/pages/` and `frontend/src/components/` for any new UI text.
 
+## Pull requests and commits
+
+- Never include a Claude Code session URL (e.g. `https://claude.ai/code/session_...`) in a PR title, PR body, or commit message. It is internal session state, not something a public GitHub reader needs, and should not be published.
+
 ## Managing the README
 
 - `README.md` is the **source of truth** in **English** (since this is a public repository).

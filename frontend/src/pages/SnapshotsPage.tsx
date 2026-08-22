@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { listSchemaSnapshots } from '../api/operations'
+import { DiffSummary } from '../components/DiffSummary'
 import { Layout } from '../components/Layout'
 import { EmptyState, Loading, PageHeader } from '../components/ui'
 import { formatDateTime } from '../lib/format'
@@ -38,7 +39,7 @@ export function SnapshotsPage() {
                     {snapshot.spec_hash.slice(0, 12)}
                   </td>
                   <td>
-                    <pre style={{ whiteSpace: 'pre-wrap' }}>{snapshot.diff_summary}</pre>
+                    <DiffSummary diffSummary={snapshot.diff_summary} />
                   </td>
                 </tr>
               ))}

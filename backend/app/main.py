@@ -14,6 +14,7 @@ from app.db import init_db
 from app.routers import (
     auth,
     backend_config,
+    health,
     operations,
     proxy,
     schema_snapshots,
@@ -41,7 +42,7 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
                 "Sessions will be invalidated on every restart. Set SECRET_KEY in .env for production use."
             )
         init_db()
-        async with httpx.AsyncClient() as http_client:
+        async with httpx.AsyncClient(timeout=app_settings.proxy_timeout_seconds) as http_client:
             app.state.http_client = http_client
             yield
 
@@ -64,6 +65,7 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
             allow_headers=["*"],
         )
 
+    app.include_router(health.router, prefix="/_admin")
     app.include_router(auth.router, prefix="/_admin")
     app.include_router(backend_config.router, prefix="/_admin")
     app.include_router(tokens.router, prefix="/_admin")

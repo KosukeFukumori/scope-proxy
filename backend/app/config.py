@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./scope_proxy.db"
     secret_key: str | None = None
     session_cookie_name: str = "scope_proxy_session"
+    # Timeout (in seconds) applied to requests forwarded to upstream backends.
+    # Set to a larger value (or None to disable) if the upstream API is expected
+    # to take longer than the default.
+    proxy_timeout_seconds: float | None = 30.0
 
     # Comma-separated list of origins allowed to make cross-origin requests to the proxy.
     # Empty by default: CORS is disabled and every request (including preflight OPTIONS)

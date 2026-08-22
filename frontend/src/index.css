@@ -566,6 +566,12 @@ pre {
   border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
 }
 
+.alert--success {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  border-color: color-mix(in srgb, var(--color-success) 25%, transparent);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -665,6 +671,28 @@ pre {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.permission-group__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.permission-group__chevron {
+  display: inline-flex;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+}
+
+.permission-group__chevron.is-expanded {
+  transform: rotate(90deg);
 }
 
 .permission-item {
