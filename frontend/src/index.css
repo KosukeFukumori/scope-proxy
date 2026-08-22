@@ -745,12 +745,6 @@ pre {
   font-size: 0.825rem;
 }
 
-.permission-item__id {
-  margin-left: auto;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
 /* =========================================================
    モーダル
    ========================================================= */

@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     # is handled by the normal auth flow, i.e. denied without a bearer token.
     cors_allowed_origins: str = ""
 
+    # Optional presets for the upstream backend URL / OpenAPI JSON URL. When set, the
+    # value is enforced on every startup (overwriting whatever is stored in
+    # backend_config) and the corresponding field becomes read-only in the dashboard:
+    # see app/routers/backend_config.py's apply_env_config_overrides and the
+    # "*_locked" fields on BackendConfigRead.
+    endpoint_url: str | None = None
+    openapi_url: str | None = None
+
     @property
     def secret_key_is_generated(self) -> bool:
         return self.secret_key is None

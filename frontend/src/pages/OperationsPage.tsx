@@ -106,7 +106,6 @@ export function OperationsPage() {
               <tr>
                 <th>{t('operations.table.method')}</th>
                 <th>{t('operations.table.path')}</th>
-                <th>{t('operations.table.operationId')}</th>
                 <th>{t('operations.table.summary')}</th>
                 <th>{t('operations.table.status')}</th>
               </tr>
@@ -118,7 +117,6 @@ export function OperationsPage() {
                     <MethodBadge method={op.method} />
                   </td>
                   <td className="mono">{op.path}</td>
-                  <td>{op.openapi_operation_id ?? '—'}</td>
                   <td className="muted">{op.summary ?? '—'}</td>
                   <td>
                     {op.is_active ? (
