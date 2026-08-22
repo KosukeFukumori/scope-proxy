@@ -71,7 +71,7 @@ function SchemaChangeModal({ diffSummary, onClose }: { diffSummary: string; onCl
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="schema-change-modal-title">
       <div className="modal">
-        <div className="stack stack--tight">
+        <div className="stack stack--tight" style={{ overflowY: 'auto' }}>
           <h2 id="schema-change-modal-title">{t('dashboard.schemaChangeModal.title')}</h2>
           <p>{t('dashboard.schemaChangeModal.message')}</p>
           <DiffSummary diffSummary={diffSummary} />
