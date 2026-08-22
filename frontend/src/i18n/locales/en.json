@@ -57,6 +57,15 @@
       "lastFetched": "Last fetched:",
       "notFetched": "Not fetched yet"
     },
+    "switchConfirm": {
+      "title": "Change backend target",
+      "message": "Changing the backend URLs resets the synced operation list and every permission granted to tokens. After switching, fetch the new schema and re-grant permissions.",
+      "confirm": "Switch and reset"
+    },
+    "schemaChangeModal": {
+      "title": "Schema changes detected",
+      "message": "The backend schema has changed. Added operations are not granted to any token automatically, and removed operations have been deactivated. Please review the diff below."
+    },
     "recentSnapshots": "Recent history",
     "viewAll": "View all",
     "emptySnapshots": {

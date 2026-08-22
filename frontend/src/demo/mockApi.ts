@@ -2,6 +2,7 @@ import { ApiError } from '../api/errors'
 import type {
   BackendConfig,
   Operation,
+  SchemaRefreshResult,
   SchemaSnapshot,
   TokenCreateResponse,
   TokenDetail,
@@ -44,26 +45,43 @@ function isoNow(): string {
   return new Date().toISOString()
 }
 
+/** Mimics the backend's hash-based operation ids: the id is opaque while
+ * `openapi_operation_id` carries the human-readable operationId. */
+function demoOperation(
+  id: string,
+  method: string,
+  path: string,
+  summary: string,
+  isActive = true,
+): Operation {
+  return {
+    operation_id: `demo-hash-${id}`,
+    method,
+    path,
+    openapi_operation_id: id,
+    summary,
+    is_active: isActive,
+  }
+}
+
+function seedOperations(): Operation[] {
+  return [
+    demoOperation('listPets', 'GET', '/pets', 'List all pets'),
+    demoOperation('createPet', 'POST', '/pets', 'Create a pet'),
+    demoOperation('getPet', 'GET', '/pets/{petId}', 'Get a pet by id'),
+    demoOperation('updatePet', 'PATCH', '/pets/{petId}', 'Update a pet'),
+    demoOperation('deletePet', 'DELETE', '/pets/{petId}', 'Delete a pet'),
+    demoOperation('listOrders', 'GET', '/orders', 'List orders'),
+    demoOperation('createOrder', 'POST', '/orders', 'Create an order'),
+    demoOperation('legacyExport', 'GET', '/legacy/export', 'Deprecated bulk export', false),
+  ]
+}
+
 function seedState(): DemoState {
   const now = Date.now()
   const daysAgo = (days: number) => new Date(now - days * 24 * 60 * 60 * 1000).toISOString()
 
-  const operations: Operation[] = [
-    { operation_id: 'listPets', method: 'GET', path: '/pets', summary: 'List all pets', is_active: true },
-    { operation_id: 'createPet', method: 'POST', path: '/pets', summary: 'Create a pet', is_active: true },
-    { operation_id: 'getPet', method: 'GET', path: '/pets/{petId}', summary: 'Get a pet by id', is_active: true },
-    { operation_id: 'updatePet', method: 'PATCH', path: '/pets/{petId}', summary: 'Update a pet', is_active: true },
-    { operation_id: 'deletePet', method: 'DELETE', path: '/pets/{petId}', summary: 'Delete a pet', is_active: true },
-    { operation_id: 'listOrders', method: 'GET', path: '/orders', summary: 'List orders', is_active: true },
-    { operation_id: 'createOrder', method: 'POST', path: '/orders', summary: 'Create an order', is_active: true },
-    {
-      operation_id: 'legacyExport',
-      method: 'GET',
-      path: '/legacy/export',
-      summary: 'Deprecated bulk export',
-      is_active: false,
-    },
-  ]
+  const operations = seedOperations()
 
   const tokens: DemoToken[] = [
     {
@@ -73,7 +91,7 @@ function seedState(): DemoState {
       expires_at: null,
       revoked_at: null,
       last_used_at: daysAgo(1),
-      operation_ids: ['listPets', 'getPet'],
+      operation_ids: ['demo-hash-listPets', 'demo-hash-getPet'],
       rawToken: 'sp_demo_batch_job_do_not_use',
     },
     {
@@ -83,7 +101,7 @@ function seedState(): DemoState {
       expires_at: daysAgo(-30),
       revoked_at: null,
       last_used_at: daysAgo(2),
-      operation_ids: ['listOrders', 'createOrder'],
+      operation_ids: ['demo-hash-listOrders', 'demo-hash-createOrder'],
       rawToken: 'sp_demo_order_sync_do_not_use',
     },
     {
@@ -93,7 +111,7 @@ function seedState(): DemoState {
       expires_at: null,
       revoked_at: daysAgo(20),
       last_used_at: daysAgo(21),
-      operation_ids: ['listPets', 'createPet', 'deletePet'],
+      operation_ids: ['demo-hash-listPets', 'demo-hash-createPet', 'demo-hash-deletePet'],
       rawToken: 'sp_demo_old_migration_do_not_use',
     },
   ]
@@ -243,6 +261,15 @@ const ROUTES: {
     handler: (s, _m, body) => {
       requireLogin(s)
       const { endpoint_url, openapi_url } = (body ?? {}) as { endpoint_url?: string; openapi_url?: string }
+      const urlChanged =
+        (endpoint_url !== undefined && endpoint_url !== s.backendConfig.endpoint_url) ||
+        (openapi_url !== undefined && openapi_url !== s.backendConfig.openapi_url)
+      if (urlChanged) {
+        // Mirror the real backend: switching the target wipes operations and permissions.
+        s.operations = []
+        s.tokens = s.tokens.map((token) => ({ ...token, operation_ids: [] }))
+        s.backendConfig = { ...s.backendConfig, last_fetched_at: null }
+      }
       s.backendConfig = {
         ...s.backendConfig,
         endpoint_url: endpoint_url ?? s.backendConfig.endpoint_url,
@@ -257,14 +284,32 @@ const ROUTES: {
     handler: (s) => {
       requireLogin(s)
       s.backendConfig = { ...s.backendConfig, last_fetched_at: isoNow() }
+      // After a backend switch the operations list is empty; "fetching" the schema
+      // re-seeds it so the demo shows a schema-change diff, like the real backend.
+      const added: string[] = []
+      if (s.operations.length === 0) {
+        s.operations = seedOperations()
+        for (const op of s.operations) {
+          added.push(`${op.method} ${op.path}`)
+        }
+      }
+      const diffSummary = JSON.stringify({
+        added,
+        updated: [],
+        removed: [],
+        skipped_admin_conflict: [],
+      })
       const snapshot: SchemaSnapshot = {
         id: s.nextSnapshotId++,
         fetched_at: isoNow(),
         spec_hash: `sha256:demo-${Math.random().toString(16).slice(2, 10)}`,
-        diff_summary: 'No changes',
+        diff_summary: diffSummary,
       }
-      s.snapshots = [snapshot, ...s.snapshots]
-      return snapshot
+      if (added.length > 0) {
+        s.snapshots = [snapshot, ...s.snapshots]
+      }
+      const response: SchemaRefreshResult = { snapshot, diff_summary: diffSummary }
+      return response
     },
   },
   {

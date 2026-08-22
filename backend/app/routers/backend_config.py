@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
+from sqlalchemy import delete
 
 from app.deps import CurrentUserDep, SessionDep
 from app.models.backend_config import BackendConfig
-from app.models.schema_snapshot import SchemaSnapshot
+from app.models.operation import Operation
+from app.models.token import TokenPermission
 from app.schemas.backend_config import BackendConfigRead, BackendConfigUpsert
-from app.schemas.schema_snapshot import SchemaSnapshotRead
+from app.schemas.schema_snapshot import SchemaRefreshRead, SchemaSnapshotRead
 from app.services.schema_sync import refresh_backend_schema
 
 router = APIRouter(prefix="/api/backend-config", tags=["backend-config"])
@@ -12,6 +14,18 @@ router = APIRouter(prefix="/api/backend-config", tags=["backend-config"])
 
 def _get_singleton(session) -> BackendConfig | None:
     return session.get(BackendConfig, 1)
+
+
+def _reset_operations_and_permissions(session) -> None:
+    """Wipe operations and token permissions.
+
+    Called when the upstream backend URL changes: permissions granted against the
+    previous backend must never silently apply to a different server, even if it
+    exposes operations with identical method/path/operationId (and thus identical
+    hash ids). The admin re-syncs the schema and re-grants permissions explicitly.
+    """
+    session.execute(delete(TokenPermission))
+    session.execute(delete(Operation))
 
 
 @router.get("", response_model=BackendConfigRead)
@@ -30,6 +44,12 @@ def upsert_backend_config(
     if config is None:
         config = BackendConfig(id=1, endpoint_url=str(payload.endpoint_url), openapi_url=str(payload.openapi_url))
     else:
+        url_changed = config.endpoint_url != str(payload.endpoint_url) or config.openapi_url != str(
+            payload.openapi_url
+        )
+        if url_changed:
+            _reset_operations_and_permissions(session)
+            config.last_fetched_at = None
         config.endpoint_url = str(payload.endpoint_url)
         config.openapi_url = str(payload.openapi_url)
 
@@ -39,10 +59,14 @@ def upsert_backend_config(
     return config
 
 
-@router.post("/refresh", response_model=SchemaSnapshotRead)
-async def refresh_backend_config(session: SessionDep, current_user: CurrentUserDep) -> SchemaSnapshot:
+@router.post("/refresh", response_model=SchemaRefreshRead)
+async def refresh_backend_config(session: SessionDep, current_user: CurrentUserDep) -> SchemaRefreshRead:
     config = _get_singleton(session)
     if config is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backend config not set")
 
-    return await refresh_backend_schema(session, config)
+    outcome = await refresh_backend_schema(session, config)
+    return SchemaRefreshRead(
+        snapshot=SchemaSnapshotRead.model_validate(outcome.snapshot.model_dump()),
+        diff_summary=outcome.result.to_diff_summary(),
+    )
