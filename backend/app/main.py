@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             "Sessions will be invalidated on every restart. Set SECRET_KEY in .env for production use."
         )
     init_db()
-    async with httpx.AsyncClient() as http_client:
+    async with httpx.AsyncClient(timeout=settings.proxy_timeout_seconds) as http_client:
         app.state.http_client = http_client
         yield
 
