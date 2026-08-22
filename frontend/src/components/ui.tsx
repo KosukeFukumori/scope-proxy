@@ -48,6 +48,14 @@ export function ErrorAlert({ children }: { children: ReactNode }) {
   )
 }
 
+export function SuccessAlert({ children }: { children: ReactNode }) {
+  return (
+    <p className="alert alert--success" role="status">
+      {children}
+    </p>
+  )
+}
+
 export function PageHeader({
   title,
   description,

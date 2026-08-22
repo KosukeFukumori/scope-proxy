@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
 import { Layout } from '../components/Layout'
-import { EmptyState, ErrorAlert, Loading, PageHeader } from '../components/ui'
+import { EmptyState, ErrorAlert, Loading, PageHeader, SuccessAlert } from '../components/ui'
 import { errorMessage, formatDateTime } from '../lib/format'
 import type { BackendConfig } from '../types/api'
 
@@ -75,6 +75,7 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
         {saveMutation.isError && (
           <ErrorAlert>{errorMessage(saveMutation.error, t('dashboard.form.saveError'))}</ErrorAlert>
         )}
+        {saveMutation.isSuccess && <SuccessAlert>{t('dashboard.form.saveSuccess')}</SuccessAlert>}
         {refreshMutation.isError && (
           <ErrorAlert>{errorMessage(refreshMutation.error, t('dashboard.form.refreshError'))}</ErrorAlert>
         )}

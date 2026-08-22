@@ -33,6 +33,7 @@
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "The source of the schema used for per-operationId permission management.",
       "saveError": "Failed to save",
+      "saveSuccess": "Saved",
       "refreshError": "Failed to refresh the schema",
       "diffLabel": "Diff:",
       "save": "Save",
@@ -110,6 +111,13 @@
       "revoked": "Revoked",
       "expired": "Expired",
       "active": "Active"
+    },
+    "revokeConfirm": {
+      "title": "Revoke this token?",
+      "message": "This will revoke \"{{name}}\". This action cannot be undone. Clients using this token will lose access immediately.",
+      "confirm": "Revoke",
+      "revoking": "Revoking...",
+      "error": "Failed to revoke the token"
     }
   },
   "tokenEdit": {
