@@ -673,6 +673,28 @@ pre {
   font-weight: 600;
 }
 
+.permission-group__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.permission-group__chevron {
+  display: inline-flex;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+}
+
+.permission-group__chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
 .permission-item {
   display: flex;
   align-items: center;

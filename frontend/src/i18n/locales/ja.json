@@ -62,9 +62,19 @@
       "active": "有効のみ",
       "inactive": "無効のみ"
     },
+    "search": {
+      "placeholder": "パス・operationId・summary で検索"
+    },
+    "methodFilter": {
+      "all": "すべてのメソッド"
+    },
     "empty": {
       "title": "オペレーションがありません",
       "description": "接続先設定から OpenAPI スキーマを取得してください。"
+    },
+    "searchEmpty": {
+      "title": "該当するオペレーションがありません",
+      "description": "検索条件やメソッドフィルタを見直してください。"
     },
     "table": {
       "method": "Method",
@@ -138,13 +148,25 @@
     }
   },
   "operationPermissionTable": {
+    "search": {
+      "placeholder": "パス・operationId・summary で検索"
+    },
+    "methodFilter": {
+      "all": "すべてのメソッド"
+    },
     "empty": {
       "title": "オペレーションがありません",
       "description": "接続先設定から OpenAPI スキーマを取得してください。"
     },
+    "searchEmpty": {
+      "title": "該当するオペレーションがありません",
+      "description": "検索条件やメソッドフィルタを見直してください。"
+    },
     "selectedCount": "{{selected}} / {{total}}",
     "selectAll": "すべて選択",
     "deselectAll": "すべて解除",
+    "collapseGroup": "グループを折りたたむ",
+    "expandGroup": "グループを展開する",
     "inactive": "無効"
   },
   "tokenValueDialog": {

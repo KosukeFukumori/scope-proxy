@@ -62,9 +62,19 @@
       "active": "仅有效",
       "inactive": "仅无效"
     },
+    "search": {
+      "placeholder": "按路径、operationId 或 summary 搜索"
+    },
+    "methodFilter": {
+      "all": "所有方法"
+    },
     "empty": {
       "title": "暂无操作",
       "description": "请在后端配置中获取 OpenAPI 模式。"
+    },
+    "searchEmpty": {
+      "title": "没有匹配的操作",
+      "description": "请调整搜索条件或方法筛选。"
     },
     "table": {
       "method": "Method",
@@ -138,13 +148,25 @@
     }
   },
   "operationPermissionTable": {
+    "search": {
+      "placeholder": "按路径、operationId 或 summary 搜索"
+    },
+    "methodFilter": {
+      "all": "所有方法"
+    },
     "empty": {
       "title": "暂无操作",
       "description": "请在后端配置中获取 OpenAPI 模式。"
     },
+    "searchEmpty": {
+      "title": "没有匹配的操作",
+      "description": "请调整搜索条件或方法筛选。"
+    },
     "selectedCount": "{{selected}} / {{total}}",
     "selectAll": "全选",
     "deselectAll": "全部取消",
+    "collapseGroup": "折叠分组",
+    "expandGroup": "展开分组",
     "inactive": "无效"
   },
   "tokenValueDialog": {

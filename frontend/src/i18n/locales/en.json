@@ -62,9 +62,19 @@
       "active": "Active only",
       "inactive": "Inactive only"
     },
+    "search": {
+      "placeholder": "Search by path, operationId, or summary"
+    },
+    "methodFilter": {
+      "all": "All methods"
+    },
     "empty": {
       "title": "No operations",
       "description": "Fetch the OpenAPI schema from the backend config."
+    },
+    "searchEmpty": {
+      "title": "No matching operations",
+      "description": "Try adjusting the search term or method filter."
     },
     "table": {
       "method": "Method",
@@ -138,13 +148,25 @@
     }
   },
   "operationPermissionTable": {
+    "search": {
+      "placeholder": "Search by path, operationId, or summary"
+    },
+    "methodFilter": {
+      "all": "All methods"
+    },
     "empty": {
       "title": "No operations",
       "description": "Fetch the OpenAPI schema from the backend config."
     },
+    "searchEmpty": {
+      "title": "No matching operations",
+      "description": "Try adjusting the search term or method filter."
+    },
     "selectedCount": "{{selected}} / {{total}}",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
+    "collapseGroup": "Collapse group",
+    "expandGroup": "Expand group",
     "inactive": "Inactive"
   },
   "tokenValueDialog": {
