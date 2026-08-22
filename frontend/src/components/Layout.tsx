@@ -44,7 +44,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <DemoBanner />
       <header className="app-header">
         <NavLink to="/" className="app-brand">
-          <span className="app-brand__mark">SP</span>
+          <img src="/favicon.svg" alt="" className="app-brand__mark" />
           {t('common.appName')}
         </NavLink>
         <nav className="app-nav">
