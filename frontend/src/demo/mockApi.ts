@@ -126,6 +126,8 @@ function seedState(): DemoState {
       last_sync_error: null,
       schema_sync_interval_seconds: null,
       effective_schema_sync_interval_seconds: 0,
+      endpoint_url_locked: false,
+      openapi_url_locked: false,
     },
     operations,
     snapshots: [
@@ -268,6 +270,15 @@ const ROUTES: {
     handler: (s) => {
       requireLogin(s)
       return s.backendConfig
+    },
+  },
+  {
+    method: 'GET',
+    pattern: /^\/_admin\/api\/backend-config\/env-preset$/,
+    handler: (s) => {
+      requireLogin(s)
+      // The demo never runs with ENDPOINT_URL / OPENAPI_URL set, so nothing is locked.
+      return { endpoint_url: null, openapi_url: null }
     },
   },
   {

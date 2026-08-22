@@ -1,8 +1,13 @@
+from collections.abc import Generator
+
+import pytest
 from httpx import AsyncClient
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.models.operation import Operation
 from app.models.token import TokenPermission
+from app.routers.backend_config import apply_env_config_overrides
 
 
 async def test_get_backend_config_requires_authentication(client: AsyncClient) -> None:
@@ -127,3 +132,107 @@ async def test_saving_unchanged_urls_keeps_operations_and_permissions(
 
     assert len(session.exec(select(Operation)).all()) == 1
     assert len(session.exec(select(TokenPermission)).all()) == 1
+
+
+@pytest.fixture
+def clear_env_preset() -> Generator[None]:
+    """settings is a process-wide singleton; make sure no test leaks its overrides."""
+    original_endpoint_url = settings.endpoint_url
+    original_openapi_url = settings.openapi_url
+    yield
+    settings.endpoint_url = original_endpoint_url
+    settings.openapi_url = original_openapi_url
+
+
+async def test_env_preset_defaults_to_unset(logged_in_client: AsyncClient, clear_env_preset: None) -> None:
+    response = await logged_in_client.get("/_admin/api/backend-config/env-preset")
+    assert response.status_code == 200
+    assert response.json() == {"endpoint_url": None, "openapi_url": None}
+
+
+async def test_env_preset_reports_locked_fields(logged_in_client: AsyncClient, clear_env_preset: None) -> None:
+    settings.endpoint_url = "https://locked.example.com"
+
+    preset_response = await logged_in_client.get("/_admin/api/backend-config/env-preset")
+    assert preset_response.json() == {"endpoint_url": "https://locked.example.com", "openapi_url": None}
+
+    await logged_in_client.put(
+        "/_admin/api/backend-config",
+        json={
+            "endpoint_url": "https://ignored.example.com",
+            "openapi_url": "https://api.example.com/openapi.json",
+        },
+    )
+    response = await logged_in_client.get("/_admin/api/backend-config")
+    body = response.json()
+    assert body["endpoint_url_locked"] is True
+    assert body["openapi_url_locked"] is False
+
+
+async def test_env_locked_endpoint_url_overrides_payload_on_upsert(
+    logged_in_client: AsyncClient, clear_env_preset: None
+) -> None:
+    settings.endpoint_url = "https://locked.example.com"
+
+    response = await logged_in_client.put(
+        "/_admin/api/backend-config",
+        json={
+            "endpoint_url": "https://attempted-override.example.com",
+            "openapi_url": "https://api.example.com/openapi.json",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["endpoint_url"] == "https://locked.example.com"
+    assert body["openapi_url"] == "https://api.example.com/openapi.json"
+
+
+async def test_apply_env_config_overrides_creates_row_when_both_urls_preset(
+    session: Session, clear_env_preset: None
+) -> None:
+    settings.endpoint_url = "https://locked.example.com"
+    settings.openapi_url = "https://locked.example.com/openapi.json"
+
+    apply_env_config_overrides(session)
+
+    from app.models.backend_config import BackendConfig
+
+    config = session.get(BackendConfig, 1)
+    assert config is not None
+    assert config.endpoint_url == "https://locked.example.com"
+    assert config.openapi_url == "https://locked.example.com/openapi.json"
+
+
+async def test_apply_env_config_overrides_skips_row_creation_when_only_one_url_preset(
+    session: Session, clear_env_preset: None
+) -> None:
+    settings.endpoint_url = "https://locked.example.com"
+
+    apply_env_config_overrides(session)
+
+    from app.models.backend_config import BackendConfig
+
+    assert session.get(BackendConfig, 1) is None
+
+
+async def test_apply_env_config_overrides_resets_operations_on_url_change(
+    logged_in_client: AsyncClient, session: Session, clear_env_preset: None
+) -> None:
+    config = {
+        "endpoint_url": "https://api.example.com",
+        "openapi_url": "https://api.example.com/openapi.json",
+    }
+    await logged_in_client.put("/_admin/api/backend-config", json=config)
+    await _seed_operation_and_permission(session, logged_in_client)
+
+    settings.endpoint_url = "https://api2.example.com"
+    apply_env_config_overrides(session)
+
+    from app.models.backend_config import BackendConfig
+
+    stored = session.get(BackendConfig, 1)
+    assert stored is not None
+    assert stored.endpoint_url == "https://api2.example.com"
+    assert stored.last_fetched_at is None
+    assert session.exec(select(Operation)).all() == []
+    assert session.exec(select(TokenPermission)).all() == []

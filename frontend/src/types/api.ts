@@ -12,6 +12,14 @@ export interface BackendConfig {
   last_sync_error: string | null
   schema_sync_interval_seconds: number | null
   effective_schema_sync_interval_seconds: number
+  endpoint_url_locked: boolean
+  openapi_url_locked: boolean
+}
+
+/** The raw ENDPOINT_URL / OPENAPI_URL env var values, if set. */
+export interface BackendConfigEnvPreset {
+  endpoint_url: string | null
+  openapi_url: string | null
 }
 
 export interface Operation {

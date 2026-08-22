@@ -9,6 +9,7 @@ from pathlib import Path
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response
+from sqlmodel import Session
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -54,6 +55,9 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
                 "Sessions will be invalidated on every restart. Set SECRET_KEY in .env for production use."
             )
         init_db()
+
+        with Session(engine) as session:
+            backend_config.apply_env_config_overrides(session)
 
         # Always runs; the configured interval (0 = disabled) is re-read from backend_config on
         # every tick, so it reacts to changes made from the GUI without needing a restart.

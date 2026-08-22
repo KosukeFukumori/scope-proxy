@@ -22,3 +22,18 @@ class BackendConfigRead(AwareDatetimeModel):
     schema_sync_interval_seconds: int | None
     # The interval actually in effect: schema_sync_interval_seconds if set, otherwise the env var default.
     effective_schema_sync_interval_seconds: int
+    # True when the corresponding field is pinned by the ENDPOINT_URL / OPENAPI_URL
+    # env var, meaning it cannot be changed through the dashboard.
+    endpoint_url_locked: bool
+    openapi_url_locked: bool
+
+
+class BackendConfigEnvPresetRead(BaseModel):
+    """The raw ENDPOINT_URL / OPENAPI_URL env var values, if set.
+
+    Exposed separately from BackendConfigRead so the dashboard can pre-fill and
+    disable a locked field even before any backend_config row exists.
+    """
+
+    endpoint_url: str | None
+    openapi_url: str | None
