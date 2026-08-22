@@ -12,16 +12,8 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import Settings, settings
 from app.db import init_db
-from app.routers import (
-    auth,
-    backend_config,
-    health,
-    operations,
-    proxy,
-    schema_snapshots,
-    tokens,
-    users,
-)
+from app.routers import (auth, backend_config, health, operations, proxy,
+                         schema_snapshots, tokens, users)
 
 logger = logging.getLogger("scope_proxy")
 
@@ -87,8 +79,7 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
 
     if FRONTEND_DIST.is_dir():
 
-        @app.get("/_admin/{full_path:path}", include_in_schema=False)
-        async def serve_frontend(full_path: str) -> Response:
+        async def serve_frontend(full_path: str = "") -> Response:
             """Serve the frontend SPA. Returns the actual file if it exists,
             otherwise falls back to index.html (for react-router client-side routes).
             """
@@ -100,6 +91,11 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
             if not index_file.is_file():
                 raise HTTPException(status_code=404)
             return FileResponse(index_file)
+
+        # Without this, "/_admin" (no trailing slash) falls through to the
+        # proxy's catch-all route below instead of matching "/_admin/{full_path}".
+        app.add_api_route("/_admin", serve_frontend, include_in_schema=False)
+        app.add_api_route("/_admin/{full_path:path}", serve_frontend, include_in_schema=False)
 
     # The proxy is a catch-all for every path, so it must always be registered last,
     # after all other routers and static files.
