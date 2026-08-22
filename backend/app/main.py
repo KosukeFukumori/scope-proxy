@@ -13,6 +13,7 @@ from app.db import init_db
 from app.routers import (
     auth,
     backend_config,
+    health,
     operations,
     proxy,
     schema_snapshots,
@@ -41,6 +42,7 @@ app = FastAPI(title="scope-proxy", lifespan=lifespan)
 
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
+app.include_router(health.router, prefix="/_admin")
 app.include_router(auth.router, prefix="/_admin")
 app.include_router(backend_config.router, prefix="/_admin")
 app.include_router(tokens.router, prefix="/_admin")

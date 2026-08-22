@@ -67,6 +67,10 @@ npm run dev
 
 `backend/migrations/` には連番の冪等なSQLファイル(`0001_initial.sql`, `0002_xxx.sql`, ...)を置きます。起動のたびに(`app.main.lifespan` → `app.db.init_db`)、`app.migration_runner.run_migrations` が `schema_migrations` テーブルに未記録のファイルをファイル名順に適用します。手動で実行するマイグレーションコマンドは無く、`backend/migrations/` に新しい連番の `.sql` ファイルを追加するだけで、次回アプリ起動時に自動適用されます。
 
+## ヘルスチェック
+
+`GET /_admin/api/health` は認証不要のエンドポイントで、アプリが起動しDBに接続できている状態であれば `{"status": "ok"}` を返します。キャッチオールのプロキシルーターより前に登録されているため、認証の対象外です。Docker Compose の `healthcheck` やロードバランサーの死活監視に利用してください(`docker-compose.yml` と `Dockerfile` の `HEALTHCHECK` を参照)。
+
 ## 環境変数 (backend/.env)
 
 `backend/.env.example` を参照してください。
