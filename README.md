@@ -2,7 +2,22 @@
 
 [日本語](./README.ja.md)
 
+[![CI](https://github.com/KosukeFukumori/scope-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/KosukeFukumori/scope-proxy/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](./backend/pyproject.toml)
+[![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![React 19](https://img.shields.io/badge/frontend-React%2019-61DAFB.svg)](./frontend/package.json)
+
 A wrapper server that sits in front of an existing API server (one that publishes an OpenAPI JSON but has no authentication of its own), providing token-based authorization and proxying.
+
+**No auth server, no OAuth dance, no code changes to the upstream API.** Point scope-proxy at an OpenAPI schema, and it gives every upstream operation a permission you can grant or revoke per token — turning any unauthenticated internal API into a properly access-controlled one in minutes.
+
+## Why scope-proxy?
+
+- **Zero changes to the upstream API** — it doesn't need to know auth exists. scope-proxy sits in front and speaks the exact same URL structure.
+- **No OAuth server to run** — tokens are self-service, opaque, and scoped to individual `operationId`s straight from the upstream's own OpenAPI schema. No client registration, no redirect URIs, no identity provider.
+- **Schema drift is handled safely** — when the upstream OpenAPI changes, new operations start with zero permissions (allowlist), so nothing is accidentally exposed.
+- **Small footprint** — a single FastAPI service + SQLite, deployable as one Docker container with `docker compose up`.
 
 ## Features
 
@@ -66,6 +81,10 @@ The production build (`npm run build`) output is served from `/_admin/` by `back
 ## Database migrations
 
 `backend/migrations/` holds numbered, idempotent SQL files (`0001_initial.sql`, `0002_xxx.sql`, ...). On every startup (`app.main.lifespan` → `app.db.init_db`), `app.migration_runner.run_migrations` applies any files not yet recorded in the `schema_migrations` table, in filename order. There is no separate migration command to run manually — adding a new numbered `.sql` file under `backend/migrations/` is enough; it gets applied automatically the next time the app starts.
+
+## Health check
+
+`GET /_admin/api/health` is unauthenticated and returns `{"status": "ok"}` once the app is up and the database is reachable. It's registered before the catch-all proxy router, so it's exempt from authentication. Use it for Docker Compose `healthcheck` and load balancer liveness probes (see `docker-compose.yml` and `Dockerfile` for the built-in `HEALTHCHECK`).
 
 ## Environment variables (backend/.env)
 

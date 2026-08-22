@@ -12,7 +12,7 @@ from app.deps import SessionDep
 from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
 from app.models.token import Token, TokenPermission
-from app.services.operation_matcher import build_operation_matcher
+from app.services.operation_matcher import get_cached_operation_matcher
 from app.services.request_log_service import record_request_log
 from app.services.token_service import hash_token
 
@@ -33,7 +33,7 @@ REQUEST_ONLY_STRIPPED_HEADERS = {"host", "authorization", "content-length"}
 RESPONSE_ONLY_STRIPPED_HEADERS = {"content-length"}
 
 
-def strip_hop_by_hop(headers: Headers, extra: set[str]) -> list[tuple[str, str]]:
+def strip_hop_by_hop(headers: Headers | httpx.Headers, extra: set[str]) -> list[tuple[str, str]]:
     excluded = HOP_BY_HOP_HEADERS | extra
     return [(key, value) for key, value in headers.items() if key.lower() not in excluded]
 
@@ -63,12 +63,14 @@ async def _authenticate_token(session: SessionDep, authorization: str | None) ->
 
 def _resolve_operation(session: SessionDep, method: str, path: str) -> Operation:
     all_operations = list(session.exec(select(Operation)).all())
-    matcher = build_operation_matcher(all_operations)
+    matcher = get_cached_operation_matcher(all_operations)
     operation_id = matcher.match(method, path)
     if operation_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-    operation = session.get(Operation, operation_id)
+    # Look up in the already-fetched list instead of issuing another query.
+    operations_by_id = {op.operation_id: op for op in all_operations}
+    operation = operations_by_id.get(operation_id)
     if operation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
@@ -118,7 +120,20 @@ async def proxy(full_path: str, request: Request, session: SessionDep) -> Stream
             headers=strip_hop_by_hop(request.headers, REQUEST_ONLY_STRIPPED_HEADERS),
             content=request.stream(),
         )
-        upstream_response = await http_client.send(upstream_request, stream=True)
+        try:
+            upstream_response = await http_client.send(upstream_request, stream=True)
+        except httpx.TimeoutException as exc:
+            raise HTTPException(
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Upstream request timed out"
+            ) from exc
+        except httpx.ConnectError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY, detail="Failed to connect to upstream backend"
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY, detail="Upstream backend request failed"
+            ) from exc
 
         token.last_used_at = datetime.now(UTC)
         session.add(token)

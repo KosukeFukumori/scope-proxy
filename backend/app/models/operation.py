@@ -9,7 +9,8 @@ class Operation(SQLModel, table=True):
     for a different endpoint.
     """
 
-    __tablename__ = "operations"
+    # sqlmodel declares __tablename__ as declared_attr; pyright cannot narrow a plain str assignment.
+    __tablename__ = "operations"  # type: ignore[assignment]
 
     operation_id: str = Field(primary_key=True)
     method: str

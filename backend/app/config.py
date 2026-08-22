@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     session_cookie_name: str = "scope_proxy_session"
     request_log_retention_days: int = 30
     """How long request_logs rows are kept before opportunistic pruning removes them."""
+    # Timeout (in seconds) applied to requests forwarded to upstream backends.
+    # Set to a larger value (or None to disable) if the upstream API is expected
+    # to take longer than the default.
+    proxy_timeout_seconds: float | None = 30.0
 
     @property
     def secret_key_is_generated(self) -> bool:

@@ -49,6 +49,7 @@ def list_tokens(session: SessionDep, current_user: CurrentUserDep) -> list[Token
 @router.post("", response_model=TokenCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_token(payload: TokenCreate, session: SessionDep, current_user: CurrentUserDep) -> TokenCreateResponse:
     raw, token_hash = generate_token()
+    assert current_user.id is not None  # current_user is always a persisted row
     token = Token(
         user_id=current_user.id,
         name=payload.name,
@@ -94,14 +95,20 @@ def update_token(
 ) -> TokenDetailRead:
     token = _get_owned_token(session, current_user, token_id)
 
-    if payload.name is not None:
-        token.name = payload.name
-    if payload.expires_at is not None:
-        token.expires_at = payload.expires_at
+    # Only fields explicitly present in the request body are applied.
+    # This distinguishes "field omitted (no change)" from "field set to null
+    # (clear the value)", so `expires_at: null` clears the expiration instead
+    # of being silently ignored.
+    update_fields = payload.model_dump(exclude_unset=True)
+
+    if "name" in update_fields and update_fields["name"] is not None:
+        token.name = update_fields["name"]
+    if "expires_at" in update_fields:
+        token.expires_at = update_fields["expires_at"]
     session.add(token)
 
-    if payload.operation_ids is not None:
-        _set_permissions(session, token_id, payload.operation_ids)
+    if "operation_ids" in update_fields and update_fields["operation_ids"] is not None:
+        _set_permissions(session, token_id, update_fields["operation_ids"])
 
     session.commit()
 
