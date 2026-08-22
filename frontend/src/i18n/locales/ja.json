@@ -207,6 +207,10 @@
     }
   },
   "operationPermissionTable": {
+    "mode": {
+      "individual": "個別選択",
+      "byMethod": "メソッド別選択"
+    },
     "search": {
       "placeholder": "パス・operationId・summary で検索"
     },

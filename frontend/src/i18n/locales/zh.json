@@ -207,6 +207,10 @@
     }
   },
   "operationPermissionTable": {
+    "mode": {
+      "individual": "单独选择",
+      "byMethod": "按方法选择"
+    },
     "search": {
       "placeholder": "按路径、operationId 或 summary 搜索"
     },

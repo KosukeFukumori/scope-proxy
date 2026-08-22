@@ -207,6 +207,10 @@
     }
   },
   "operationPermissionTable": {
+    "mode": {
+      "individual": "Individual selection",
+      "byMethod": "Select by method"
+    },
     "search": {
       "placeholder": "Search by path, operationId, or summary"
     },
