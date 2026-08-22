@@ -12,8 +12,16 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import Settings, settings
 from app.db import init_db
-from app.routers import (auth, backend_config, health, operations, proxy,
-                         schema_snapshots, tokens, users)
+from app.routers import (
+    auth,
+    backend_config,
+    health,
+    operations,
+    proxy,
+    schema_snapshots,
+    tokens,
+    users,
+)
 
 logger = logging.getLogger("scope_proxy")
 
