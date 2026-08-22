@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./scope_proxy.db"
     secret_key: str | None = None
     session_cookie_name: str = "scope_proxy_session"
+    # Timeout (in seconds) applied to requests forwarded to upstream backends.
+    # Set to a larger value (or None to disable) if the upstream API is expected
+    # to take longer than the default.
+    proxy_timeout_seconds: float | None = 30.0
 
     @property
     def secret_key_is_generated(self) -> bool:

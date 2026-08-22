@@ -111,7 +111,20 @@ async def proxy(full_path: str, request: Request, session: SessionDep) -> Stream
         headers=strip_hop_by_hop(request.headers, REQUEST_ONLY_STRIPPED_HEADERS),
         content=request.stream(),
     )
-    upstream_response = await http_client.send(upstream_request, stream=True)
+    try:
+        upstream_response = await http_client.send(upstream_request, stream=True)
+    except httpx.TimeoutException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Upstream request timed out"
+        ) from exc
+    except httpx.ConnectError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail="Failed to connect to upstream backend"
+        ) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail="Upstream backend request failed"
+        ) from exc
 
     token.last_used_at = datetime.now(UTC)
     session.add(token)
