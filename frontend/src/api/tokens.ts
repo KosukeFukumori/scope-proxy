@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { TokenCreateResponse, TokenDetail, TokenSummary } from '../types/api'
+import type { RequestLog, TokenCreateResponse, TokenDetail, TokenSummary } from '../types/api'
 
 export function listTokens(): Promise<TokenSummary[]> {
   return apiClient.get<TokenSummary[]>('/_admin/api/tokens')
@@ -31,4 +31,8 @@ export function updateToken(id: string, input: UpdateTokenInput): Promise<TokenD
 
 export function revokeToken(id: string): Promise<TokenSummary> {
   return apiClient.post<TokenSummary>(`/_admin/api/tokens/${id}/revoke`)
+}
+
+export function listTokenLogs(id: string): Promise<RequestLog[]> {
+  return apiClient.get<RequestLog[]>(`/_admin/api/tokens/${id}/logs`)
 }

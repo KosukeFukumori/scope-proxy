@@ -4,7 +4,9 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
 from app.deps import CurrentUserDep, SessionDep
+from app.models.request_log import RequestLog
 from app.models.token import Token, TokenPermission
+from app.schemas.request_log import RequestLogRead
 from app.schemas.token import (
     TokenCreate,
     TokenCreateResponse,
@@ -13,6 +15,8 @@ from app.schemas.token import (
     TokenUpdate,
 )
 from app.services.token_service import generate_token
+
+MAX_TOKEN_LOGS = 50
 
 router = APIRouter(prefix="/api/tokens", tags=["tokens"])
 
@@ -110,6 +114,18 @@ def update_token(
         last_used_at=token.last_used_at,
         operation_ids=_operation_ids(session, token_id),
     )
+
+
+@router.get("/{token_id}/logs", response_model=list[RequestLogRead])
+def list_token_logs(token_id: str, session: SessionDep, current_user: CurrentUserDep) -> list[RequestLog]:
+    _get_owned_token(session, current_user, token_id)
+    statement = (
+        select(RequestLog)
+        .where(RequestLog.token_id == token_id)
+        .order_by(RequestLog.created_at.desc())
+        .limit(MAX_TOKEN_LOGS)
+    )
+    return list(session.exec(statement).all())
 
 
 @router.post("/{token_id}/revoke", response_model=TokenRead)

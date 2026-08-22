@@ -1,9 +1,11 @@
 import hashlib
+from datetime import UTC, datetime
 
 from httpx import AsyncClient
 from sqlmodel import Session, select
 
 from app.models.operation import Operation
+from app.models.request_log import RequestLog
 from app.models.token import Token, TokenPermission
 
 
@@ -82,4 +84,47 @@ async def test_revoke_token(logged_in_client: AsyncClient) -> None:
 
 async def test_token_not_found_for_other_user(logged_in_client: AsyncClient) -> None:
     response = await logged_in_client.get("/_admin/api/tokens/9999")
+    assert response.status_code == 404
+
+
+async def test_list_token_logs_returns_recent_entries_newest_first(
+    logged_in_client: AsyncClient, session: Session
+) -> None:
+    create_response = await logged_in_client.post("/_admin/api/tokens", json={"name": "t1"})
+    token_id = create_response.json()["id"]
+
+    session.add(
+        RequestLog(
+            token_id=token_id,
+            operation_id="getUser",
+            method="GET",
+            path="/users/1",
+            status=200,
+            latency_ms=12,
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+    )
+    session.add(
+        RequestLog(
+            token_id=token_id,
+            operation_id="getUser",
+            method="GET",
+            path="/users/1",
+            status=403,
+            latency_ms=3,
+            created_at=datetime(2024, 1, 2, tzinfo=UTC),
+        )
+    )
+    session.commit()
+
+    response = await logged_in_client.get(f"/_admin/api/tokens/{token_id}/logs")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 2
+    assert body[0]["status"] == 403
+    assert body[1]["status"] == 200
+
+
+async def test_list_token_logs_requires_ownership(logged_in_client: AsyncClient) -> None:
+    response = await logged_in_client.get("/_admin/api/tokens/9999/logs")
     assert response.status_code == 404

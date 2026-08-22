@@ -51,6 +51,12 @@
     "table": {
       "fetchedAt": "Fetched at",
       "diff": "Diff"
+    },
+    "usage": {
+      "title": "Usage (last {{days}} days)",
+      "totalRequests": "Requests",
+      "deniedRequests": "Denied",
+      "forwardedRequests": "Forwarded"
     }
   },
   "operations": {
@@ -127,6 +133,17 @@
       "save": "Save",
       "issue": "Issue",
       "cancel": "Cancel"
+    },
+    "logs": {
+      "title": "Recent usage",
+      "empty": "No usage recorded yet",
+      "table": {
+        "time": "Time",
+        "method": "Method",
+        "path": "Path",
+        "status": "Status",
+        "latency": "Latency"
+      }
     }
   },
   "operationPermissionTable": {

@@ -1,3 +1,4 @@
+import time
 from datetime import UTC, datetime
 
 import httpx
@@ -12,6 +13,7 @@ from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
 from app.models.token import Token, TokenPermission
 from app.services.operation_matcher import build_operation_matcher
+from app.services.request_log_service import record_request_log
 from app.services.token_service import hash_token
 
 router = APIRouter(tags=["proxy"])
@@ -90,36 +92,64 @@ def _ensure_permission(session: SessionDep, token: Token, operation: Operation) 
     include_in_schema=False,
 )
 async def proxy(full_path: str, request: Request, session: SessionDep) -> StreamingResponse:
-    token = await _authenticate_token(session, request.headers.get("authorization"))
+    started_at = time.monotonic()
+    token: Token | None = None
+    operation: Operation | None = None
 
-    operation = _resolve_operation(session, request.method, request.url.path)
-    _ensure_permission(session, token, operation)
+    try:
+        token = await _authenticate_token(session, request.headers.get("authorization"))
 
-    backend_config = session.get(BackendConfig, 1)
-    if backend_config is None:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Backend is not configured")
+        operation = _resolve_operation(session, request.method, request.url.path)
+        _ensure_permission(session, token, operation)
 
-    target_url = httpx.URL(backend_config.endpoint_url).copy_with(
-        path=request.url.path,
-        query=request.url.query.encode(),
-    )
+        backend_config = session.get(BackendConfig, 1)
+        if backend_config is None:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Backend is not configured")
 
-    http_client: httpx.AsyncClient = request.app.state.http_client
-    upstream_request = http_client.build_request(
-        method=request.method,
-        url=target_url,
-        headers=strip_hop_by_hop(request.headers, REQUEST_ONLY_STRIPPED_HEADERS),
-        content=request.stream(),
-    )
-    upstream_response = await http_client.send(upstream_request, stream=True)
+        target_url = httpx.URL(backend_config.endpoint_url).copy_with(
+            path=request.url.path,
+            query=request.url.query.encode(),
+        )
 
-    token.last_used_at = datetime.now(UTC)
-    session.add(token)
-    session.commit()
+        http_client: httpx.AsyncClient = request.app.state.http_client
+        upstream_request = http_client.build_request(
+            method=request.method,
+            url=target_url,
+            headers=strip_hop_by_hop(request.headers, REQUEST_ONLY_STRIPPED_HEADERS),
+            content=request.stream(),
+        )
+        upstream_response = await http_client.send(upstream_request, stream=True)
 
-    return StreamingResponse(
-        upstream_response.aiter_raw(),
-        status_code=upstream_response.status_code,
-        headers=dict(strip_hop_by_hop(upstream_response.headers, RESPONSE_ONLY_STRIPPED_HEADERS)),
-        background=BackgroundTask(upstream_response.aclose),
-    )
+        token.last_used_at = datetime.now(UTC)
+        session.add(token)
+        record_request_log(
+            session,
+            token_id=token.id,
+            operation_id=operation.operation_id,
+            method=request.method,
+            path=request.url.path,
+            status_code=upstream_response.status_code,
+            latency_ms=_elapsed_ms(started_at),
+        )
+
+        return StreamingResponse(
+            upstream_response.aiter_raw(),
+            status_code=upstream_response.status_code,
+            headers=dict(strip_hop_by_hop(upstream_response.headers, RESPONSE_ONLY_STRIPPED_HEADERS)),
+            background=BackgroundTask(upstream_response.aclose),
+        )
+    except HTTPException as exc:
+        record_request_log(
+            session,
+            token_id=token.id if token is not None else None,
+            operation_id=operation.operation_id if operation is not None else None,
+            method=request.method,
+            path=request.url.path,
+            status_code=exc.status_code,
+            latency_ms=_elapsed_ms(started_at),
+        )
+        raise
+
+
+def _elapsed_ms(started_at: float) -> int:
+    return int((time.monotonic() - started_at) * 1000)

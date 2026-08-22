@@ -51,6 +51,12 @@
     "table": {
       "fetchedAt": "取得日時",
       "diff": "差分"
+    },
+    "usage": {
+      "title": "利用状況(直近{{days}}日間)",
+      "totalRequests": "リクエスト数",
+      "deniedRequests": "拒否数",
+      "forwardedRequests": "転送数"
     }
   },
   "operations": {
@@ -127,6 +133,17 @@
       "save": "保存",
       "issue": "発行",
       "cancel": "キャンセル"
+    },
+    "logs": {
+      "title": "直近の利用履歴",
+      "empty": "まだ利用履歴がありません",
+      "table": {
+        "time": "日時",
+        "method": "Method",
+        "path": "Path",
+        "status": "ステータス",
+        "latency": "レイテンシ"
+      }
     }
   },
   "operationPermissionTable": {

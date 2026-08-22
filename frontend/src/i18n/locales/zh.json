@@ -51,6 +51,12 @@
     "table": {
       "fetchedAt": "获取时间",
       "diff": "差异"
+    },
+    "usage": {
+      "title": "使用情况(最近 {{days}} 天)",
+      "totalRequests": "请求数",
+      "deniedRequests": "拒绝数",
+      "forwardedRequests": "转发数"
     }
   },
   "operations": {
@@ -127,6 +133,17 @@
       "save": "保存",
       "issue": "发行",
       "cancel": "取消"
+    },
+    "logs": {
+      "title": "最近的使用记录",
+      "empty": "暂无使用记录",
+      "table": {
+        "time": "时间",
+        "method": "Method",
+        "path": "Path",
+        "status": "状态",
+        "latency": "延迟"
+      }
     }
   },
   "operationPermissionTable": {

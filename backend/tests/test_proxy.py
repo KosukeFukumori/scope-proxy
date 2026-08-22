@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 
 from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
+from app.models.request_log import RequestLog
 from app.models.token import Token, TokenPermission
 from app.services.token_service import generate_token
 
@@ -130,3 +131,47 @@ async def test_backend_not_configured_returns_503(client: AsyncClient, session: 
 
     response = await client.get("/users/1", headers={"Authorization": f"Bearer {raw}"})
     assert response.status_code == 503
+
+
+async def test_missing_authorization_records_request_log(client: AsyncClient, session: Session) -> None:
+    _setup_backend(session)
+    response = await client.get("/users/1")
+    assert response.status_code == 401
+
+    log = session.exec(select(RequestLog)).one()
+    assert log.token_id is None
+    assert log.operation_id is None
+    assert log.method == "GET"
+    assert log.path == "/users/1"
+    assert log.status == 401
+    assert log.latency_ms >= 0
+
+
+async def test_no_permission_records_request_log_with_token_and_operation(
+    client: AsyncClient, session: Session
+) -> None:
+    _setup_backend(session)
+    raw = _create_token(session, operation_ids=[])
+    response = await client.get("/users/1", headers={"Authorization": f"Bearer {raw}"})
+    assert response.status_code == 403
+
+    log = session.exec(select(RequestLog)).one()
+    token = session.exec(select(Token)).one()
+    assert log.token_id == token.id
+    assert log.operation_id == "getUser"
+    assert log.status == 403
+
+
+@respx.mock
+async def test_authorized_request_records_upstream_status(client: AsyncClient, session: Session) -> None:
+    _setup_backend(session)
+    raw = _create_token(session, operation_ids=["getUser"])
+
+    respx.get(f"{BACKEND_URL}/users/1").mock(return_value=Response(200, json={"id": 1}))
+
+    response = await client.get("/users/1", headers={"Authorization": f"Bearer {raw}"})
+    assert response.status_code == 200
+
+    log = session.exec(select(RequestLog)).one()
+    assert log.operation_id == "getUser"
+    assert log.status == 200
