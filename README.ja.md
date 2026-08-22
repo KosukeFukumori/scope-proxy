@@ -1,6 +1,4 @@
-# scope-proxy
-
-![scope-proxy logo](./frontend/public/favicon.svg)
+# ![scope-proxy logo](./frontend/public/favicon.svg) scope-proxy
 
 [English](./README.md)
 
