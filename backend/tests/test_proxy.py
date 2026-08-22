@@ -108,6 +108,7 @@ async def test_authorized_request_is_forwarded(client: AsyncClient, session: Ses
     assert upstream_request.headers["x-client"] == "test"
 
     token = session.exec(select(Token)).first()
+    assert token is not None
     assert token.last_used_at is not None
 
 

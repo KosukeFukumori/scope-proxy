@@ -5,7 +5,8 @@ from sqlmodel import Field, SQLModel
 
 
 class Token(SQLModel, table=True):
-    __tablename__ = "tokens"
+    # sqlmodel declares __tablename__ as declared_attr; pyright cannot narrow a plain str assignment.
+    __tablename__ = "tokens"  # type: ignore[assignment]
 
     id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     user_id: int = Field(foreign_key="users.id")
@@ -21,7 +22,8 @@ class Token(SQLModel, table=True):
 class TokenPermission(SQLModel, table=True):
     """Many-to-many association between tokens and operations."""
 
-    __tablename__ = "token_permissions"
+    # sqlmodel declares __tablename__ as declared_attr; pyright cannot narrow a plain str assignment.
+    __tablename__ = "token_permissions"  # type: ignore[assignment]
 
     id: int | None = Field(default=None, primary_key=True)
     token_id: str = Field(foreign_key="tokens.id", index=True)
