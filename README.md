@@ -71,6 +71,8 @@ The production build (`npm run build`) output is served from `/_admin/` by `back
 
 See `backend/.env.example`.
 
+CORS is disabled by default (`CORS_ALLOWED_ORIGINS` empty), which is the safe default: every request, including a browser's CORS preflight `OPTIONS`, goes through the normal auth flow and is denied without a bearer token — this also means the proxy **cannot** be called directly from a browser-based SPA. To allow that, set `CORS_ALLOWED_ORIGINS` to a comma-separated list of allowed origins; preflight requests from those origins are then answered before hitting auth/routing.
+
 ## Tests
 
 ```bash
@@ -90,6 +92,7 @@ npm run build
 - Requests to unmatched paths/methods are denied by default (404).
 - Newly added operations have no permissions by default (allowlist).
 - Removed operations are soft-deleted (`is_active=false`) and are always denied.
+- CORS is disabled by default; enabling it via `CORS_ALLOWED_ORIGINS` only affects the preflight `OPTIONS` handshake — actual requests still require a valid bearer token.
 
 ## License
 
