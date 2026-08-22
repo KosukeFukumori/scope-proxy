@@ -1,4 +1,4 @@
-# scope-proxy
+# ![scope-proxy logo](./frontend/public/favicon.svg) scope-proxy
 
 [English](./README.md)
 
@@ -11,6 +11,12 @@
 認証機能を持たない既存APIサーバー(OpenAPI JSONを公開)の手前に立ち、トークンベースの認可とプロキシ機能を提供するラッパーサーバーです。
 
 **認可サーバー不要、OAuthのやり取り不要、接続先APIへのコード変更も不要。** OpenAPIスキーマを指定するだけで、接続先の各オペレーションに対しトークンごとに付与・剥奪できる権限が自動的に用意されます。認証を持たない社内APIを、数分でアクセス制御されたAPIに変えられます。
+
+## デモ
+
+**[管理画面のデモを試す](https://kosukefukumori.github.io/scope-proxy/)** — ログイン: `admin@example.com` / `demo-password`
+
+これは管理画面をGitHub Pages上にホストした静的ビルドで、すべてのAPI呼び出しはブラウザ内のモックデータで応答しています(`frontend/src/demo/mockApi.ts` 参照)。実際のバックエンドは存在せず、操作内容はブラウザタブを閉じると失われます。画面の見た目や操作感を確認するためのものです。scope-proxy自体を試す場合は、下記の[セットアップ](#セットアップ)にあるDocker Compose構成を使ってください。
 
 ## なぜ scope-proxy か
 
@@ -49,7 +55,11 @@ docker compose up --build
 docker compose exec app .venv/bin/python scripts/create_admin_user.py
 ```
 
+このスクリプトは非対話モードにも対応しています。`ADMIN_EMAIL` と `ADMIN_PASSWORD` の両方を(例えば `docker-compose.yml` の `app` サービスの環境変数として)設定すると、プロンプトなしでユーザーを作成し、既に存在する場合は何もせずスキップします。これによりコンテナ起動のたびに自動実行しても安全です。
+
 本番運用では `docker-compose.yml` 内で `SECRET_KEY` を固定値に設定してください。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
+
+ログイン後は、管理画面の「アカウント」ページから自分のパスワードを変更でき、「ユーザー」ページから他のユーザーの追加・削除もできます。上記のCLIスクリプトは最初の1人目のユーザーを作成する場合にのみ必要です。
 
 ### 開発実行
 
@@ -90,6 +100,8 @@ npm run dev
 
 `backend/.env.example` を参照してください。
 
+CORSは既定で無効です(`CORS_ALLOWED_ORIGINS` が空)。これは安全側の既定値で、ブラウザのCORSプリフライト `OPTIONS` を含む全リクエストが通常の認証フローに乗り、Bearerトークンなしでは拒否されます。つまり、ブラウザ上のSPAなどからプロキシを直接呼び出すことは**できません**。それを許可するには、`CORS_ALLOWED_ORIGINS` に許可するオリジンをカンマ区切りで設定してください。設定したオリジンからのプリフライトリクエストは、認証・ルーティングに到達する前に応答されるようになります。
+
 ## テスト
 
 ```bash
@@ -109,6 +121,7 @@ npm run build
 - 未マッチのpath/methodへのリクエストはデフォルトで拒否されます(404)。
 - 新規追加されたオペレーションはデフォルトで無権限です(allowlist)。
 - 削除されたオペレーションは論理削除(`is_active=false`)され、常に拒否されます。
+- CORSは既定で無効です。`CORS_ALLOWED_ORIGINS` で有効化しても、影響するのはプリフライト `OPTIONS` のハンドシェイクのみで、実際のリクエストには引き続き有効なBearerトークンが必要です。
 
 ## ライセンス
 

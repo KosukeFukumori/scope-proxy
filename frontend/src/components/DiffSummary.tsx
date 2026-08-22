@@ -1,28 +1,6 @@
 import { useTranslation } from 'react-i18next'
+import { diffSummaryHasChanges, parseDiffSummary } from '../lib/diffSummary'
 import { Badge } from './ui'
-
-interface ParsedDiff {
-  added: string[]
-  updated: string[]
-  removed: string[]
-  skipped_admin_conflict: string[]
-}
-
-/** Parses the `diff_summary` JSON string stored on a schema snapshot. Falls back to an
- * empty diff if the value cannot be parsed (e.g. legacy/unexpected data). */
-function parseDiffSummary(raw: string): ParsedDiff {
-  try {
-    const parsed = JSON.parse(raw) as Partial<ParsedDiff>
-    return {
-      added: parsed.added ?? [],
-      updated: parsed.updated ?? [],
-      removed: parsed.removed ?? [],
-      skipped_admin_conflict: parsed.skipped_admin_conflict ?? [],
-    }
-  } catch {
-    return { added: [], updated: [], removed: [], skipped_admin_conflict: [] }
-  }
-}
 
 function DiffCategory({
   label,
@@ -60,8 +38,7 @@ function DiffCategory({
 export function DiffSummary({ diffSummary }: { diffSummary: string }) {
   const { t } = useTranslation()
   const diff = parseDiffSummary(diffSummary)
-  const hasChanges =
-    diff.added.length > 0 || diff.updated.length > 0 || diff.removed.length > 0 || diff.skipped_admin_conflict.length > 0
+  const hasChanges = diffSummaryHasChanges(diffSummary)
 
   if (!hasChanges) {
     return <Badge tone="neutral">{t('diffSummary.noChanges')}</Badge>

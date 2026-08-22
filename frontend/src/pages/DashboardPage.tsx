@@ -6,9 +6,11 @@ import { useTranslation } from 'react-i18next'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
 import { getUsageSummary } from '../api/usage'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { DiffSummary } from '../components/DiffSummary'
 import { Layout } from '../components/Layout'
 import { EmptyState, ErrorAlert, Loading, PageHeader, SuccessAlert } from '../components/ui'
+import { diffSummaryHasChanges } from '../lib/diffSummary'
 import { errorMessage, formatDateTime } from '../lib/format'
 import type { BackendConfig } from '../types/api'
 
@@ -62,34 +64,76 @@ function UsageSummaryCard() {
   )
 }
 
+/** Notice modal shown after a schema refresh detected changes. */
+function SchemaChangeModal({ diffSummary, onClose }: { diffSummary: string; onClose: () => void }) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="schema-change-modal-title">
+      <div className="modal">
+        <div className="stack stack--tight">
+          <h2 id="schema-change-modal-title">{t('dashboard.schemaChangeModal.title')}</h2>
+          <p>{t('dashboard.schemaChangeModal.message')}</p>
+          <DiffSummary diffSummary={diffSummary} />
+        </div>
+        <div className="modal__actions">
+          <button type="button" className="btn btn--primary" onClick={onClose}>
+            {t('common.close')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ConfigForm({ config }: { config: BackendConfig | null }) {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? '')
   const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? '')
+  const [switchConfirmOpen, setSwitchConfirmOpen] = useState(false)
+  const [schemaChangeDiff, setSchemaChangeDiff] = useState<string | null>(null)
+
+  const refreshMutation = useMutation({
+    mutationFn: refreshBackendConfig,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
+      queryClient.invalidateQueries({ queryKey: ['schemaSnapshots'] })
+      queryClient.invalidateQueries({ queryKey: ['operations'] })
+      if (diffSummaryHasChanges(data.diff_summary)) {
+        setSchemaChangeDiff(data.diff_summary)
+      }
+    },
+  })
 
   const saveMutation = useMutation({
     mutationFn: () => upsertBackendConfig(endpointUrl, openapiUrl),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
+      // Switching the backend resets operations and token permissions server-side.
+      queryClient.invalidateQueries({ queryKey: ['operations'] })
+      queryClient.invalidateQueries({ queryKey: ['tokens'] })
+      // Fetch the new backend's schema right away so the proxy doesn't sit
+      // without operations until someone presses "refresh" manually.
+      refreshMutation.mutate()
     },
   })
 
-  const refreshMutation = useMutation({
-    mutationFn: refreshBackendConfig,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
-      queryClient.invalidateQueries({ queryKey: ['schemaSnapshots'] })
-      queryClient.invalidateQueries({ queryKey: ['operations'] })
-    },
-  })
+  const urlChanged =
+    config !== null && (endpointUrl !== config.endpoint_url || openapiUrl !== config.openapi_url)
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (urlChanged) {
+      // Warn before switching: this wipes operations and all token permissions.
+      setSwitchConfirmOpen(true)
+      return
+    }
     saveMutation.mutate()
   }
 
   return (
+    <>
     <form className="card" onSubmit={handleSubmit}>
       <div className="card__body stack">
         <div className="field">
@@ -136,8 +180,7 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             <p style={{ margin: '0 0 0.3rem' }}>{t('dashboard.form.diffLabel')}</p>
             <DiffSummary diffSummary={refreshMutation.data.diff_summary} />
           </div>
-        )}
-      </div>
+        )}      </div>
 
       <div className="card__footer">
         <button type="submit" className="btn btn--primary" disabled={saveMutation.isPending}>
@@ -156,6 +199,24 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
         </span>
       </div>
     </form>
+
+    {switchConfirmOpen && (
+      <ConfirmDialog
+        title={t('dashboard.switchConfirm.title')}
+        message={t('dashboard.switchConfirm.message')}
+        confirmLabel={t('dashboard.switchConfirm.confirm')}
+        onConfirm={() => {
+          setSwitchConfirmOpen(false)
+          saveMutation.mutate()
+        }}
+        onCancel={() => setSwitchConfirmOpen(false)}
+      />
+    )}
+
+    {schemaChangeDiff !== null && (
+      <SchemaChangeModal diffSummary={schemaChangeDiff} onClose={() => setSchemaChangeDiff(null)} />
+    )}
+    </>
   )
 }
 

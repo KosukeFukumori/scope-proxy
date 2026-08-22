@@ -1,4 +1,4 @@
-# scope-proxy
+# ![scope-proxy logo](./frontend/public/favicon.svg) scope-proxy
 
 [日本語](./README.ja.md)
 
@@ -11,6 +11,12 @@
 A wrapper server that sits in front of an existing API server (one that publishes an OpenAPI JSON but has no authentication of its own), providing token-based authorization and proxying.
 
 **No auth server, no OAuth dance, no code changes to the upstream API.** Point scope-proxy at an OpenAPI schema, and it gives every upstream operation a permission you can grant or revoke per token — turning any unauthenticated internal API into a properly access-controlled one in minutes.
+
+## Demo
+
+**[Try the admin UI demo](https://kosukefukumori.github.io/scope-proxy/)** — login: `admin@example.com` / `demo-password`
+
+This is a static build of the admin UI hosted on GitHub Pages, with all API calls answered by mock data in the browser (see `frontend/src/demo/mockApi.ts`). There is no real backend behind it — nothing you do there is persisted beyond your browser tab, and it exists only to let you click through the screens. To try scope-proxy itself, use the [Docker Compose setup](#setup) below.
 
 ## Why scope-proxy?
 
@@ -49,7 +55,11 @@ This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQL
 docker compose exec app .venv/bin/python scripts/create_admin_user.py
 ```
 
+The script also supports a non-interactive mode: set both `ADMIN_EMAIL` and `ADMIN_PASSWORD` (e.g. as environment variables on the `app` service in `docker-compose.yml`) and it will create the user without prompting, skipping silently if that user already exists. This makes it safe to run automatically on every container startup.
+
 Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
+
+Once logged in, users can manage their own password from the "Account" page, and add or remove other users from the "Users" page in the admin UI — the CLI script above is only needed to bootstrap the very first user.
 
 ### Development
 
@@ -90,6 +100,8 @@ The production build (`npm run build`) output is served from `/_admin/` by `back
 
 See `backend/.env.example`.
 
+CORS is disabled by default (`CORS_ALLOWED_ORIGINS` empty), which is the safe default: every request, including a browser's CORS preflight `OPTIONS`, goes through the normal auth flow and is denied without a bearer token — this also means the proxy **cannot** be called directly from a browser-based SPA. To allow that, set `CORS_ALLOWED_ORIGINS` to a comma-separated list of allowed origins; preflight requests from those origins are then answered before hitting auth/routing.
+
 ## Tests
 
 ```bash
@@ -109,6 +121,7 @@ npm run build
 - Requests to unmatched paths/methods are denied by default (404).
 - Newly added operations have no permissions by default (allowlist).
 - Removed operations are soft-deleted (`is_active=false`) and are always denied.
+- CORS is disabled by default; enabling it via `CORS_ALLOWED_ORIGINS` only affects the preflight `OPTIONS` handshake — actual requests still require a valid bearer token.
 
 ## License
 

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { logout } from '../api/auth'
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../i18n'
+import { DemoBanner } from '../demo/DemoBanner'
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   ja: '日本語',
@@ -25,7 +26,9 @@ export function Layout({ children }: { children: ReactNode }) {
     { to: '/operations', label: t('layout.nav.operations'), end: false },
     { to: '/snapshots', label: t('layout.nav.snapshots'), end: false },
     { to: '/tokens', label: t('layout.nav.tokens'), end: false },
+    { to: '/users', label: t('layout.nav.users'), end: false },
     { to: '/usage', label: t('layout.nav.usage'), end: false },
+    { to: '/account', label: t('layout.nav.account'), end: false },
   ]
 
   const logoutMutation = useMutation({
@@ -38,9 +41,10 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="app-shell">
+      <DemoBanner />
       <header className="app-header">
         <NavLink to="/" className="app-brand">
-          <span className="app-brand__mark">SP</span>
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="app-brand__mark" />
           {t('common.appName')}
         </NavLink>
         <nav className="app-nav">

@@ -34,7 +34,7 @@ export function OperationsPage() {
     const matchesSearch =
       normalizedSearch === '' ||
       op.path.toLowerCase().includes(normalizedSearch) ||
-      op.operation_id.toLowerCase().includes(normalizedSearch) ||
+      (op.openapi_operation_id ?? '').toLowerCase().includes(normalizedSearch) ||
       (op.summary ?? '').toLowerCase().includes(normalizedSearch)
     return matchesMethod && matchesSearch
   })
@@ -118,7 +118,7 @@ export function OperationsPage() {
                     <MethodBadge method={op.method} />
                   </td>
                   <td className="mono">{op.path}</td>
-                  <td>{op.operation_id}</td>
+                  <td>{op.openapi_operation_id ?? '—'}</td>
                   <td className="muted">{op.summary ?? '—'}</td>
                   <td>
                     {op.is_active ? (

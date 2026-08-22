@@ -5,6 +5,11 @@
     "close": "閉じる",
     "unset": "—"
   },
+  "demo": {
+    "banner": "デモモード — この画面はモックデータのみで動作しており、実際のバックエンドは呼び出されません。",
+    "reset": "デモデータをリセット",
+    "credentialsHint": "デモ用ログイン: {{email}} / {{password}}"
+  },
   "diffSummary": {
     "noChanges": "変更なし",
     "added": "追加",
@@ -18,7 +23,9 @@
       "operations": "オペレーション",
       "snapshots": "変更履歴",
       "tokens": "トークン",
-      "usage": "使い方"
+      "users": "ユーザー",
+      "usage": "使い方",
+      "account": "アカウント"
     },
     "logout": "ログアウト",
     "language": "言語"
@@ -49,6 +56,15 @@
       "refreshing": "更新中...",
       "lastFetched": "最終取得:",
       "notFetched": "未取得"
+    },
+    "switchConfirm": {
+      "title": "接続先の変更",
+      "message": "接続先URLを変更すると、同期済みのオペレーション一覧と、トークンに付与されたすべての権限がリセットされます。変更後は新しいスキーマを取得し、権限を付け直してください。",
+      "confirm": "変更してリセット"
+    },
+    "schemaChangeModal": {
+      "title": "スキーマの変更を検出しました",
+      "message": "バックエンドのスキーマに変更があります。追加されたオペレーションに権限は自動付与されず、削除されたオペレーションは無効化されています。以下の差分を確認してください。"
     },
     "recentSnapshots": "直近の変更履歴",
     "viewAll": "すべて表示",
@@ -120,6 +136,16 @@
       "title": "トークンがまだありません",
       "description": "「新規発行」から最初のトークンを作成してください。"
     },
+    "filterEmpty": {
+      "title": "該当するトークンがありません",
+      "description": "フィルタ条件を変更してください。"
+    },
+    "filters": {
+      "all": "すべて",
+      "active": "有効のみ",
+      "revoked": "失効済みのみ",
+      "expired": "期限切れのみ"
+    },
     "table": {
       "name": "名前",
       "status": "状態",
@@ -130,6 +156,8 @@
     "noExpiry": "無期限",
     "notUsed": "未使用",
     "revoke": "失効",
+    "delete": "削除",
+    "confirmDelete": "このトークンを削除しますか？この操作は取り消せません。",
     "status": {
       "revoked": "失効済み",
       "expired": "期限切れ",
@@ -231,5 +259,36 @@
   },
   "ui": {
     "loading": "読み込み中..."
+  },
+  "account": {
+    "title": "アカウント",
+    "description": "ログイン中のアカウントのパスワードを変更します。",
+    "form": {
+      "currentPasswordLabel": "現在のパスワード",
+      "newPasswordLabel": "新しいパスワード",
+      "confirmPasswordLabel": "新しいパスワード（確認）",
+      "mismatchError": "新しいパスワードが一致しません",
+      "saveError": "パスワードの変更に失敗しました",
+      "save": "パスワードを変更",
+      "saving": "変更中...",
+      "success": "パスワードを変更しました。"
+    }
+  },
+  "users": {
+    "title": "ユーザー",
+    "description": "管理画面にログインできるユーザーの一覧・追加・削除を行います。",
+    "form": {
+      "emailLabel": "メールアドレス",
+      "passwordLabel": "パスワード",
+      "saveError": "ユーザーの作成に失敗しました",
+      "create": "ユーザーを追加",
+      "saving": "作成中..."
+    },
+    "table": {
+      "email": "メールアドレス",
+      "createdAt": "作成日時"
+    },
+    "delete": "削除",
+    "deleteError": "ユーザーの削除に失敗しました"
   }
 }

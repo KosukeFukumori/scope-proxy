@@ -36,3 +36,7 @@ export function revokeToken(id: string): Promise<TokenSummary> {
 export function listTokenLogs(id: string): Promise<RequestLog[]> {
   return apiClient.get<RequestLog[]>(`/_admin/api/tokens/${id}/logs`)
 }
+
+export function deleteToken(id: string): Promise<void> {
+  return apiClient.delete<void>(`/_admin/api/tokens/${id}`)
+}

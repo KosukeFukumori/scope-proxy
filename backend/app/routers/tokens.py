@@ -144,3 +144,19 @@ def revoke_token(token_id: str, session: SessionDep, current_user: CurrentUserDe
         session.commit()
         session.refresh(token)
     return token
+
+
+@router.delete("/{token_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_token(token_id: str, session: SessionDep, current_user: CurrentUserDep) -> None:
+    token = _get_owned_token(session, current_user, token_id)
+    if token.revoked_at is None:
+        # Only revoked tokens can be deleted, to keep an audit trail for active ones.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only revoked tokens can be deleted",
+        )
+
+    for permission in session.exec(select(TokenPermission).where(TokenPermission.token_id == token_id)).all():
+        session.delete(permission)
+    session.delete(token)
+    session.commit()
