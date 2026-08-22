@@ -118,6 +118,11 @@ def sync_operations(session: Session, spec: dict) -> SyncResult:
     return result
 
 
+def _get_latest_snapshot(session: Session) -> SchemaSnapshot | None:
+    statement = select(SchemaSnapshot).order_by(SchemaSnapshot.fetched_at.desc()).limit(1)
+    return session.exec(statement).first()
+
+
 async def refresh_backend_schema(session: Session, backend_config: BackendConfig) -> SchemaSnapshot:
     spec = await fetch_openapi_spec(backend_config.openapi_url)
     spec_hash = hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()
@@ -126,6 +131,14 @@ async def refresh_backend_schema(session: Session, backend_config: BackendConfig
 
     backend_config.last_fetched_at = datetime.now(UTC)
     session.add(backend_config)
+
+    latest_snapshot = _get_latest_snapshot(session)
+    if latest_snapshot is not None and latest_snapshot.spec_hash == spec_hash:
+        # Spec is unchanged since the last snapshot: avoid piling up "no change" rows,
+        # which would otherwise flood the history once periodic sync is introduced.
+        session.commit()
+        session.refresh(latest_snapshot)
+        return latest_snapshot
 
     snapshot = SchemaSnapshot(spec_hash=spec_hash, diff_summary=result.to_diff_summary())
     session.add(snapshot)

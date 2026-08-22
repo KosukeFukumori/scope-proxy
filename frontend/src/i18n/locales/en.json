@@ -5,6 +5,13 @@
     "close": "Close",
     "unset": "—"
   },
+  "diffSummary": {
+    "noChanges": "No changes",
+    "added": "Added",
+    "updated": "Updated",
+    "removed": "Removed",
+    "skippedAdminConflict": "Skipped (admin conflict)"
+  },
   "layout": {
     "nav": {
       "dashboard": "Backend Config",
