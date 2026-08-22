@@ -23,6 +23,13 @@ from app.routers import (
     users,
 )
 
+# uvicorn only attaches handlers to its own "uvicorn"/"uvicorn.error"/"uvicorn.access"
+# loggers, not the root logger, so app loggers (e.g. "scope_proxy",
+# "app.migration_runner") would otherwise be dropped by logging's lastResort
+# handler (WARNING+ only). Configure the root logger explicitly so INFO logs
+# from application code show up in `docker compose logs`.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+
 logger = logging.getLogger("scope_proxy")
 
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
