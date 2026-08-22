@@ -4,6 +4,40 @@ from app.config import settings
 from app.models.user import User
 
 
+async def test_setup_status_needs_setup_when_no_user(client: AsyncClient) -> None:
+    response = await client.get("/_admin/api/setup/status")
+    assert response.status_code == 200
+    assert response.json() == {"needs_setup": True}
+
+
+async def test_setup_status_does_not_need_setup_once_user_exists(client: AsyncClient, test_user: User) -> None:
+    response = await client.get("/_admin/api/setup/status")
+    assert response.status_code == 200
+    assert response.json() == {"needs_setup": False}
+
+
+async def test_setup_creates_user_and_logs_in(client: AsyncClient) -> None:
+    response = await client.post(
+        "/_admin/api/setup",
+        json={"username": "admin", "password": "initial-pass123"},
+    )
+    assert response.status_code == 201
+    assert response.json()["username"] == "admin"
+
+    # The setup call also establishes a session, like /login does.
+    me_response = await client.get("/_admin/api/me")
+    assert me_response.status_code == 200
+    assert me_response.json()["username"] == "admin"
+
+
+async def test_setup_rejected_once_a_user_exists(client: AsyncClient, test_user: User) -> None:
+    response = await client.post(
+        "/_admin/api/setup",
+        json={"username": "another-admin", "password": "whatever123"},
+    )
+    assert response.status_code == 409
+
+
 async def test_login_success(client: AsyncClient, test_user: User) -> None:
     response = await client.post(
         "/_admin/api/login",

@@ -1,5 +1,13 @@
 import { apiClient } from './client'
-import type { User } from '../types/api'
+import type { SetupStatus, User } from '../types/api'
+
+export function getSetupStatus(): Promise<SetupStatus> {
+  return apiClient.get<SetupStatus>('/_admin/api/setup/status')
+}
+
+export function setup(username: string, password: string): Promise<User> {
+  return apiClient.post<User>('/_admin/api/setup', { username, password })
+}
 
 export function login(username: string, password: string): Promise<User> {
   return apiClient.post<User>('/_admin/api/login', { username, password })

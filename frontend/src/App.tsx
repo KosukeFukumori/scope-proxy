@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
+import { SetupPage } from './pages/SetupPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { OperationsPage } from './pages/OperationsPage'
 import { SnapshotsPage } from './pages/SnapshotsPage'
@@ -31,6 +32,14 @@ function App() {
         element={
           <RedirectIfAuthenticated>
             <LoginPage />
+          </RedirectIfAuthenticated>
+        }
+      />
+      <Route
+        path="/setup"
+        element={
+          <RedirectIfAuthenticated>
+            <SetupPage />
           </RedirectIfAuthenticated>
         }
       />

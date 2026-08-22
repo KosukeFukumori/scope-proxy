@@ -206,6 +206,14 @@ const ROUTES: {
   handler: (s: DemoState, match: RegExpMatchArray, body: unknown, query: URLSearchParams) => unknown
 }[] = [
   {
+    method: 'GET',
+    pattern: /^\/_admin\/api\/setup\/status$/,
+    handler: () => {
+      // The demo always ships with a preseeded admin user, so setup is never needed.
+      return { needs_setup: false }
+    },
+  },
+  {
     method: 'POST',
     pattern: /^\/_admin\/api\/login$/,
     handler: (s, _m, body) => {

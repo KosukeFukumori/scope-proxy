@@ -49,17 +49,22 @@ For a single-port setup, build the frontend into the backend image and run it wi
 docker compose up --build
 ```
 
-This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQLite database is persisted in the `scope_proxy_db` named volume. To create the initial admin user:
+This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQLite database is persisted in the `scope_proxy_db` named volume.
 
-```bash
-docker compose exec app .venv/bin/python scripts/create_admin_user.py
-```
+There are two ways to create the initial admin account:
 
-The script also supports a non-interactive mode: set both `ADMIN_USERNAME` and `ADMIN_PASSWORD` (e.g. as environment variables on the `app` service in `docker-compose.yml`) and it will create the user without prompting, skipping silently if that user already exists. This makes it safe to run automatically on every container startup.
+- **Interactively**: just open `http://localhost:8000/_admin/`. As long as no account exists yet, you'll be shown a setup screen to create the admin username and password on the spot.
+- **Via environment variables** (useful for unattended/scripted deployments): set both `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` (e.g. as environment variables on the `app` service in `docker-compose.yml`). On startup, if no user exists yet, the app creates that account automatically; if a user already exists, these variables are ignored. `ADMIN_PASSWORD_HASH` must be a **bcrypt hash**, not a plaintext password — generate one with:
+
+  ```bash
+  docker compose exec app .venv/bin/python -c "import bcrypt, getpass; print(bcrypt.hashpw(getpass.getpass().encode(), bcrypt.gensalt()).decode())"
+  ```
+
+  Paste the resulting hash as `ADMIN_PASSWORD_HASH`.
 
 Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
 
-Once logged in, users can manage their own password from the "Account" page, and add or remove other users from the "Users" page in the admin UI — the CLI script above is only needed to bootstrap the very first user.
+scope-proxy has a single admin account; once logged in, it can be renamed and have its password changed from the "Account" page — `ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` and the setup screen are only used to bootstrap that initial account.
 
 ### Using the pre-built image
 
@@ -78,11 +83,10 @@ To use it with Docker Compose instead of building locally, replace the `build:` 
 ```bash
 cd backend
 uv sync
-uv run scripts/create_admin_user.py  # create the initial admin user
 uv run uvicorn app.main:app --reload
 ```
 
-Database schema migrations run automatically on startup (see [Database migrations](#database-migrations) below).
+Database schema migrations run automatically on startup (see [Database migrations](#database-migrations) below). Open `http://127.0.0.1:8000/_admin/` and use the setup screen to create the initial admin account (or set `ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` beforehand — see [Environment variables](#environment-variables-backendenv)).
 
 #### Frontend
 
@@ -111,6 +115,15 @@ The production build (`npm run build`) output is served from `/_admin/` by `back
 See `backend/.env.example`.
 
 CORS is disabled by default (`CORS_ALLOWED_ORIGINS` empty), which is the safe default: every request, including a browser's CORS preflight `OPTIONS`, goes through the normal auth flow and is denied without a bearer token — this also means the proxy **cannot** be called directly from a browser-based SPA. To allow that, set `CORS_ALLOWED_ORIGINS` to a comma-separated list of allowed origins; preflight requests from those origins are then answered before hitting auth/routing.
+
+`ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` bootstrap the initial admin account non-interactively; both must be set together, and they only take effect while no account exists yet. `ADMIN_PASSWORD_HASH` must be a bcrypt hash, generated with:
+
+```bash
+cd backend
+uv run python -c "import bcrypt, getpass; print(bcrypt.hashpw(getpass.getpass().encode(), bcrypt.gensalt()).decode())"
+```
+
+If these are left unset, the first visit to the admin UI shows a setup screen to create the account interactively instead.
 
 ## Tests
 

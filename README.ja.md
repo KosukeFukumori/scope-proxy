@@ -49,17 +49,22 @@
 docker compose up --build
 ```
 
-これで管理画面とプロキシの両方が `http://localhost:8000` の1ポートで動作します。SQLiteのDBファイルは `scope_proxy_db` という名前付きボリュームに永続化されます。初回管理ユーザーの作成は次のコマンドで行います。
+これで管理画面とプロキシの両方が `http://localhost:8000` の1ポートで動作します。SQLiteのDBファイルは `scope_proxy_db` という名前付きボリュームに永続化されます。
 
-```bash
-docker compose exec app .venv/bin/python scripts/create_admin_user.py
-```
+初回管理アカウントの作成方法は2通りあります。
 
-このスクリプトは非対話モードにも対応しています。`ADMIN_USERNAME` と `ADMIN_PASSWORD` の両方を(例えば `docker-compose.yml` の `app` サービスの環境変数として)設定すると、プロンプトなしでユーザーを作成し、既に存在する場合は何もせずスキップします。これによりコンテナ起動のたびに自動実行しても安全です。
+- **画面から作成する**: `http://localhost:8000/_admin/` を開くだけです。まだアカウントが存在しない間は、その場で管理者のユーザー名とパスワードを設定するセットアップ画面が表示されます。
+- **環境変数で作成する**(無人・スクリプト化されたデプロイ向け): `ADMIN_USERNAME` と `ADMIN_PASSWORD_HASH` の両方を(例えば `docker-compose.yml` の `app` サービスの環境変数として)設定します。起動時にアカウントが1つも存在しなければ、この設定から自動的にアカウントが作成されます。既にアカウントが存在する場合、これらの変数は無視されます。`ADMIN_PASSWORD_HASH` には平文パスワードではなく**bcryptハッシュ値**を設定する必要があります。ハッシュ値は次のコマンドで生成できます。
+
+  ```bash
+  docker compose exec app .venv/bin/python -c "import bcrypt, getpass; print(bcrypt.hashpw(getpass.getpass().encode(), bcrypt.gensalt()).decode())"
+  ```
+
+  生成されたハッシュ値を `ADMIN_PASSWORD_HASH` に設定してください。
 
 本番運用では `docker-compose.yml` 内で `SECRET_KEY` を固定値に設定してください。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
 
-ログイン後は、管理画面の「アカウント」ページから自分のパスワードを変更でき、「ユーザー」ページから他のユーザーの追加・削除もできます。上記のCLIスクリプトは最初の1人目のユーザーを作成する場合にのみ必要です。
+scope-proxyの管理アカウントは単一です。ログイン後は、管理画面の「アカウント」ページからユーザー名やパスワードを変更できます。`ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` とセットアップ画面は、この最初のアカウントを作成するためだけに使われます。
 
 ### ビルド済みイメージを使う
 
@@ -78,11 +83,10 @@ Docker Composeでローカルビルドの代わりにこのイメージを使う
 ```bash
 cd backend
 uv sync
-uv run scripts/create_admin_user.py  # 初回管理ユーザー作成
 uv run uvicorn app.main:app --reload
 ```
 
-DBスキーマのマイグレーションは起動時に自動実行されます(詳細は下記の[DBマイグレーション](#dbマイグレーション)を参照)。
+DBスキーマのマイグレーションは起動時に自動実行されます(詳細は下記の[DBマイグレーション](#dbマイグレーション)を参照)。`http://127.0.0.1:8000/_admin/` を開き、セットアップ画面から初回管理アカウントを作成してください(あるいは事前に `ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` を設定しておくこともできます。[環境変数](#環境変数-backendenv)を参照)。
 
 #### フロントエンド
 
@@ -111,6 +115,15 @@ npm run dev
 `backend/.env.example` を参照してください。
 
 CORSは既定で無効です(`CORS_ALLOWED_ORIGINS` が空)。これは安全側の既定値で、ブラウザのCORSプリフライト `OPTIONS` を含む全リクエストが通常の認証フローに乗り、Bearerトークンなしでは拒否されます。つまり、ブラウザ上のSPAなどからプロキシを直接呼び出すことは**できません**。それを許可するには、`CORS_ALLOWED_ORIGINS` に許可するオリジンをカンマ区切りで設定してください。設定したオリジンからのプリフライトリクエストは、認証・ルーティングに到達する前に応答されるようになります。
+
+`ADMIN_USERNAME` と `ADMIN_PASSWORD_HASH` は初回管理アカウントを非対話で作成するための設定です。両方セットで指定する必要があり、まだアカウントが1つも存在しない場合にのみ有効になります。`ADMIN_PASSWORD_HASH` にはbcryptハッシュ値を設定してください。生成方法は次のとおりです。
+
+```bash
+cd backend
+uv run python -c "import bcrypt, getpass; print(bcrypt.hashpw(getpass.getpass().encode(), bcrypt.gensalt()).decode())"
+```
+
+未設定のままにしておくと、管理画面への初回アクセス時にセットアップ画面が表示され、そこから対話的にアカウントを作成できます。
 
 ## テスト
 

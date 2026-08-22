@@ -14,10 +14,13 @@ services:
       # SECRET_KEY is generated on every restart and sessions are invalidated
       # each time the container restarts.
       # SECRET_KEY: change-me-to-a-random-secret
-      # Uncomment both to have `create_admin_user.py` create the initial admin
-      # user non-interactively (e.g. from an init container or entrypoint).
+      # Uncomment both to bootstrap the initial admin account non-interactively at
+      # startup (only takes effect while no account exists yet). ADMIN_PASSWORD_HASH
+      # must be a bcrypt hash, not a plaintext password:
+      #   docker compose exec app .venv/bin/python -c "import bcrypt, getpass; print(bcrypt.hashpw(getpass.getpass().encode(), bcrypt.gensalt()).decode())"
+      # Leaving these unset shows a setup screen on the admin UI's first visit instead.
       # ADMIN_USERNAME: admin
-      # ADMIN_PASSWORD: change-me
+      # ADMIN_PASSWORD_HASH: change-me
     healthcheck:
       # Use the stdlib instead of curl since the image doesn't ship curl.
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/_admin/api/health', timeout=2)"]

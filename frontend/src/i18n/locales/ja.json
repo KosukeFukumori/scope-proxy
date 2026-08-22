@@ -37,6 +37,16 @@
     "submitting": "ログイン中...",
     "error": "ユーザー名またはパスワードが違います"
   },
+  "setup": {
+    "subtitle": "初回セットアップ: 管理者アカウントを作成してください",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "confirmPassword": "パスワード(確認)",
+    "passwordMismatch": "パスワードが一致しません",
+    "submit": "アカウントを作成",
+    "submitting": "作成中...",
+    "error": "アカウントの作成に失敗しました"
+  },
   "dashboard": {
     "title": "接続先設定",
     "description": "プロキシ先のバックエンドと OpenAPI スキーマの取得元を設定します。",

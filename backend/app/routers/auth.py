@@ -10,6 +10,8 @@ from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
     PasswordChangeRequest,
+    SetupRequest,
+    SetupStatus,
     UsernameChangeRequest,
     UserRead,
 )
@@ -17,6 +19,34 @@ from app.schemas.auth import (
 logger = logging.getLogger("scope_proxy")
 
 router = APIRouter(prefix="/api", tags=["auth"])
+
+
+@router.get("/setup/status", response_model=SetupStatus)
+def setup_status(session: SessionDep) -> SetupStatus:
+    needs_setup = session.exec(select(User)).first() is None
+    return SetupStatus(needs_setup=needs_setup)
+
+
+@router.post("/setup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def setup(payload: SetupRequest, request: Request, session: SessionDep) -> User:
+    # Only usable while no account exists yet; once the first admin is created (via this
+    # endpoint, or via ADMIN_USERNAME/ADMIN_PASSWORD_HASH at startup), it stays closed for good.
+    if session.exec(select(User)).first() is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Setup has already been completed")
+
+    username = payload.username.strip()
+    if not username or not payload.password:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Username and password are required"
+        )
+
+    user = User(username=username, password_hash=hash_password(payload.password))
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    request.session["user_id"] = user.id
+    return user
 
 
 @router.post("/login", response_model=UserRead)

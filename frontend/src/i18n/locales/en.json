@@ -37,6 +37,16 @@
     "submitting": "Logging in...",
     "error": "Invalid username or password"
   },
+  "setup": {
+    "subtitle": "First-time setup: create the admin account",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "Passwords do not match",
+    "submit": "Create account",
+    "submitting": "Creating...",
+    "error": "Failed to create the account"
+  },
   "dashboard": {
     "title": "Backend Config",
     "description": "Configure the proxied backend and the source of the OpenAPI schema.",
