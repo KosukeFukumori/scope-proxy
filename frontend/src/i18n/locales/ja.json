@@ -33,6 +33,7 @@
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "operationId 単位の権限管理に使用するスキーマの取得元。",
       "saveError": "保存に失敗しました",
+      "saveSuccess": "保存しました",
       "refreshError": "スキーマの更新に失敗しました",
       "diffLabel": "差分:",
       "save": "保存",
@@ -110,6 +111,13 @@
       "revoked": "失効済み",
       "expired": "期限切れ",
       "active": "有効"
+    },
+    "revokeConfirm": {
+      "title": "トークンを失効しますか？",
+      "message": "「{{name}}」を失効します。この操作は取り消せません。このトークンを使用しているクライアントは即座にアクセスできなくなります。",
+      "confirm": "失効する",
+      "revoking": "失効中...",
+      "error": "失効に失敗しました"
     }
   },
   "tokenEdit": {

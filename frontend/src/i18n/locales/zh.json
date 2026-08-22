@@ -33,6 +33,7 @@
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "用于按 operationId 管理权限的模式获取来源。",
       "saveError": "保存失败",
+      "saveSuccess": "已保存",
       "refreshError": "更新模式失败",
       "diffLabel": "差异:",
       "save": "保存",
@@ -110,6 +111,13 @@
       "revoked": "已作废",
       "expired": "已过期",
       "active": "有效"
+    },
+    "revokeConfirm": {
+      "title": "确定要作废该令牌吗？",
+      "message": "即将作废「{{name}}」。此操作无法撤销，使用该令牌的客户端将立即失去访问权限。",
+      "confirm": "作废",
+      "revoking": "作废中...",
+      "error": "作废失败"
     }
   },
   "tokenEdit": {
