@@ -114,7 +114,6 @@
     "table": {
       "method": "Method",
       "path": "Path",
-      "operationId": "Reference ID",
       "summary": "Summary",
       "status": "Status"
     },
