@@ -1,10 +1,18 @@
 import hashlib
+from datetime import UTC, datetime, timedelta
 
 from httpx import AsyncClient
 from sqlmodel import Session, select
 
 from app.models.operation import Operation
 from app.models.token import Token, TokenPermission
+
+
+def _assert_utc_aware(value: str) -> None:
+    """Assert a serialized datetime string carries a UTC offset (`+00:00` / `Z`)."""
+    parsed = datetime.fromisoformat(value)
+    assert parsed.tzinfo is not None
+    assert parsed.utcoffset() == timedelta(0)
 
 
 async def test_list_tokens_requires_authentication(client: AsyncClient) -> None:
@@ -117,3 +125,31 @@ async def test_revoke_token(logged_in_client: AsyncClient) -> None:
 async def test_token_not_found_for_other_user(logged_in_client: AsyncClient) -> None:
     response = await logged_in_client.get("/_admin/api/tokens/9999")
     assert response.status_code == 404
+
+
+async def test_token_datetime_fields_are_utc_aware(logged_in_client: AsyncClient) -> None:
+    expires_at = (datetime.now(UTC) + timedelta(days=1)).isoformat()
+
+    create_response = await logged_in_client.post(
+        "/_admin/api/tokens", json={"name": "t1", "expires_at": expires_at}
+    )
+    assert create_response.status_code == 201
+    created = create_response.json()
+    _assert_utc_aware(created["created_at"])
+    _assert_utc_aware(created["expires_at"])
+    token_id = created["id"]
+
+    list_response = await logged_in_client.get("/_admin/api/tokens")
+    listed = list_response.json()[0]
+    _assert_utc_aware(listed["created_at"])
+    _assert_utc_aware(listed["expires_at"])
+
+    detail_response = await logged_in_client.get(f"/_admin/api/tokens/{token_id}")
+    detail = detail_response.json()
+    _assert_utc_aware(detail["created_at"])
+    _assert_utc_aware(detail["expires_at"])
+
+    revoke_response = await logged_in_client.post(f"/_admin/api/tokens/{token_id}/revoke")
+    revoked = revoke_response.json()
+    _assert_utc_aware(revoked["created_at"])
+    _assert_utc_aware(revoked["revoked_at"])
