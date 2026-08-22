@@ -12,3 +12,7 @@ class BackendConfig(SQLModel, table=True):
     endpoint_url: str
     openapi_url: str
     last_fetched_at: datetime | None = None
+    # Outcome of the most recent sync attempt (manual or scheduled): "success" or "error".
+    last_sync_status: str | None = None
+    # Error message from the most recent failed sync attempt, if any.
+    last_sync_error: str | None = None

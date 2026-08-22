@@ -8,6 +8,8 @@ export interface BackendConfig {
   endpoint_url: string
   openapi_url: string
   last_fetched_at: string | null
+  last_sync_status: 'success' | 'error' | null
+  last_sync_error: string | null
 }
 
 export interface Operation {

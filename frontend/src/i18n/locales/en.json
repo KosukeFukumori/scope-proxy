@@ -40,7 +40,10 @@
       "refreshNow": "Refresh schema now",
       "refreshing": "Refreshing...",
       "lastFetched": "Last fetched:",
-      "notFetched": "Not fetched yet"
+      "notFetched": "Not fetched yet",
+      "syncStatusSuccess": "success",
+      "syncStatusError": "failed",
+      "lastSyncError": "Last sync error:"
     },
     "recentSnapshots": "Recent history",
     "viewAll": "View all",

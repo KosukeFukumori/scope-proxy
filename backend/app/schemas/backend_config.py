@@ -13,3 +13,5 @@ class BackendConfigRead(BaseModel):
     endpoint_url: str
     openapi_url: str
     last_fetched_at: datetime | None
+    last_sync_status: str | None
+    last_sync_error: str | None

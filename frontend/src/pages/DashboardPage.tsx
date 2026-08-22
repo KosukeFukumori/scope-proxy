@@ -83,6 +83,11 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             {t('dashboard.form.diffLabel')} <code>{refreshMutation.data.diff_summary}</code>
           </p>
         )}
+        {config?.last_sync_status === 'error' && (
+          <ErrorAlert>
+            {t('dashboard.form.lastSyncError')} {config.last_sync_error}
+          </ErrorAlert>
+        )}
       </div>
 
       <div className="card__footer">
@@ -99,6 +104,16 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
         </button>
         <span className="muted" style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>
           {t('dashboard.form.lastFetched')} {formatDateTime(config?.last_fetched_at, t('dashboard.form.notFetched'), i18n.resolvedLanguage)}
+          {config?.last_sync_status && (
+            <>
+              {' '}
+              (
+              {config.last_sync_status === 'success'
+                ? t('dashboard.form.syncStatusSuccess')
+                : t('dashboard.form.syncStatusError')}
+              )
+            </>
+          )}
         </span>
       </div>
     </form>

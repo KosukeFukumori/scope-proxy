@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./scope_proxy.db"
     secret_key: str | None = None
     session_cookie_name: str = "scope_proxy_session"
+    # Interval in seconds between automatic schema syncs. 0 (default) disables the background loop.
+    schema_sync_interval_seconds: int = 0
 
     @property
     def secret_key_is_generated(self) -> bool:

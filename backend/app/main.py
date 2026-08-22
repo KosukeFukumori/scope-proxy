@@ -1,3 +1,5 @@
+import asyncio
+import contextlib
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -9,7 +11,7 @@ from fastapi.responses import FileResponse, Response
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
-from app.db import init_db
+from app.db import engine, init_db
 from app.routers import (
     auth,
     backend_config,
@@ -18,6 +20,7 @@ from app.routers import (
     schema_snapshots,
     tokens,
 )
+from app.services.schema_sync import schema_sync_loop
 
 logger = logging.getLogger("scope_proxy")
 
@@ -32,9 +35,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             "Sessions will be invalidated on every restart. Set SECRET_KEY in .env for production use."
         )
     init_db()
+
+    sync_task: asyncio.Task[None] | None = None
+    if settings.schema_sync_interval_seconds > 0:
+        sync_task = asyncio.create_task(
+            schema_sync_loop(engine, settings.schema_sync_interval_seconds)
+        )
+
     async with httpx.AsyncClient() as http_client:
         app.state.http_client = http_client
         yield
+
+    if sync_task is not None:
+        sync_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await sync_task
 
 
 app = FastAPI(title="scope-proxy", lifespan=lifespan)

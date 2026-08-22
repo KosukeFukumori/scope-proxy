@@ -40,7 +40,10 @@
       "refreshNow": "スキーマを今すぐ更新",
       "refreshing": "更新中...",
       "lastFetched": "最終取得:",
-      "notFetched": "未取得"
+      "notFetched": "未取得",
+      "syncStatusSuccess": "成功",
+      "syncStatusError": "失敗",
+      "lastSyncError": "直近の同期エラー:"
     },
     "recentSnapshots": "直近の変更履歴",
     "viewAll": "すべて表示",

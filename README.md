@@ -9,7 +9,7 @@ A wrapper server that sits in front of an existing API server (one that publishe
 - Self-service, token-based authorization (not a three-legged OAuth flow)
 - Per-token permissions defined at the `operationId` level of the upstream OpenAPI schema
 - A proxy that forwards only authorized requests to the upstream server, **preserving the original URL structure**
-- Detects changes in the upstream OpenAPI schema and reflects them into permissions on the safe side (allowlist)
+- Detects changes in the upstream OpenAPI schema and reflects them into permissions on the safe side (allowlist), either via the dashboard's manual "Refresh now" button or an optional periodic background sync (`SCHEMA_SYNC_INTERVAL_SECONDS`)
 - A frontend where logged-in users can issue and manage their own tokens
 
 ## Architecture overview

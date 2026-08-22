@@ -1,16 +1,24 @@
+import asyncio
 import hashlib
 import json
+import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 import httpx
+from sqlalchemy import Engine
 from sqlmodel import Session, select
 
 from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
 from app.models.schema_snapshot import SchemaSnapshot
 
+logger = logging.getLogger("scope_proxy")
+
 ADMIN_PATH_PREFIX = "/_admin"
+
+# BackendConfig.id of the single backend configuration record used by this app.
+BACKEND_CONFIG_ID = 1
 
 
 @dataclass
@@ -119,17 +127,67 @@ def sync_operations(session: Session, spec: dict) -> SyncResult:
 
 
 async def refresh_backend_schema(session: Session, backend_config: BackendConfig) -> SchemaSnapshot:
-    spec = await fetch_openapi_spec(backend_config.openapi_url)
-    spec_hash = hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()
+    """Fetch the upstream OpenAPI spec, reconcile operations, and record a snapshot.
 
-    result = sync_operations(session, spec)
+    Also records the outcome (success/error) on backend_config so the dashboard can
+    show whether the most recent sync attempt (manual or scheduled) succeeded, regardless
+    of whether the failure happened during the fetch or afterwards.
+    """
+    try:
+        spec = await fetch_openapi_spec(backend_config.openapi_url)
+        spec_hash = hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()
 
-    backend_config.last_fetched_at = datetime.now(UTC)
-    session.add(backend_config)
+        result = sync_operations(session, spec)
 
-    snapshot = SchemaSnapshot(spec_hash=spec_hash, diff_summary=result.to_diff_summary())
-    session.add(snapshot)
+        backend_config.last_fetched_at = datetime.now(UTC)
+        backend_config.last_sync_status = "success"
+        backend_config.last_sync_error = None
+        session.add(backend_config)
 
-    session.commit()
-    session.refresh(snapshot)
-    return snapshot
+        snapshot = SchemaSnapshot(spec_hash=spec_hash, diff_summary=result.to_diff_summary())
+        session.add(snapshot)
+
+        session.commit()
+        session.refresh(snapshot)
+        return snapshot
+    except Exception as exc:
+        backend_config.last_sync_status = "error"
+        backend_config.last_sync_error = str(exc)[:2000]
+        session.add(backend_config)
+        session.commit()
+        raise
+
+
+async def run_scheduled_sync(engine: Engine) -> None:
+    """Run a single scheduled sync attempt against the singleton backend config, if configured.
+
+    Failures are logged as warnings (and recorded on backend_config via refresh_backend_schema)
+    instead of being raised, so the periodic loop keeps running.
+    """
+    with Session(engine) as session:
+        backend_config = session.get(BackendConfig, BACKEND_CONFIG_ID)
+        if backend_config is None:
+            logger.debug("Skipping scheduled schema sync: backend config is not set")
+            return
+
+        try:
+            await refresh_backend_schema(session, backend_config)
+        except Exception:
+            logger.warning("Scheduled schema sync failed for %s", backend_config.openapi_url, exc_info=True)
+
+
+async def schema_sync_loop(engine: Engine, interval_seconds: float) -> None:
+    """Periodically run schema sync every interval_seconds until the task is cancelled.
+
+    Intended to be started as an asyncio task from the FastAPI lifespan and cancelled on shutdown.
+    """
+    while True:
+        await asyncio.sleep(interval_seconds)
+        try:
+            await run_scheduled_sync(engine)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            # Defensive: run_scheduled_sync already handles sync failures internally, but this
+            # ensures a truly unexpected error (e.g. a DB connectivity issue) never kills the loop.
+            logger.exception("Unexpected error in schema sync loop")

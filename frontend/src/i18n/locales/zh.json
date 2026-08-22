@@ -40,7 +40,10 @@
       "refreshNow": "立即更新模式",
       "refreshing": "更新中...",
       "lastFetched": "最近获取:",
-      "notFetched": "尚未获取"
+      "notFetched": "尚未获取",
+      "syncStatusSuccess": "成功",
+      "syncStatusError": "失败",
+      "lastSyncError": "最近的同步错误:"
     },
     "recentSnapshots": "最近的变更历史",
     "viewAll": "查看全部",
