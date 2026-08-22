@@ -67,6 +67,10 @@ The production build (`npm run build`) output is served from `/_admin/` by `back
 
 `backend/migrations/` holds numbered, idempotent SQL files (`0001_initial.sql`, `0002_xxx.sql`, ...). On every startup (`app.main.lifespan` → `app.db.init_db`), `app.migration_runner.run_migrations` applies any files not yet recorded in the `schema_migrations` table, in filename order. There is no separate migration command to run manually — adding a new numbered `.sql` file under `backend/migrations/` is enough; it gets applied automatically the next time the app starts.
 
+## Health check
+
+`GET /_admin/api/health` is unauthenticated and returns `{"status": "ok"}` once the app is up and the database is reachable. It's registered before the catch-all proxy router, so it's exempt from authentication. Use it for Docker Compose `healthcheck` and load balancer liveness probes (see `docker-compose.yml` and `Dockerfile` for the built-in `HEALTHCHECK`).
+
 ## Environment variables (backend/.env)
 
 See `backend/.env.example`.
