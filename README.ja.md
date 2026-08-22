@@ -14,7 +14,7 @@
 
 ## デモ
 
-**[管理画面のデモを試す](https://kosukefukumori.github.io/scope-proxy/)** — ログイン: `admin@example.com` / `demo-password`
+**[管理画面のデモを試す](https://kosukefukumori.github.io/scope-proxy/)** — ログイン: `admin` / `demo-password`
 
 これは管理画面をGitHub Pages上にホストした静的ビルドで、すべてのAPI呼び出しはブラウザ内のモックデータで応答しています(`frontend/src/demo/mockApi.ts` 参照)。実際のバックエンドは存在せず、操作内容はブラウザタブを閉じると失われます。画面の見た目や操作感を確認するためのものです。scope-proxy自体を試す場合は、下記の[セットアップ](#セットアップ)にあるDocker Compose構成を使ってください。
 
