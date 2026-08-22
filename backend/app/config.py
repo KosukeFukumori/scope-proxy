@@ -8,6 +8,12 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./scope_proxy.db"
     secret_key: str | None = None
+
+    # Bootstrap credentials for the initial admin account, applied once at
+    # startup when no user exists yet. admin_password_hash must already be a
+    # bcrypt hash (see README for how to generate one), not a plaintext password.
+    admin_username: str | None = None
+    admin_password_hash: str | None = None
     session_cookie_name: str = "scope_proxy_session"
     # Interval in seconds between automatic schema syncs. 0 (default) disables the background loop.
     # This is only the fallback default: a value set from the dashboard GUI (backend_config.

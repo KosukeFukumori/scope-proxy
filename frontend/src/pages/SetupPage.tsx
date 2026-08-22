@@ -1,43 +1,32 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { getSetupStatus, login } from '../api/auth'
+import { setup, getSetupStatus } from '../api/auth'
 import { errorMessage } from '../lib/format'
-import { sanitizeReturnTo } from '../lib/returnTo'
 import { ErrorAlert, Loading } from '../components/ui'
-import { DemoBanner } from '../demo/DemoBanner'
-import { DEMO_CREDENTIALS } from '../demo/mockApi'
 
-const IS_DEMO = import.meta.env.MODE === 'demo'
-
-export function LoginPage() {
+export function SetupPage() {
   const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [searchParams] = useSearchParams()
-  const returnTo = sanitizeReturnTo(searchParams.get('returnTo'))
 
   const setupStatusQuery = useQuery({
     queryKey: ['setupStatus'],
     queryFn: getSetupStatus,
   })
 
-  const loginMutation = useMutation({
-    mutationFn: () => login(username, password),
+  const setupMutation = useMutation({
+    mutationFn: () => setup(username, password),
     onSuccess: (user) => {
       queryClient.setQueryData(['currentUser'], user)
-      navigate(returnTo, { replace: true })
+      navigate('/', { replace: true })
     },
   })
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    loginMutation.mutate()
-  }
 
   if (setupStatusQuery.isLoading) {
     return (
@@ -47,15 +36,21 @@ export function LoginPage() {
     )
   }
 
-  // No admin account exists yet — send the visitor to the setup screen instead
-  // of a login form for a user that doesn't exist.
-  if (setupStatusQuery.data?.needs_setup) {
-    return <Navigate to="/setup" replace />
+  // Setup was already completed (e.g. by another tab, or ADMIN_USERNAME/ADMIN_PASSWORD_HASH
+  // at startup) — there's nothing left to set up here.
+  if (setupStatusQuery.data && !setupStatusQuery.data.needs_setup) {
+    return <Navigate to="/login" replace />
   }
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    setupMutation.mutate()
+  }
+
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
   return (
     <div className="login-page">
-      <DemoBanner />
       <div className="login-screen">
         <form className="login-card" onSubmit={handleSubmit}>
           <div className="login-card__head">
@@ -66,21 +61,13 @@ export function LoginPage() {
               style={{ width: '2.25rem', height: '2.25rem' }}
             />
             <h1>{t('common.appName')}</h1>
-            <p className="page-header__description">{t('login.subtitle')}</p>
-            {IS_DEMO && (
-              <p className="page-header__description">
-                {t('demo.credentialsHint', {
-                  username: DEMO_CREDENTIALS.username,
-                  password: DEMO_CREDENTIALS.password,
-                })}
-              </p>
-            )}
+            <p className="page-header__description">{t('setup.subtitle')}</p>
           </div>
 
           <div className="stack">
             <div className="field">
               <label className="field__label" htmlFor="username">
-                {t('login.username')}
+                {t('setup.username')}
               </label>
               <input
                 id="username"
@@ -95,25 +82,46 @@ export function LoginPage() {
 
             <div className="field">
               <label className="field__label" htmlFor="password">
-                {t('login.password')}
+                {t('setup.password')}
               </label>
               <input
                 id="password"
                 className="input"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
 
-            {loginMutation.isError && (
-              <ErrorAlert>{errorMessage(loginMutation.error, t('login.error'))}</ErrorAlert>
+            <div className="field">
+              <label className="field__label" htmlFor="confirm-password">
+                {t('setup.confirmPassword')}
+              </label>
+              <input
+                id="confirm-password"
+                className="input"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {passwordMismatch && <ErrorAlert>{t('setup.passwordMismatch')}</ErrorAlert>}
+
+            {setupMutation.isError && (
+              <ErrorAlert>{errorMessage(setupMutation.error, t('setup.error'))}</ErrorAlert>
             )}
 
-            <button type="submit" className="btn btn--primary btn--block" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? t('login.submitting') : t('login.submit')}
+            <button
+              type="submit"
+              className="btn btn--primary btn--block"
+              disabled={setupMutation.isPending || passwordMismatch}
+            >
+              {setupMutation.isPending ? t('setup.submitting') : t('setup.submit')}
             </button>
           </div>
         </form>

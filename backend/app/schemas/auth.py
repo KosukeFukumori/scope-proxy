@@ -18,3 +18,12 @@ class PasswordChangeRequest(BaseModel):
 
 class UsernameChangeRequest(BaseModel):
     username: str
+
+
+class SetupRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SetupStatus(BaseModel):
+    needs_setup: bool

@@ -37,6 +37,16 @@
     "submitting": "登录中...",
     "error": "用户名或密码错误"
   },
+  "setup": {
+    "subtitle": "初始设置: 创建管理员账户",
+    "username": "用户名",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "passwordMismatch": "两次输入的密码不一致",
+    "submit": "创建账户",
+    "submitting": "创建中...",
+    "error": "创建账户失败"
+  },
   "dashboard": {
     "title": "后端配置",
     "description": "设置代理转发的后端及 OpenAPI 模式的获取来源。",

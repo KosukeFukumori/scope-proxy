@@ -3,6 +3,10 @@ export interface User {
   username: string
 }
 
+export interface SetupStatus {
+  needs_setup: boolean
+}
+
 export interface BackendConfig {
   id: number
   endpoint_url: string
