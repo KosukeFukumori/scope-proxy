@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { login } from '../api/auth'
 import { errorMessage } from '../lib/format'
+import { sanitizeReturnTo } from '../lib/returnTo'
 import { ErrorAlert } from '../components/ui'
 
 export function LoginPage() {
@@ -13,12 +14,14 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const returnTo = sanitizeReturnTo(searchParams.get('returnTo'))
 
   const loginMutation = useMutation({
     mutationFn: () => login(email, password),
     onSuccess: (user) => {
       queryClient.setQueryData(['currentUser'], user)
-      navigate('/', { replace: true })
+      navigate(returnTo, { replace: true })
     },
   })
 
