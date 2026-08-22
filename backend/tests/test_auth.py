@@ -1,5 +1,6 @@
 from httpx import AsyncClient
 
+from app.config import settings
 from app.models.user import User
 
 
@@ -89,3 +90,28 @@ async def test_change_password_success_allows_login_with_new_password(
         json={"email": test_user.email, "password": "newpass456"},
     )
     assert new_login.status_code == 200
+
+
+async def test_login_blocked_after_repeated_failures(client: AsyncClient, test_user: User) -> None:
+    """After enough failed attempts within the rate-limit window, the endpoint
+    should return 429 instead of continuing to check the password.
+    """
+    for _ in range(settings.login_rate_limit_max_attempts):
+        response = await client.post(
+            "/_admin/api/login",
+            json={"email": test_user.email, "password": "wrong-password"},
+        )
+        assert response.status_code == 401
+
+    response = await client.post(
+        "/_admin/api/login",
+        json={"email": test_user.email, "password": "wrong-password"},
+    )
+    assert response.status_code == 429
+
+    # Even the correct password should be blocked while the rate limit is active.
+    response = await client.post(
+        "/_admin/api/login",
+        json={"email": test_user.email, "password": "testpass123"},
+    )
+    assert response.status_code == 429
