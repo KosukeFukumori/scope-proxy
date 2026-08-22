@@ -20,6 +20,7 @@ from app.routers import (
     proxy,
     schema_snapshots,
     tokens,
+    users,
 )
 
 logger = logging.getLogger("scope_proxy")
@@ -52,7 +53,14 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
     # Fall back to a freshly generated key when the caller didn't provide one
     # (mirrors the generation the process-wide `settings` singleton does at import time).
     secret_key = app_settings.secret_key or secrets.token_urlsafe(32)
-    app.add_middleware(SessionMiddleware, secret_key=secret_key)
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=secret_key,
+        session_cookie=app_settings.session_cookie_name,
+        same_site="lax",
+        https_only=app_settings.session_cookie_secure,
+        max_age=app_settings.session_cookie_max_age,
+    )
 
     # CORS is disabled by default (empty allowlist): every request, including
     # preflight OPTIONS, then falls through to the normal auth flow and is denied
@@ -75,6 +83,7 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
     app.include_router(tokens.router, prefix="/_admin")
     app.include_router(operations.router, prefix="/_admin")
     app.include_router(schema_snapshots.router, prefix="/_admin")
+    app.include_router(users.router, prefix="/_admin")
 
     if FRONTEND_DIST.is_dir():
 
