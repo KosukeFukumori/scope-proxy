@@ -14,7 +14,7 @@ A wrapper server that sits in front of an existing API server (one that publishe
 
 ## Demo
 
-**[Try the admin UI demo](https://kosukefukumori.github.io/scope-proxy/)** — login: `admin@example.com` / `demo-password`
+**[Try the admin UI demo](https://kosukefukumori.github.io/scope-proxy/)** — login: `admin` / `demo-password`
 
 This is a static build of the admin UI hosted on GitHub Pages, with all API calls answered by mock data in the browser (see `frontend/src/demo/mockApi.ts`). There is no real backend behind it — nothing you do there is persisted beyond your browser tab, and it exists only to let you click through the screens. To try scope-proxy itself, use the [Docker Compose setup](#setup) below.
 
