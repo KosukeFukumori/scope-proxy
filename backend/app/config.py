@@ -28,9 +28,22 @@ class Settings(BaseSettings):
     # to take longer than the default.
     proxy_timeout_seconds: float | None = 30.0
 
+    # Comma-separated list of origins allowed to make cross-origin requests to the proxy.
+    # Empty by default: CORS is disabled and every request (including preflight OPTIONS)
+    # is handled by the normal auth flow, i.e. denied without a bearer token.
+    cors_allowed_origins: str = ""
+
     @property
     def secret_key_is_generated(self) -> bool:
         return self.secret_key is None
+
+    @property
+    def cors_allowed_origins_list(self) -> list[str]:
+        return [
+            origin.strip()
+            for origin in self.cors_allowed_origins.split(",")
+            if origin.strip()
+        ]
 
 
 settings = Settings()
