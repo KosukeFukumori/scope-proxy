@@ -16,7 +16,7 @@
 
 **[管理画面のデモを試す](https://kosukefukumori.github.io/scope-proxy/)** — ログイン: `admin` / `demo-password`
 
-これは管理画面をGitHub Pages上にホストした静的ビルドで、すべてのAPI呼び出しはブラウザ内のモックデータで応答しています(`frontend/src/demo/mockApi.ts` 参照)。実際のバックエンドは存在せず、操作内容はブラウザタブを閉じると失われます。画面の見た目や操作感を確認するためのものです。scope-proxy自体を試す場合は、下記の[セットアップ](#セットアップ)にあるDocker Compose構成を使ってください。
+これは管理画面をGitHub Pages上にホストした静的ビルドで、すべてのAPI呼び出しはブラウザ内のモックデータで応答しています(`frontend/src/demo/mockApi.ts` 参照)。実際のバックエンドは存在せず、操作内容はブラウザタブを閉じると失われます。画面の見た目や操作感を確認するためのものです。scope-proxy自体を試す場合は、下記の[クイックスタート](#クイックスタートビルド済みイメージ)を使ってください。
 
 ## なぜ scope-proxy か
 
@@ -41,15 +41,31 @@
 
 ## セットアップ
 
-### Docker Compose(お手軽に試す場合)
+### クイックスタート(ビルド済みイメージ)
 
-ポートを1つにまとめたい場合、フロントエンドをビルドしてbackendイメージに同梱し、Docker Composeで起動できます。
+一番手早く試すには、GHCRで公開されているビルド済みイメージをpullしてそのまま実行します。このリポジトリをcloneする必要はありません。タグ付きリリースのたびに、`.github/workflows/docker-publish.yml` によってマルチアーキ(`linux/amd64`, `linux/arm64`)対応のイメージが公開されます。
+
+```bash
+docker pull ghcr.io/kosukefukumori/scope-proxy:latest
+
+docker run -d --name scope-proxy \
+  -p 8000:8000 \
+  -v scope_proxy_db:/app/backend/data \
+  -e DATABASE_URL=sqlite:////app/backend/data/scope_proxy.db \
+  ghcr.io/kosukefukumori/scope-proxy:latest
+```
+
+これで管理画面とプロキシの両方が `http://localhost:8000` の1ポートで動作します。SQLiteのDBファイルは `scope_proxy_db` という名前付きボリュームに永続化されます。`http://localhost:8000/_admin/` を開いてください。まだアカウントが存在しない間は、その場で管理者のユーザー名とパスワードを設定するセットアップ画面が表示されます。
+
+本番運用では、固定の `SECRET_KEY` も設定してください(`-e SECRET_KEY=...`)。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
+
+### Docker Compose
+
+このリポジトリをcloneしている場合、長い `docker run` コマンドの代わりに設定をファイルにまとめられるDocker Composeが便利です。`docker-compose.yml` は既定でローカルビルドを行いますが、GHCRのビルド済みイメージを使う場合は `build:` ブロックを `image: ghcr.io/kosukefukumori/scope-proxy:latest` に置き換えてください。
 
 ```bash
 docker compose up --build
 ```
-
-これで管理画面とプロキシの両方が `http://localhost:8000` の1ポートで動作します。SQLiteのDBファイルは `scope_proxy_db` という名前付きボリュームに永続化されます。
 
 初回管理アカウントの作成方法は2通りあります。
 
@@ -65,16 +81,6 @@ docker compose up --build
 本番運用では `docker-compose.yml` 内で `SECRET_KEY` を固定値に設定してください。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
 
 scope-proxyの管理アカウントは単一です。ログイン後は、管理画面の「アカウント」ページからユーザー名やパスワードを変更できます。`ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` とセットアップ画面は、この最初のアカウントを作成するためだけに使われます。
-
-### ビルド済みイメージを使う
-
-タグ付きリリースのたびに、`.github/workflows/docker-publish.yml` によってマルチアーキ(`linux/amd64`, `linux/arm64`)対応のイメージがGHCRに公開されます。
-
-```bash
-docker pull ghcr.io/kosukefukumori/scope-proxy:latest
-```
-
-Docker Composeでローカルビルドの代わりにこのイメージを使う場合は、`docker-compose.yml` の `build:` ブロックを `image: ghcr.io/kosukefukumori/scope-proxy:latest` に置き換えてください。
 
 ### 開発実行
 
