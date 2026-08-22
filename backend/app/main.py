@@ -18,6 +18,7 @@ from app.routers import (
     proxy,
     schema_snapshots,
     tokens,
+    users,
 )
 
 logger = logging.getLogger("scope_proxy")
@@ -58,6 +59,7 @@ app.include_router(backend_config.router, prefix="/_admin")
 app.include_router(tokens.router, prefix="/_admin")
 app.include_router(operations.router, prefix="/_admin")
 app.include_router(schema_snapshots.router, prefix="/_admin")
+app.include_router(users.router, prefix="/_admin")
 
 if FRONTEND_DIST.is_dir():
 
