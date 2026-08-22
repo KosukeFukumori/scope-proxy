@@ -64,3 +64,44 @@ def operations_cache_key(operations: list[Operation]) -> str:
 
 def build_operation_matcher(operations: list[Operation]) -> OperationMatcher:
     return OperationMatcher(operations)
+
+
+class _CachedOperationMatcher:
+    """Process-local single-slot cache for the last built OperationMatcher.
+
+    Building an OperationMatcher parses and validates a full OpenAPI spec via
+    openapi-core, which is expensive. Operations rarely change (only on schema
+    sync), so we keep a single cached matcher keyed by operations_cache_key()
+    and only rebuild it when the fingerprint changes.
+    """
+
+    def __init__(self) -> None:
+        self._key: str | None = None
+        self._matcher: OperationMatcher | None = None
+
+    def get(self, operations: list[Operation]) -> OperationMatcher:
+        key = operations_cache_key(operations)
+        if key != self._key or self._matcher is None:
+            self._matcher = build_operation_matcher(operations)
+            self._key = key
+        return self._matcher
+
+    def clear(self) -> None:
+        """Reset the cache. Exposed for tests that need to isolate cache state."""
+        self._key = None
+        self._matcher = None
+
+
+_cache = _CachedOperationMatcher()
+
+
+def get_cached_operation_matcher(operations: list[Operation]) -> OperationMatcher:
+    """Return a cached OperationMatcher for the given operations, rebuilding only if
+    the operations fingerprint (operations_cache_key) has changed since the last call.
+    """
+    return _cache.get(operations)
+
+
+def reset_operation_matcher_cache() -> None:
+    """Clear the cached OperationMatcher. Intended for test isolation."""
+    _cache.clear()
