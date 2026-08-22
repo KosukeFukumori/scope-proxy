@@ -20,6 +20,7 @@ export interface Operation {
   operation_id: string
   method: string
   path: string
+  openapi_operation_id: string | null
   summary: string | null
   is_active: boolean
 }
@@ -28,6 +29,12 @@ export interface SchemaSnapshot {
   id: number
   fetched_at: string
   spec_hash: string
+  diff_summary: string
+}
+
+export interface SchemaRefreshResult {
+  snapshot: SchemaSnapshot
+  /** Diff of this refresh run (snapshot.diff_summary may belong to an older run). */
   diff_summary: string
 }
 

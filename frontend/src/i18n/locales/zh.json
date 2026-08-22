@@ -57,6 +57,15 @@
       "lastFetched": "最近获取:",
       "notFetched": "尚未获取"
     },
+    "switchConfirm": {
+      "title": "更改后端目标",
+      "message": "更改后端 URL 后，已同步的操作列表以及授予令牌的所有权限都将被重置。切换后请重新获取架构并重新授予权限。",
+      "confirm": "更改并重置"
+    },
+    "schemaChangeModal": {
+      "title": "检测到架构变更",
+      "message": "后端架构发生了变更。新增的操作不会自动授予任何令牌，已删除的操作已被停用。请确认以下差异。"
+    },
     "recentSnapshots": "最近的变更历史",
     "viewAll": "查看全部",
     "emptySnapshots": {

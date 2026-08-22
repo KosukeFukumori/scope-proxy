@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { BackendConfig, SchemaSnapshot } from '../types/api'
+import type { BackendConfig, SchemaRefreshResult } from '../types/api'
 
 export function getBackendConfig(): Promise<BackendConfig> {
   return apiClient.get<BackendConfig>('/_admin/api/backend-config')
@@ -12,6 +12,6 @@ export function upsertBackendConfig(endpointUrl: string, openapiUrl: string): Pr
   })
 }
 
-export function refreshBackendConfig(): Promise<SchemaSnapshot> {
-  return apiClient.post<SchemaSnapshot>('/_admin/api/backend-config/refresh')
+export function refreshBackendConfig(): Promise<SchemaRefreshResult> {
+  return apiClient.post<SchemaRefreshResult>('/_admin/api/backend-config/refresh')
 }
