@@ -71,6 +71,40 @@ async def test_update_token_permissions(logged_in_client: AsyncClient, session: 
     assert remaining[0].operation_id == "opB"
 
 
+async def test_update_token_expires_at_unset_keeps_existing_value(logged_in_client: AsyncClient) -> None:
+    create_response = await logged_in_client.post(
+        "/_admin/api/tokens",
+        json={"name": "t1", "expires_at": "2030-01-01T00:00:00Z"},
+    )
+    token_id = create_response.json()["id"]
+    assert create_response.json()["expires_at"] is not None
+
+    # Field omitted entirely -> no change to expires_at.
+    update_response = await logged_in_client.patch(
+        f"/_admin/api/tokens/{token_id}",
+        json={"name": "renamed"},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["expires_at"] is not None
+
+
+async def test_update_token_expires_at_null_clears_value(logged_in_client: AsyncClient) -> None:
+    create_response = await logged_in_client.post(
+        "/_admin/api/tokens",
+        json={"name": "t1", "expires_at": "2030-01-01T00:00:00Z"},
+    )
+    token_id = create_response.json()["id"]
+    assert create_response.json()["expires_at"] is not None
+
+    # Field explicitly set to null -> expires_at is cleared (token becomes non-expiring).
+    update_response = await logged_in_client.patch(
+        f"/_admin/api/tokens/{token_id}",
+        json={"name": "t1", "expires_at": None},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["expires_at"] is None
+
+
 async def test_revoke_token(logged_in_client: AsyncClient) -> None:
     create_response = await logged_in_client.post("/_admin/api/tokens", json={"name": "t1"})
     token_id = create_response.json()["id"]
