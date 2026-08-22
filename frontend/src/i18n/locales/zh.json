@@ -46,6 +46,10 @@
       "endpointUrlHint": "请求转发目标后端的基础 URL。",
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "用于按 operationId 管理权限的模式获取来源。",
+      "syncIntervalLabel": "自动同步间隔(秒)",
+      "syncIntervalHint": "留空则使用服务器端的默认值。设为 0 可禁用自动同步。",
+      "syncIntervalActive": "自动同步: 每 {{seconds}} 秒",
+      "syncIntervalDisabled": "自动同步: 已禁用",
       "saveError": "保存失败",
       "saveSuccess": "已保存",
       "refreshError": "更新模式失败",
@@ -55,7 +59,10 @@
       "refreshNow": "立即更新模式",
       "refreshing": "更新中...",
       "lastFetched": "最近获取:",
-      "notFetched": "尚未获取"
+      "notFetched": "尚未获取",
+      "syncStatusSuccess": "成功",
+      "syncStatusError": "失败",
+      "lastSyncError": "最近的同步错误:"
     },
     "switchConfirm": {
       "title": "更改后端目标",

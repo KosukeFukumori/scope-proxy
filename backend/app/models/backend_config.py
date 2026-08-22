@@ -13,3 +13,10 @@ class BackendConfig(SQLModel, table=True):
     endpoint_url: str
     openapi_url: str
     last_fetched_at: datetime | None = None
+    # Outcome of the most recent sync attempt (manual or scheduled): "success" or "error".
+    last_sync_status: str | None = None
+    # Error message from the most recent failed sync attempt, if any.
+    last_sync_error: str | None = None
+    # Overrides settings.schema_sync_interval_seconds when set from the GUI.
+    # None means "no override": fall back to the SCHEMA_SYNC_INTERVAL_SECONDS env var.
+    schema_sync_interval_seconds: int | None = None

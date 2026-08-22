@@ -1,10 +1,13 @@
 import json
 from datetime import datetime, timedelta
 
+import httpx
+import pytest
 import respx
 from httpx import AsyncClient, Response
 from sqlmodel import Session, select
 
+from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
 from app.models.token import TokenPermission
 from app.services.schema_sync import compute_operation_id
@@ -197,6 +200,37 @@ async def test_list_operations_filter_by_is_active(logged_in_client: AsyncClient
     assert {op["operation_id"] for op in active_response.json()} == {LIST_USERS_ID, CREATE_USER_ID}
     assert {op["openapi_operation_id"] for op in active_response.json()} == {"listUsers", "createUser"}
     assert {op["operation_id"] for op in inactive_response.json()} == {GET_USER_ID}
+
+
+@respx.mock
+async def test_refresh_records_success_status(logged_in_client: AsyncClient, session: Session) -> None:
+    await _set_backend_config(logged_in_client)
+    respx.get(OPENAPI_URL).mock(return_value=Response(200, json=SPEC_V1))
+
+    response = await logged_in_client.post("/_admin/api/backend-config/refresh")
+    assert response.status_code == 200
+
+    config = session.get(BackendConfig, 1)
+    assert config is not None
+    assert config.last_sync_status == "success"
+    assert config.last_sync_error is None
+
+
+@respx.mock
+async def test_refresh_records_error_status_on_fetch_failure(
+    logged_in_client: AsyncClient, session: Session
+) -> None:
+    await _set_backend_config(logged_in_client)
+    respx.get(OPENAPI_URL).mock(side_effect=httpx.ConnectError("connection failed"))
+
+    with pytest.raises(httpx.ConnectError):
+        await logged_in_client.post("/_admin/api/backend-config/refresh")
+
+    config = session.get(BackendConfig, 1)
+    assert config is not None
+    assert config.last_sync_status == "error"
+    assert config.last_sync_error is not None
+    assert "connection failed" in config.last_sync_error
 
 
 @respx.mock

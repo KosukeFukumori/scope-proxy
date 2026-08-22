@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./scope_proxy.db"
     secret_key: str | None = None
     session_cookie_name: str = "scope_proxy_session"
+    # Interval in seconds between automatic schema syncs. 0 (default) disables the background loop.
+    # This is only the fallback default: a value set from the dashboard GUI (backend_config.
+    # schema_sync_interval_seconds) takes precedence and can be changed without a restart.
+    schema_sync_interval_seconds: int = 0
+
     request_log_retention_days: int = 30
     """How long request_logs rows are kept before opportunistic pruning removes them."""
 

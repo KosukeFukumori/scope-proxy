@@ -91,6 +91,10 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
   const queryClient = useQueryClient()
   const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? '')
   const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? '')
+  // Empty string means "no override": the SCHEMA_SYNC_INTERVAL_SECONDS env var default is used.
+  const [syncIntervalInput, setSyncIntervalInput] = useState(
+    config?.schema_sync_interval_seconds != null ? String(config.schema_sync_interval_seconds) : '',
+  )
   const [switchConfirmOpen, setSwitchConfirmOpen] = useState(false)
   const [schemaChangeDiff, setSchemaChangeDiff] = useState<string | null>(null)
 
@@ -107,7 +111,8 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
   })
 
   const saveMutation = useMutation({
-    mutationFn: () => upsertBackendConfig(endpointUrl, openapiUrl),
+    mutationFn: () =>
+      upsertBackendConfig(endpointUrl, openapiUrl, syncIntervalInput === '' ? null : Number(syncIntervalInput)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
       // Switching the backend resets operations and token permissions server-side.
@@ -168,6 +173,23 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
           <p className="field__hint">{t('dashboard.form.openapiUrlHint')}</p>
         </div>
 
+        <div className="field">
+          <label className="field__label" htmlFor="sync-interval">
+            {t('dashboard.form.syncIntervalLabel')}
+          </label>
+          <input
+            id="sync-interval"
+            className="input"
+            type="number"
+            min={0}
+            step={1}
+            value={syncIntervalInput}
+            onChange={(e) => setSyncIntervalInput(e.target.value)}
+            placeholder={String(config?.effective_schema_sync_interval_seconds ?? 0)}
+          />
+          <p className="field__hint">{t('dashboard.form.syncIntervalHint')}</p>
+        </div>
+
         {saveMutation.isError && (
           <ErrorAlert>{errorMessage(saveMutation.error, t('dashboard.form.saveError'))}</ErrorAlert>
         )}
@@ -180,7 +202,13 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
             <p style={{ margin: '0 0 0.3rem' }}>{t('dashboard.form.diffLabel')}</p>
             <DiffSummary diffSummary={refreshMutation.data.diff_summary} />
           </div>
-        )}      </div>
+        )}
+        {config?.last_sync_status === 'error' && (
+          <ErrorAlert>
+            {t('dashboard.form.lastSyncError')} {config.last_sync_error}
+          </ErrorAlert>
+        )}
+      </div>
 
       <div className="card__footer">
         <button type="submit" className="btn btn--primary" disabled={saveMutation.isPending}>
@@ -196,6 +224,24 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
         </button>
         <span className="muted" style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>
           {t('dashboard.form.lastFetched')} {formatDateTime(config?.last_fetched_at, t('dashboard.form.notFetched'), i18n.resolvedLanguage)}
+          {config?.last_sync_status && (
+            <>
+              {' '}
+              (
+              {config.last_sync_status === 'success'
+                ? t('dashboard.form.syncStatusSuccess')
+                : t('dashboard.form.syncStatusError')}
+              )
+            </>
+          )}
+          {config && (
+            <>
+              {' · '}
+              {config.effective_schema_sync_interval_seconds > 0
+                ? t('dashboard.form.syncIntervalActive', { seconds: config.effective_schema_sync_interval_seconds })
+                : t('dashboard.form.syncIntervalDisabled')}
+            </>
+          )}
         </span>
       </div>
     </form>

@@ -46,6 +46,10 @@
       "endpointUrlHint": "リクエストの転送先となるバックエンドのベースURL。",
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "operationId 単位の権限管理に使用するスキーマの取得元。",
+      "syncIntervalLabel": "自動同期間隔(秒)",
+      "syncIntervalHint": "空欄でサーバー側の初期値を使用します。0で自動同期を無効化します。",
+      "syncIntervalActive": "自動同期: {{seconds}}秒ごと",
+      "syncIntervalDisabled": "自動同期: 無効",
       "saveError": "保存に失敗しました",
       "saveSuccess": "保存しました",
       "refreshError": "スキーマの更新に失敗しました",
@@ -55,7 +59,10 @@
       "refreshNow": "スキーマを今すぐ更新",
       "refreshing": "更新中...",
       "lastFetched": "最終取得:",
-      "notFetched": "未取得"
+      "notFetched": "未取得",
+      "syncStatusSuccess": "成功",
+      "syncStatusError": "失敗",
+      "lastSyncError": "直近の同期エラー:"
     },
     "switchConfirm": {
       "title": "接続先の変更",

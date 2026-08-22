@@ -46,6 +46,10 @@
       "endpointUrlHint": "The base URL of the backend that requests are forwarded to.",
       "openapiUrlLabel": "OpenAPI JSON URL",
       "openapiUrlHint": "The source of the schema used for per-operationId permission management.",
+      "syncIntervalLabel": "Auto sync interval (seconds)",
+      "syncIntervalHint": "Leave blank to use the server-side default. Set to 0 to disable auto sync.",
+      "syncIntervalActive": "Auto sync: every {{seconds}}s",
+      "syncIntervalDisabled": "Auto sync: disabled",
       "saveError": "Failed to save",
       "saveSuccess": "Saved",
       "refreshError": "Failed to refresh the schema",
@@ -55,7 +59,10 @@
       "refreshNow": "Refresh schema now",
       "refreshing": "Refreshing...",
       "lastFetched": "Last fetched:",
-      "notFetched": "Not fetched yet"
+      "notFetched": "Not fetched yet",
+      "syncStatusSuccess": "success",
+      "syncStatusError": "failed",
+      "lastSyncError": "Last sync error:"
     },
     "switchConfirm": {
       "title": "Change backend target",

@@ -1,3 +1,5 @@
+import asyncio
+import contextlib
 import logging
 import secrets
 from collections.abc import AsyncGenerator
@@ -11,7 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import Settings, settings
-from app.db import init_db
+from app.db import engine, init_db
 from app.routers import (
     auth,
     backend_config,
@@ -23,6 +25,7 @@ from app.routers import (
     usage,
     users,
 )
+from app.services.schema_sync import schema_sync_loop
 
 # uvicorn only attaches handlers to its own "uvicorn"/"uvicorn.error"/"uvicorn.access"
 # loggers, not the root logger, so app loggers (e.g. "scope_proxy",
@@ -52,9 +55,18 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
                 "Sessions will be invalidated on every restart. Set SECRET_KEY in .env for production use."
             )
         init_db()
+
+        # Always runs; the configured interval (0 = disabled) is re-read from backend_config on
+        # every tick, so it reacts to changes made from the GUI without needing a restart.
+        sync_task = asyncio.create_task(schema_sync_loop(engine))
+
         async with httpx.AsyncClient(timeout=app_settings.proxy_timeout_seconds) as http_client:
             app.state.http_client = http_client
             yield
+
+        sync_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await sync_task
 
     app = FastAPI(title="scope-proxy", lifespan=lifespan)
 
