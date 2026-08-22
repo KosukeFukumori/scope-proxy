@@ -45,7 +45,7 @@
       "endpointUrlLabel": "Endpoint URL",
       "endpointUrlHint": "The base URL of the backend that requests are forwarded to.",
       "openapiUrlLabel": "OpenAPI JSON URL",
-      "openapiUrlHint": "The source of the schema used for per-operationId permission management.",
+      "openapiUrlHint": "The source of the schema used for per-operation permission management.",
       "syncIntervalLabel": "Auto sync interval (seconds)",
       "syncIntervalHint": "Leave blank to use the server-side default. Set to 0 to disable auto sync.",
       "syncIntervalActive": "Auto sync: every {{seconds}}s",
@@ -92,14 +92,14 @@
   },
   "operations": {
     "title": "Operations",
-    "description": "operationIds retrieved from the connected OpenAPI schema. Inactive ones are always rejected.",
+    "description": "Operations retrieved from the connected OpenAPI schema. Inactive ones are always rejected.",
     "filters": {
       "all": "All",
       "active": "Active only",
       "inactive": "Inactive only"
     },
     "search": {
-      "placeholder": "Search by path, operationId, or summary"
+      "placeholder": "Search by path, ID, or summary"
     },
     "methodFilter": {
       "all": "All methods"
@@ -115,7 +115,7 @@
     "table": {
       "method": "Method",
       "path": "Path",
-      "operationId": "operationId",
+      "operationId": "Reference ID",
       "summary": "Summary",
       "status": "Status"
     },
@@ -181,7 +181,7 @@
   "tokenEdit": {
     "titleEdit": "Edit Token",
     "titleNew": "Issue Token",
-    "description": "Only the checked operationIds are allowed to be accessed through the proxy.",
+    "description": "Only the checked operations are allowed to be accessed through the proxy.",
     "form": {
       "nameLabel": "Name",
       "namePlaceholder": "e.g. batch-job",
@@ -212,7 +212,7 @@
       "byMethod": "Select by method"
     },
     "search": {
-      "placeholder": "Search by path, operationId, or summary"
+      "placeholder": "Search by path, ID, or summary"
     },
     "methodFilter": {
       "all": "All methods"
@@ -246,11 +246,11 @@
     "description": "How to call your backend API through scope-proxy.",
     "step1": {
       "title": "1. Configure the backend",
-      "description": "On the \"Backend Config\" page, register the base URL of the proxied backend and the URL of the OpenAPI JSON used for per-operationId permission management."
+      "description": "On the \"Backend Config\" page, register the base URL of the proxied backend and the URL of the OpenAPI JSON used for per-operation permission management."
     },
     "step2": {
       "title": "2. Check the operations",
-      "description": "On the \"Operations\" page, you can see the list of operationIds fetched from the connected OpenAPI schema. Inactive operations can never be accessed by any token."
+      "description": "On the \"Operations\" page, you can see the list of operations fetched from the connected OpenAPI schema. Inactive operations can never be accessed by any token."
     },
     "step3": {
       "title": "3. Issue a token",
@@ -259,12 +259,12 @@
     "step4": {
       "title": "4. Call the API",
       "description": "Send the token as a Bearer value in the Authorization header, and request the same path and method as the backend, against scope-proxy's own origin.",
-      "hint": "Use the path and method that correspond to an operationId allowed for that token. Requests to operations that aren't allowed return 403."
+      "hint": "Use the path and method that correspond to an operation allowed for that token. Requests to operations that aren't allowed return 403."
     },
     "errors": {
       "title": "Error responses",
       "unauthorized": "401: the token is missing, invalid, revoked, or expired",
-      "forbidden": "403: the operationId isn't allowed for the token, or the operation is inactive",
+      "forbidden": "403: the operation isn't allowed for the token, or the operation is inactive",
       "notFound": "404: the path/method doesn't exist in the connected OpenAPI schema"
     }
   },
