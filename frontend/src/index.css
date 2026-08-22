@@ -189,14 +189,9 @@ pre {
 }
 
 .app-brand__mark {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 1.75rem;
   height: 1.75rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-primary-text);
-  background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 60%, #06b6d4));
   border-radius: var(--radius-sm);
 }
 

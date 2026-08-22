@@ -1,5 +1,7 @@
 # scope-proxy
 
+![scope-proxy logo](./frontend/public/favicon.svg)
+
 [日本語](./README.ja.md)
 
 [![CI](https://github.com/KosukeFukumori/scope-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/KosukeFukumori/scope-proxy/actions/workflows/ci.yml)
