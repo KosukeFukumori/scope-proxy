@@ -8,9 +8,20 @@ from httpx import ASGITransport, AsyncClient
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.auth.password import hash_password
+from app.auth.rate_limiter import login_rate_limiter
 from app.db import get_session
 from app.main import app
 from app.models.user import User
+
+
+@pytest.fixture(autouse=True)
+def reset_login_rate_limiter() -> Generator[None]:
+    """The login rate limiter is a process-wide singleton, so its state must be
+    reset between tests to avoid cross-test interference.
+    """
+    login_rate_limiter.clear()
+    yield
+    login_rate_limiter.clear()
 
 
 @pytest.fixture
@@ -49,7 +60,10 @@ async def backend_http_client() -> AsyncGenerator[httpx.AsyncClient]:
 @pytest_asyncio.fixture
 async def client() -> AsyncGenerator[AsyncClient]:
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
+    # Use an https:// base URL so the session cookie's Secure attribute (set via
+    # SESSION_COOKIE_SECURE, default true) is actually stored and resent by the
+    # httpx cookie jar between requests, matching real browser behavior.
+    async with AsyncClient(transport=transport, base_url="https://testserver") as ac:
         yield ac
 
 
