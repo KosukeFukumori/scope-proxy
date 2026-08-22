@@ -9,6 +9,7 @@ import httpx
 from sqlalchemy import Engine, desc
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
 from app.models.schema_snapshot import SchemaSnapshot
@@ -19,6 +20,18 @@ ADMIN_PATH_PREFIX = "/_admin"
 
 # BackendConfig.id of the single backend configuration record used by this app.
 BACKEND_CONFIG_ID = 1
+
+# How often the background loop checks whether a sync is due. Kept independent of the
+# configured sync interval so a change made from the GUI takes effect within one tick
+# instead of requiring an app restart.
+SCHEDULER_TICK_SECONDS = 30
+
+
+def effective_sync_interval_seconds(backend_config: BackendConfig) -> int:
+    """Resolve the interval actually in effect: the GUI override if set, otherwise the env var default."""
+    if backend_config.schema_sync_interval_seconds is not None:
+        return backend_config.schema_sync_interval_seconds
+    return settings.schema_sync_interval_seconds
 
 
 @dataclass
@@ -191,18 +204,48 @@ async def run_scheduled_sync(engine: Engine) -> None:
             logger.warning("Scheduled schema sync failed for %s", backend_config.openapi_url, exc_info=True)
 
 
-async def schema_sync_loop(engine: Engine, interval_seconds: float) -> None:
-    """Periodically run schema sync every interval_seconds until the task is cancelled.
+async def _maybe_run_scheduled_sync(engine: Engine, last_run_at: datetime | None) -> datetime | None:
+    """Run a scheduled sync if the configured interval has elapsed since last_run_at.
 
-    Intended to be started as an asyncio task from the FastAPI lifespan and cancelled on shutdown.
+    Returns the timestamp to use as last_run_at on the next tick (unchanged if no sync ran).
+    Reading the interval and last_fetched_at fresh from the DB on every tick is what lets a
+    change made from the GUI (or disabling auto sync entirely) take effect without a restart.
     """
-    while True:
-        await asyncio.sleep(interval_seconds)
+    with Session(engine) as session:
+        backend_config = session.get(BackendConfig, BACKEND_CONFIG_ID)
+        if backend_config is None:
+            return last_run_at
+
+        interval = effective_sync_interval_seconds(backend_config)
+        if interval <= 0:
+            return last_run_at
+
+        now = datetime.now(UTC)
+        if last_run_at is not None and (now - last_run_at).total_seconds() < interval:
+            return last_run_at
+
         try:
-            await run_scheduled_sync(engine)
+            await refresh_backend_schema(session, backend_config)
+        except Exception:
+            logger.warning("Scheduled schema sync failed for %s", backend_config.openapi_url, exc_info=True)
+        return now
+
+
+async def schema_sync_loop(engine: Engine, tick_seconds: float = SCHEDULER_TICK_SECONDS) -> None:
+    """Periodically check whether a schema sync is due, until the task is cancelled.
+
+    Intended to be started unconditionally as an asyncio task from the FastAPI lifespan and
+    cancelled on shutdown; the configured interval (0 = disabled) is re-read from backend_config
+    on every tick, so it can be changed from the GUI at any time.
+    """
+    last_run_at: datetime | None = None
+    while True:
+        await asyncio.sleep(tick_seconds)
+        try:
+            last_run_at = await _maybe_run_scheduled_sync(engine, last_run_at)
         except asyncio.CancelledError:
             raise
         except Exception:
-            # Defensive: run_scheduled_sync already handles sync failures internally, but this
-            # ensures a truly unexpected error (e.g. a DB connectivity issue) never kills the loop.
+            # Defensive: _maybe_run_scheduled_sync already handles sync failures internally, but
+            # this ensures a truly unexpected error (e.g. a DB connectivity issue) never kills the loop.
             logger.exception("Unexpected error in schema sync loop")

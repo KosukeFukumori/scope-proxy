@@ -16,9 +16,14 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
   const queryClient = useQueryClient()
   const [endpointUrl, setEndpointUrl] = useState(config?.endpoint_url ?? '')
   const [openapiUrl, setOpenapiUrl] = useState(config?.openapi_url ?? '')
+  // Empty string means "no override": the SCHEMA_SYNC_INTERVAL_SECONDS env var default is used.
+  const [syncIntervalInput, setSyncIntervalInput] = useState(
+    config?.schema_sync_interval_seconds != null ? String(config.schema_sync_interval_seconds) : '',
+  )
 
   const saveMutation = useMutation({
-    mutationFn: () => upsertBackendConfig(endpointUrl, openapiUrl),
+    mutationFn: () =>
+      upsertBackendConfig(endpointUrl, openapiUrl, syncIntervalInput === '' ? null : Number(syncIntervalInput)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
     },
@@ -73,6 +78,23 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
           <p className="field__hint">{t('dashboard.form.openapiUrlHint')}</p>
         </div>
 
+        <div className="field">
+          <label className="field__label" htmlFor="sync-interval">
+            {t('dashboard.form.syncIntervalLabel')}
+          </label>
+          <input
+            id="sync-interval"
+            className="input"
+            type="number"
+            min={0}
+            step={1}
+            value={syncIntervalInput}
+            onChange={(e) => setSyncIntervalInput(e.target.value)}
+            placeholder={String(config?.effective_schema_sync_interval_seconds ?? 0)}
+          />
+          <p className="field__hint">{t('dashboard.form.syncIntervalHint')}</p>
+        </div>
+
         {saveMutation.isError && (
           <ErrorAlert>{errorMessage(saveMutation.error, t('dashboard.form.saveError'))}</ErrorAlert>
         )}
@@ -115,6 +137,14 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
                 ? t('dashboard.form.syncStatusSuccess')
                 : t('dashboard.form.syncStatusError')}
               )
+            </>
+          )}
+          {config && (
+            <>
+              {' · '}
+              {config.effective_schema_sync_interval_seconds > 0
+                ? t('dashboard.form.syncIntervalActive', { seconds: config.effective_schema_sync_interval_seconds })
+                : t('dashboard.form.syncIntervalDisabled')}
             </>
           )}
         </span>

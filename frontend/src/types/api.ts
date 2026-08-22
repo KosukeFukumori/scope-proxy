@@ -10,6 +10,8 @@ export interface BackendConfig {
   last_fetched_at: string | null
   last_sync_status: 'success' | 'error' | null
   last_sync_error: string | null
+  schema_sync_interval_seconds: number | null
+  effective_schema_sync_interval_seconds: number
 }
 
 export interface Operation {

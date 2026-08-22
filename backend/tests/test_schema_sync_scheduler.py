@@ -64,14 +64,23 @@ async def test_run_scheduled_sync_records_error_and_does_not_raise(engine) -> No
 
 @respx.mock
 async def test_schema_sync_loop_runs_periodically_until_cancelled(engine) -> None:
+    # A 1s GUI override combined with a fast tick and a wall-clock sleep spanning more than
+    # one interval makes the loop run more than once.
     with Session(engine) as session:
-        session.add(BackendConfig(id=1, endpoint_url="https://api.example.com", openapi_url=OPENAPI_URL))
+        session.add(
+            BackendConfig(
+                id=1,
+                endpoint_url="https://api.example.com",
+                openapi_url=OPENAPI_URL,
+                schema_sync_interval_seconds=1,
+            )
+        )
         session.commit()
 
     respx.get(OPENAPI_URL).mock(return_value=Response(200, json=SPEC))
 
-    task = asyncio.create_task(schema_sync_loop(engine, interval_seconds=0.01))
-    await asyncio.sleep(0.05)
+    task = asyncio.create_task(schema_sync_loop(engine, tick_seconds=0.05))
+    await asyncio.sleep(1.15)
     task.cancel()
     try:
         await task
@@ -84,3 +93,57 @@ async def test_schema_sync_loop_runs_periodically_until_cancelled(engine) -> Non
         assert config.last_sync_status == "success"
         # The loop should have run more than once within the sleep window.
         assert respx.calls.call_count >= 2
+
+
+@respx.mock
+async def test_schema_sync_loop_skips_when_interval_is_disabled(engine) -> None:
+    with Session(engine) as session:
+        session.add(
+            BackendConfig(
+                id=1,
+                endpoint_url="https://api.example.com",
+                openapi_url=OPENAPI_URL,
+                schema_sync_interval_seconds=None,
+            )
+        )
+        session.commit()
+
+    respx.get(OPENAPI_URL).mock(return_value=Response(200, json=SPEC))
+
+    # settings.schema_sync_interval_seconds defaults to 0 (disabled) with no override set.
+    task = asyncio.create_task(schema_sync_loop(engine, tick_seconds=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+    assert respx.calls.call_count == 0
+
+
+@respx.mock
+async def test_schema_sync_loop_honors_gui_interval_between_runs(engine) -> None:
+    # A large interval should suppress additional runs even though the tick is fast.
+    with Session(engine) as session:
+        session.add(
+            BackendConfig(
+                id=1,
+                endpoint_url="https://api.example.com",
+                openapi_url=OPENAPI_URL,
+                schema_sync_interval_seconds=3600,
+            )
+        )
+        session.commit()
+
+    respx.get(OPENAPI_URL).mock(return_value=Response(200, json=SPEC))
+
+    task = asyncio.create_task(schema_sync_loop(engine, tick_seconds=0.01))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+    assert respx.calls.call_count == 1

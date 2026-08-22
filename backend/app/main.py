@@ -37,20 +37,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         )
     init_db()
 
-    sync_task: asyncio.Task[None] | None = None
-    if settings.schema_sync_interval_seconds > 0:
-        sync_task = asyncio.create_task(
-            schema_sync_loop(engine, settings.schema_sync_interval_seconds)
-        )
+    # Always runs; the configured interval (0 = disabled) is re-read from backend_config on
+    # every tick, so it reacts to changes made from the GUI without needing a restart.
+    sync_task = asyncio.create_task(schema_sync_loop(engine))
 
     async with httpx.AsyncClient(timeout=settings.proxy_timeout_seconds) as http_client:
         app.state.http_client = http_client
         yield
 
-    if sync_task is not None:
-        sync_task.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await sync_task
+    sync_task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await sync_task
 
 
 app = FastAPI(title="scope-proxy", lifespan=lifespan)
