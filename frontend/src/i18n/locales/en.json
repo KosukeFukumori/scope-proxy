@@ -96,6 +96,16 @@
       "title": "No tokens yet",
       "description": "Create your first token from \"Issue new token\"."
     },
+    "filterEmpty": {
+      "title": "No matching tokens",
+      "description": "Try changing the filter."
+    },
+    "filters": {
+      "all": "All",
+      "active": "Active only",
+      "revoked": "Revoked only",
+      "expired": "Expired only"
+    },
     "table": {
       "name": "Name",
       "status": "Status",
@@ -106,6 +116,8 @@
     "noExpiry": "Never",
     "notUsed": "Never used",
     "revoke": "Revoke",
+    "delete": "Delete",
+    "confirmDelete": "Delete this token? This action cannot be undone.",
     "status": {
       "revoked": "Revoked",
       "expired": "Expired",

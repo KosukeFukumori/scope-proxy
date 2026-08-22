@@ -83,3 +83,42 @@ async def test_revoke_token(logged_in_client: AsyncClient) -> None:
 async def test_token_not_found_for_other_user(logged_in_client: AsyncClient) -> None:
     response = await logged_in_client.get("/_admin/api/tokens/9999")
     assert response.status_code == 404
+
+
+async def test_delete_revoked_token(logged_in_client: AsyncClient, session: Session) -> None:
+    session.add(Operation(operation_id="opA", method="GET", path="/a", is_active=True))
+    session.commit()
+
+    create_response = await logged_in_client.post(
+        "/_admin/api/tokens", json={"name": "t1", "operation_ids": ["opA"]}
+    )
+    token_id = create_response.json()["id"]
+
+    await logged_in_client.post(f"/_admin/api/tokens/{token_id}/revoke")
+
+    delete_response = await logged_in_client.delete(f"/_admin/api/tokens/{token_id}")
+    assert delete_response.status_code == 204
+
+    assert session.get(Token, token_id) is None
+    remaining_permissions = session.exec(
+        select(TokenPermission).where(TokenPermission.token_id == token_id)
+    ).all()
+    assert remaining_permissions == []
+
+    get_response = await logged_in_client.get(f"/_admin/api/tokens/{token_id}")
+    assert get_response.status_code == 404
+
+
+async def test_delete_active_token_is_forbidden(logged_in_client: AsyncClient, session: Session) -> None:
+    create_response = await logged_in_client.post("/_admin/api/tokens", json={"name": "t1"})
+    token_id = create_response.json()["id"]
+
+    delete_response = await logged_in_client.delete(f"/_admin/api/tokens/{token_id}")
+    assert delete_response.status_code == 403
+
+    assert session.get(Token, token_id) is not None
+
+
+async def test_delete_token_not_found_for_other_user(logged_in_client: AsyncClient) -> None:
+    response = await logged_in_client.delete("/_admin/api/tokens/9999")
+    assert response.status_code == 404

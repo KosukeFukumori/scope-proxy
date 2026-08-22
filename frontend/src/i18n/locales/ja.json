@@ -96,6 +96,16 @@
       "title": "トークンがまだありません",
       "description": "「新規発行」から最初のトークンを作成してください。"
     },
+    "filterEmpty": {
+      "title": "該当するトークンがありません",
+      "description": "フィルタ条件を変更してください。"
+    },
+    "filters": {
+      "all": "すべて",
+      "active": "有効のみ",
+      "revoked": "失効済みのみ",
+      "expired": "期限切れのみ"
+    },
     "table": {
       "name": "名前",
       "status": "状態",
@@ -106,6 +116,8 @@
     "noExpiry": "無期限",
     "notUsed": "未使用",
     "revoke": "失効",
+    "delete": "削除",
+    "confirmDelete": "このトークンを削除しますか？この操作は取り消せません。",
     "status": {
       "revoked": "失効済み",
       "expired": "期限切れ",
