@@ -7,7 +7,10 @@ from app.models.operation import Operation
 from app.models.token import TokenPermission
 from app.schemas.backend_config import BackendConfigRead, BackendConfigUpsert
 from app.schemas.schema_snapshot import SchemaRefreshRead, SchemaSnapshotRead
-from app.services.schema_sync import effective_sync_interval_seconds, refresh_backend_schema
+from app.services.schema_sync import (
+    effective_sync_interval_seconds,
+    refresh_backend_schema,
+)
 
 router = APIRouter(prefix="/api/backend-config", tags=["backend-config"])
 

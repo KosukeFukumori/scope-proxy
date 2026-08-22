@@ -127,6 +127,10 @@ function seedState(): DemoState {
       endpoint_url: 'https://petstore.example.com',
       openapi_url: 'https://petstore.example.com/openapi.json',
       last_fetched_at: daysAgo(1),
+      last_sync_status: 'success',
+      last_sync_error: null,
+      schema_sync_interval_seconds: null,
+      effective_schema_sync_interval_seconds: 0,
     },
     operations,
     snapshots: [
@@ -260,7 +264,11 @@ const ROUTES: {
     pattern: /^\/_admin\/api\/backend-config$/,
     handler: (s, _m, body) => {
       requireLogin(s)
-      const { endpoint_url, openapi_url } = (body ?? {}) as { endpoint_url?: string; openapi_url?: string }
+      const { endpoint_url, openapi_url, schema_sync_interval_seconds } = (body ?? {}) as {
+        endpoint_url?: string
+        openapi_url?: string
+        schema_sync_interval_seconds?: number | null
+      }
       const urlChanged =
         (endpoint_url !== undefined && endpoint_url !== s.backendConfig.endpoint_url) ||
         (openapi_url !== undefined && openapi_url !== s.backendConfig.openapi_url)
@@ -274,6 +282,8 @@ const ROUTES: {
         ...s.backendConfig,
         endpoint_url: endpoint_url ?? s.backendConfig.endpoint_url,
         openapi_url: openapi_url ?? s.backendConfig.openapi_url,
+        schema_sync_interval_seconds: schema_sync_interval_seconds ?? null,
+        effective_schema_sync_interval_seconds: schema_sync_interval_seconds ?? 0,
       }
       return s.backendConfig
     },
