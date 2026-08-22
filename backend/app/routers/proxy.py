@@ -11,7 +11,7 @@ from app.deps import SessionDep
 from app.models.backend_config import BackendConfig
 from app.models.operation import Operation
 from app.models.token import Token, TokenPermission
-from app.services.operation_matcher import build_operation_matcher
+from app.services.operation_matcher import get_cached_operation_matcher
 from app.services.token_service import hash_token
 
 router = APIRouter(tags=["proxy"])
@@ -61,12 +61,14 @@ async def _authenticate_token(session: SessionDep, authorization: str | None) ->
 
 def _resolve_operation(session: SessionDep, method: str, path: str) -> Operation:
     all_operations = list(session.exec(select(Operation)).all())
-    matcher = build_operation_matcher(all_operations)
+    matcher = get_cached_operation_matcher(all_operations)
     operation_id = matcher.match(method, path)
     if operation_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-    operation = session.get(Operation, operation_id)
+    # Look up in the already-fetched list instead of issuing another query.
+    operations_by_id = {op.operation_id: op for op in all_operations}
+    operation = operations_by_id.get(operation_id)
     if operation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
