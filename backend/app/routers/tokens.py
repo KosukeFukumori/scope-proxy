@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, status
+from sqlalchemy import desc
 from sqlmodel import select
 
 from app.deps import CurrentUserDep, SessionDep
@@ -129,7 +130,7 @@ def list_token_logs(token_id: str, session: SessionDep, current_user: CurrentUse
     statement = (
         select(RequestLog)
         .where(RequestLog.token_id == token_id)
-        .order_by(RequestLog.created_at.desc())
+        .order_by(desc(RequestLog.created_at))  # type: ignore[arg-type]
         .limit(MAX_TOKEN_LOGS)
     )
     return list(session.exec(statement).all())

@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Query
 from sqlalchemy import func
-from sqlmodel import select
+from sqlmodel import col, select
 
 from app.deps import CurrentUserDep, SessionDep
 from app.models.request_log import RequestLog
@@ -29,7 +29,7 @@ def get_usage_summary(
     denied_requests = session.exec(
         select(func.count())
         .select_from(RequestLog)
-        .where(RequestLog.created_at >= cutoff, RequestLog.status.in_(DENIED_STATUSES))
+        .where(RequestLog.created_at >= cutoff, col(RequestLog.status).in_(DENIED_STATUSES))
     ).one()
 
     return UsageSummary(

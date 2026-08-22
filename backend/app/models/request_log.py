@@ -11,7 +11,8 @@ class RequestLog(SQLModel, table=True):
     resolved) still need to be recorded for denial-rate visibility.
     """
 
-    __tablename__ = "request_logs"
+    # sqlmodel declares __tablename__ as declared_attr; pyright cannot narrow a plain str assignment.
+    __tablename__ = "request_logs"  # type: ignore[assignment]
 
     id: int | None = Field(default=None, primary_key=True)
     token_id: str | None = Field(default=None, foreign_key="tokens.id", index=True)

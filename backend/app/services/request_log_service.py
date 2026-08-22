@@ -1,7 +1,7 @@
 import random
 from datetime import UTC, datetime, timedelta
 
-from sqlmodel import Session, delete
+from sqlmodel import Session, col, delete
 
 from app.config import settings
 from app.models.request_log import RequestLog
@@ -39,6 +39,6 @@ def record_request_log(
 
     if random.random() < PRUNE_PROBABILITY:
         cutoff = datetime.now(UTC) - timedelta(days=settings.request_log_retention_days)
-        session.exec(delete(RequestLog).where(RequestLog.created_at < cutoff))
+        session.exec(delete(RequestLog).where(col(RequestLog.created_at) < cutoff))
 
     session.commit()
