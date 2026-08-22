@@ -45,7 +45,7 @@
       "endpointUrlLabel": "エンドポイントURL",
       "endpointUrlHint": "リクエストの転送先となるバックエンドのベースURL。",
       "openapiUrlLabel": "OpenAPI JSON URL",
-      "openapiUrlHint": "operationId 単位の権限管理に使用するスキーマの取得元。",
+      "openapiUrlHint": "オペレーション単位の権限管理に使用するスキーマの取得元。",
       "syncIntervalLabel": "自動同期間隔(秒)",
       "syncIntervalHint": "空欄でサーバー側の初期値を使用します。0で自動同期を無効化します。",
       "syncIntervalActive": "自動同期: {{seconds}}秒ごと",
@@ -92,14 +92,14 @@
   },
   "operations": {
     "title": "オペレーション一覧",
-    "description": "接続先 OpenAPI から取得した operationId の一覧です。無効なものは常に拒否されます。",
+    "description": "接続先 OpenAPI から取得したオペレーションの一覧です。無効なものは常に拒否されます。",
     "filters": {
       "all": "すべて",
       "active": "有効のみ",
       "inactive": "無効のみ"
     },
     "search": {
-      "placeholder": "パス・operationId・summary で検索"
+      "placeholder": "パス・ID・概要で検索"
     },
     "methodFilter": {
       "all": "すべてのメソッド"
@@ -115,7 +115,7 @@
     "table": {
       "method": "Method",
       "path": "Path",
-      "operationId": "operationId",
+      "operationId": "参考ID",
       "summary": "Summary",
       "status": "状態"
     },
@@ -181,7 +181,7 @@
   "tokenEdit": {
     "titleEdit": "トークン編集",
     "titleNew": "トークン発行",
-    "description": "チェックを入れた operationId のみ、プロキシ経由でのアクセスが許可されます。",
+    "description": "チェックを入れたオペレーションのみ、プロキシ経由でのアクセスが許可されます。",
     "form": {
       "nameLabel": "名前",
       "namePlaceholder": "例: batch-job",
@@ -212,7 +212,7 @@
       "byMethod": "メソッド別選択"
     },
     "search": {
-      "placeholder": "パス・operationId・summary で検索"
+      "placeholder": "パス・ID・概要で検索"
     },
     "methodFilter": {
       "all": "すべてのメソッド"
@@ -246,11 +246,11 @@
     "description": "scope-proxy 経由でバックエンドAPIを呼び出すまでの流れを説明します。",
     "step1": {
       "title": "1. 接続先を設定する",
-      "description": "「接続先設定」画面で、プロキシ先のバックエンドのベースURLと、operationId 単位の権限管理に使う OpenAPI JSON の取得元URLを登録します。"
+      "description": "「接続先設定」画面で、プロキシ先のバックエンドのベースURLと、オペレーション単位の権限管理に使う OpenAPI JSON の取得元URLを登録します。"
     },
     "step2": {
       "title": "2. オペレーションを確認する",
-      "description": "「オペレーション」画面で、接続先の OpenAPI スキーマから取得した operationId の一覧を確認できます。無効化したオペレーションはどのトークンからもアクセスできません。"
+      "description": "「オペレーション」画面で、接続先の OpenAPI スキーマから取得したオペレーションの一覧を確認できます。無効化したオペレーションはどのトークンからもアクセスできません。"
     },
     "step3": {
       "title": "3. トークンを発行する",
@@ -259,12 +259,12 @@
     "step4": {
       "title": "4. APIを呼び出す",
       "description": "発行したトークンを Authorization ヘッダーに Bearer 形式で付与し、scope-proxy 自身のオリジンに対して、バックエンドと同じパス・メソッドでリクエストしてください。",
-      "hint": "パスとメソッドは、そのトークンに許可した operationId に対応するものを使用してください。許可されていないオペレーションへのリクエストは 403 が返ります。"
+      "hint": "パスとメソッドは、そのトークンに許可したオペレーションに対応するものを使用してください。許可されていないオペレーションへのリクエストは 403 が返ります。"
     },
     "errors": {
       "title": "エラーレスポンス",
       "unauthorized": "401: トークンが未指定・無効・失効済み・期限切れの場合",
-      "forbidden": "403: トークンに許可されていない operationId、または無効化されたオペレーションへアクセスした場合",
+      "forbidden": "403: トークンに許可されていないオペレーション、または無効化されたオペレーションへアクセスした場合",
       "notFound": "404: 接続先の OpenAPI スキーマに存在しないパス・メソッドの場合"
     }
   },

@@ -45,7 +45,7 @@
       "endpointUrlLabel": "端点 URL",
       "endpointUrlHint": "请求转发目标后端的基础 URL。",
       "openapiUrlLabel": "OpenAPI JSON URL",
-      "openapiUrlHint": "用于按 operationId 管理权限的模式获取来源。",
+      "openapiUrlHint": "用于按操作管理权限的模式获取来源。",
       "syncIntervalLabel": "自动同步间隔(秒)",
       "syncIntervalHint": "留空则使用服务器端的默认值。设为 0 可禁用自动同步。",
       "syncIntervalActive": "自动同步: 每 {{seconds}} 秒",
@@ -92,14 +92,14 @@
   },
   "operations": {
     "title": "操作列表",
-    "description": "从已连接的 OpenAPI 获取的 operationId 列表。无效的操作始终会被拒绝。",
+    "description": "从已连接的 OpenAPI 获取的操作列表。无效的操作始终会被拒绝。",
     "filters": {
       "all": "全部",
       "active": "仅有效",
       "inactive": "仅无效"
     },
     "search": {
-      "placeholder": "按路径、operationId 或 summary 搜索"
+      "placeholder": "按路径、ID 或概要搜索"
     },
     "methodFilter": {
       "all": "所有方法"
@@ -115,7 +115,7 @@
     "table": {
       "method": "Method",
       "path": "Path",
-      "operationId": "operationId",
+      "operationId": "参考ID",
       "summary": "Summary",
       "status": "状态"
     },
@@ -181,7 +181,7 @@
   "tokenEdit": {
     "titleEdit": "编辑令牌",
     "titleNew": "新建令牌",
-    "description": "仅勾选的 operationId 才允许通过代理访问。",
+    "description": "仅勾选的操作才允许通过代理访问。",
     "form": {
       "nameLabel": "名称",
       "namePlaceholder": "例如: batch-job",
@@ -212,7 +212,7 @@
       "byMethod": "按方法选择"
     },
     "search": {
-      "placeholder": "按路径、operationId 或 summary 搜索"
+      "placeholder": "按路径、ID 或概要搜索"
     },
     "methodFilter": {
       "all": "所有方法"
@@ -246,11 +246,11 @@
     "description": "介绍如何通过 scope-proxy 调用后端 API。",
     "step1": {
       "title": "1. 设置后端",
-      "description": "在「后端配置」页面中，注册代理转发的后端基础 URL，以及用于按 operationId 管理权限的 OpenAPI JSON 获取地址。"
+      "description": "在「后端配置」页面中，注册代理转发的后端基础 URL，以及用于按操作管理权限的 OpenAPI JSON 获取地址。"
     },
     "step2": {
       "title": "2. 查看操作列表",
-      "description": "在「操作列表」页面中，可以查看从已连接的 OpenAPI 模式获取的 operationId 列表。已禁用的操作无法被任何令牌访问。"
+      "description": "在「操作列表」页面中，可以查看从已连接的 OpenAPI 模式获取的操作列表。已禁用的操作无法被任何令牌访问。"
     },
     "step3": {
       "title": "3. 发行令牌",
@@ -259,12 +259,12 @@
     "step4": {
       "title": "4. 调用 API",
       "description": "在 Authorization 请求头中以 Bearer 形式携带该令牌，并向 scope-proxy 自身的源发送与后端相同路径、相同方法的请求。",
-      "hint": "请使用该令牌被允许的 operationId 所对应的路径和方法。访问未被允许的操作将返回 403。"
+      "hint": "请使用该令牌被允许的操作所对应的路径和方法。访问未被允许的操作将返回 403。"
     },
     "errors": {
       "title": "错误响应",
       "unauthorized": "401：令牌缺失、无效、已作废或已过期",
-      "forbidden": "403：该 operationId 未被此令牌允许，或该操作已被禁用",
+      "forbidden": "403：该操作未被此令牌允许，或该操作已被禁用",
       "notFound": "404：所连接的 OpenAPI 模式中不存在该路径/方法"
     }
   },
