@@ -6,6 +6,22 @@ on:
   pull_request:
 
 jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for duplicate migration numbers
+        run: |
+          cd backend/migrations
+          duplicates=$(ls *.sql | sed -E 's/^([0-9]+)_.*/\1/' | sort | uniq -d)
+          if [ -n "$duplicates" ]; then
+            echo "Duplicate migration numbers found:"
+            echo "$duplicates" | while read -r num; do
+              ls "${num}"_*.sql
+            done
+            exit 1
+          fi
+
   backend:
     runs-on: ubuntu-latest
     defaults:
