@@ -40,9 +40,7 @@ export function LoginPage() {
       <div className="login-screen">
         <form className="login-card" onSubmit={handleSubmit}>
           <div className="login-card__head">
-            <span className="app-brand__mark" style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.9rem' }}>
-              SP
-            </span>
+            <img src="/favicon.svg" alt="" className="app-brand__mark" style={{ width: '2.25rem', height: '2.25rem' }} />
             <h1>{t('common.appName')}</h1>
             <p className="page-header__description">{t('login.subtitle')}</p>
             {IS_DEMO && (
