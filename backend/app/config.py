@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     login_rate_limit_max_attempts: int = 20
     login_rate_limit_window_seconds: float = 60.0
 
+    # Timeout (in seconds) applied to requests forwarded to upstream backends.
+    # Set to a larger value (or None to disable) if the upstream API is expected
+    # to take longer than the default.
+    proxy_timeout_seconds: float | None = 30.0
+
     @property
     def secret_key_is_generated(self) -> bool:
         return self.secret_key is None

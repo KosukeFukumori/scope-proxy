@@ -12,6 +12,7 @@ from app.auth.rate_limiter import login_rate_limiter
 from app.db import get_session
 from app.main import app
 from app.models.user import User
+from app.services.operation_matcher import reset_operation_matcher_cache
 
 
 @pytest.fixture(autouse=True)
@@ -37,6 +38,14 @@ def engine(tmp_path: Path) -> Generator:
 def session(engine) -> Generator[Session]:
     with Session(engine) as session:
         yield session
+
+
+@pytest.fixture(autouse=True)
+def _reset_operation_matcher_cache() -> Generator[None]:
+    """Ensure the process-local OperationMatcher cache doesn't leak across tests."""
+    reset_operation_matcher_cache()
+    yield
+    reset_operation_matcher_cache()
 
 
 @pytest.fixture(autouse=True)
