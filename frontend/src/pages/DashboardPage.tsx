@@ -5,11 +5,86 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getBackendConfig, refreshBackendConfig, upsertBackendConfig } from '../api/backendConfig'
 import { listSchemaSnapshots } from '../api/operations'
+import { getUsageSummary } from '../api/usage'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { DiffSummary } from '../components/DiffSummary'
 import { Layout } from '../components/Layout'
 import { EmptyState, ErrorAlert, Loading, PageHeader, SuccessAlert } from '../components/ui'
+import { diffSummaryHasChanges } from '../lib/diffSummary'
 import { errorMessage, formatDateTime } from '../lib/format'
 import type { BackendConfig } from '../types/api'
+
+const USAGE_SUMMARY_DAYS = 7
+
+function UsageSummaryCard() {
+  const { t } = useTranslation()
+  const usageQuery = useQuery({
+    queryKey: ['usageSummary', USAGE_SUMMARY_DAYS],
+    queryFn: () => getUsageSummary(USAGE_SUMMARY_DAYS),
+  })
+
+  if (usageQuery.isLoading || !usageQuery.data) {
+    return null
+  }
+
+  const summary = usageQuery.data
+
+  return (
+    <section className="section">
+      <div className="section__header">
+        <h2>{t('dashboard.usage.title', { days: summary.period_days })}</h2>
+      </div>
+      <div className="stat-row">
+        <div className="card">
+          <div className="card__body">
+            <p className="muted" style={{ fontSize: '0.8rem' }}>
+              {t('dashboard.usage.totalRequests')}
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>{summary.total_requests}</p>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card__body">
+            <p className="muted" style={{ fontSize: '0.8rem' }}>
+              {t('dashboard.usage.forwardedRequests')}
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>{summary.forwarded_requests}</p>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card__body">
+            <p className="muted" style={{ fontSize: '0.8rem' }}>
+              {t('dashboard.usage.deniedRequests')}
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>{summary.denied_requests}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/** Notice modal shown after a schema refresh detected changes. */
+function SchemaChangeModal({ diffSummary, onClose }: { diffSummary: string; onClose: () => void }) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="schema-change-modal-title">
+      <div className="modal">
+        <div className="stack stack--tight" style={{ overflowY: 'auto' }}>
+          <h2 id="schema-change-modal-title">{t('dashboard.schemaChangeModal.title')}</h2>
+          <p>{t('dashboard.schemaChangeModal.message')}</p>
+          <DiffSummary diffSummary={diffSummary} />
+        </div>
+        <div className="modal__actions">
+          <button type="button" className="btn btn--primary" onClick={onClose}>
+            {t('common.close')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function ConfigForm({ config }: { config: BackendConfig | null }) {
   const { t, i18n } = useTranslation()
@@ -20,30 +95,50 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
   const [syncIntervalInput, setSyncIntervalInput] = useState(
     config?.schema_sync_interval_seconds != null ? String(config.schema_sync_interval_seconds) : '',
   )
+  const [switchConfirmOpen, setSwitchConfirmOpen] = useState(false)
+  const [schemaChangeDiff, setSchemaChangeDiff] = useState<string | null>(null)
+
+  const refreshMutation = useMutation({
+    mutationFn: refreshBackendConfig,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
+      queryClient.invalidateQueries({ queryKey: ['schemaSnapshots'] })
+      queryClient.invalidateQueries({ queryKey: ['operations'] })
+      if (diffSummaryHasChanges(data.diff_summary)) {
+        setSchemaChangeDiff(data.diff_summary)
+      }
+    },
+  })
 
   const saveMutation = useMutation({
     mutationFn: () =>
       upsertBackendConfig(endpointUrl, openapiUrl, syncIntervalInput === '' ? null : Number(syncIntervalInput)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
+      // Switching the backend resets operations and token permissions server-side.
+      queryClient.invalidateQueries({ queryKey: ['operations'] })
+      queryClient.invalidateQueries({ queryKey: ['tokens'] })
+      // Fetch the new backend's schema right away so the proxy doesn't sit
+      // without operations until someone presses "refresh" manually.
+      refreshMutation.mutate()
     },
   })
 
-  const refreshMutation = useMutation({
-    mutationFn: refreshBackendConfig,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['backendConfig'] })
-      queryClient.invalidateQueries({ queryKey: ['schemaSnapshots'] })
-      queryClient.invalidateQueries({ queryKey: ['operations'] })
-    },
-  })
+  const urlChanged =
+    config !== null && (endpointUrl !== config.endpoint_url || openapiUrl !== config.openapi_url)
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (urlChanged) {
+      // Warn before switching: this wipes operations and all token permissions.
+      setSwitchConfirmOpen(true)
+      return
+    }
     saveMutation.mutate()
   }
 
   return (
+    <>
     <form className="card" onSubmit={handleSubmit}>
       <div className="card__body stack">
         <div className="field">
@@ -150,6 +245,24 @@ function ConfigForm({ config }: { config: BackendConfig | null }) {
         </span>
       </div>
     </form>
+
+    {switchConfirmOpen && (
+      <ConfirmDialog
+        title={t('dashboard.switchConfirm.title')}
+        message={t('dashboard.switchConfirm.message')}
+        confirmLabel={t('dashboard.switchConfirm.confirm')}
+        onConfirm={() => {
+          setSwitchConfirmOpen(false)
+          saveMutation.mutate()
+        }}
+        onCancel={() => setSwitchConfirmOpen(false)}
+      />
+    )}
+
+    {schemaChangeDiff !== null && (
+      <SchemaChangeModal diffSummary={schemaChangeDiff} onClose={() => setSchemaChangeDiff(null)} />
+    )}
+    </>
   )
 }
 
@@ -168,6 +281,8 @@ export function DashboardPage() {
       ) : (
         <ConfigForm key={configQuery.data?.id ?? 'new'} config={configQuery.data ?? null} />
       )}
+
+      <UsageSummaryCard />
 
       <section className="section">
         <div className="section__header">

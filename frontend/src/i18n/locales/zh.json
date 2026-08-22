@@ -5,6 +5,11 @@
     "close": "关闭",
     "unset": "—"
   },
+  "demo": {
+    "banner": "演示模式 — 此界面仅使用模拟数据，不会调用真实后端。",
+    "reset": "重置演示数据",
+    "credentialsHint": "演示登录信息：{{email}} / {{password}}"
+  },
   "diffSummary": {
     "noChanges": "无变更",
     "added": "新增",
@@ -18,7 +23,9 @@
       "operations": "操作列表",
       "snapshots": "变更历史",
       "tokens": "令牌",
-      "usage": "使用说明"
+      "users": "用户",
+      "usage": "使用说明",
+      "account": "账户"
     },
     "logout": "退出登录",
     "language": "语言"
@@ -57,6 +64,15 @@
       "syncStatusError": "失败",
       "lastSyncError": "最近的同步错误:"
     },
+    "switchConfirm": {
+      "title": "更改后端目标",
+      "message": "更改后端 URL 后，已同步的操作列表以及授予令牌的所有权限都将被重置。切换后请重新获取架构并重新授予权限。",
+      "confirm": "更改并重置"
+    },
+    "schemaChangeModal": {
+      "title": "检测到架构变更",
+      "message": "后端架构发生了变更。新增的操作不会自动授予任何令牌，已删除的操作已被停用。请确认以下差异。"
+    },
     "recentSnapshots": "最近的变更历史",
     "viewAll": "查看全部",
     "emptySnapshots": {
@@ -66,6 +82,12 @@
     "table": {
       "fetchedAt": "获取时间",
       "diff": "差异"
+    },
+    "usage": {
+      "title": "使用情况(最近 {{days}} 天)",
+      "totalRequests": "请求数",
+      "deniedRequests": "拒绝数",
+      "forwardedRequests": "转发数"
     }
   },
   "operations": {
@@ -171,6 +193,17 @@
       "save": "保存",
       "issue": "发行",
       "cancel": "取消"
+    },
+    "logs": {
+      "title": "最近的使用记录",
+      "empty": "暂无使用记录",
+      "table": {
+        "time": "时间",
+        "method": "Method",
+        "path": "Path",
+        "status": "状态",
+        "latency": "延迟"
+      }
     }
   },
   "operationPermissionTable": {
@@ -233,5 +266,36 @@
   },
   "ui": {
     "loading": "加载中..."
+  },
+  "account": {
+    "title": "账户",
+    "description": "修改当前登录账户的密码。",
+    "form": {
+      "currentPasswordLabel": "当前密码",
+      "newPasswordLabel": "新密码",
+      "confirmPasswordLabel": "确认新密码",
+      "mismatchError": "两次输入的新密码不一致",
+      "saveError": "修改密码失败",
+      "save": "修改密码",
+      "saving": "修改中...",
+      "success": "密码已修改。"
+    }
+  },
+  "users": {
+    "title": "用户",
+    "description": "查看、添加和删除可登录管理后台的用户。",
+    "form": {
+      "emailLabel": "电子邮箱",
+      "passwordLabel": "密码",
+      "saveError": "创建用户失败",
+      "create": "添加用户",
+      "saving": "创建中..."
+    },
+    "table": {
+      "email": "电子邮箱",
+      "createdAt": "创建时间"
+    },
+    "delete": "删除",
+    "deleteError": "删除用户失败"
   }
 }

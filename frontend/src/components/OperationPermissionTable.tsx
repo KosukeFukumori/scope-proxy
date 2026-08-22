@@ -43,7 +43,7 @@ export function OperationPermissionTable({
     const matchesSearch =
       normalizedSearch === '' ||
       op.path.toLowerCase().includes(normalizedSearch) ||
-      op.operation_id.toLowerCase().includes(normalizedSearch) ||
+      (op.openapi_operation_id ?? '').toLowerCase().includes(normalizedSearch) ||
       (op.summary ?? '').toLowerCase().includes(normalizedSearch)
     return matchesMethod && matchesSearch
   })
@@ -164,7 +164,7 @@ export function OperationPermissionTable({
                   <MethodBadge method={op.method} />
                   <span className="permission-item__path">{op.path}</span>
                   {!op.is_active && <Badge tone="danger">{t('operationPermissionTable.inactive')}</Badge>}
-                  <span className="permission-item__id">{op.operation_id}</span>
+                  <span className="permission-item__id">{op.openapi_operation_id ?? ''}</span>
                 </label>
               ))}
           </section>

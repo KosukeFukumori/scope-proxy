@@ -5,6 +5,11 @@
     "close": "Close",
     "unset": "—"
   },
+  "demo": {
+    "banner": "Demo mode — this UI is backed by mock data only, no real backend is called.",
+    "reset": "Reset demo data",
+    "credentialsHint": "Demo login: {{email}} / {{password}}"
+  },
   "diffSummary": {
     "noChanges": "No changes",
     "added": "Added",
@@ -18,7 +23,9 @@
       "operations": "Operations",
       "snapshots": "History",
       "tokens": "Tokens",
-      "usage": "Usage"
+      "users": "Users",
+      "usage": "Usage",
+      "account": "Account"
     },
     "logout": "Log out",
     "language": "Language"
@@ -57,6 +64,15 @@
       "syncStatusError": "failed",
       "lastSyncError": "Last sync error:"
     },
+    "switchConfirm": {
+      "title": "Change backend target",
+      "message": "Changing the backend URLs resets the synced operation list and every permission granted to tokens. After switching, fetch the new schema and re-grant permissions.",
+      "confirm": "Switch and reset"
+    },
+    "schemaChangeModal": {
+      "title": "Schema changes detected",
+      "message": "The backend schema has changed. Added operations are not granted to any token automatically, and removed operations have been deactivated. Please review the diff below."
+    },
     "recentSnapshots": "Recent history",
     "viewAll": "View all",
     "emptySnapshots": {
@@ -66,6 +82,12 @@
     "table": {
       "fetchedAt": "Fetched at",
       "diff": "Diff"
+    },
+    "usage": {
+      "title": "Usage (last {{days}} days)",
+      "totalRequests": "Requests",
+      "deniedRequests": "Denied",
+      "forwardedRequests": "Forwarded"
     }
   },
   "operations": {
@@ -171,6 +193,17 @@
       "save": "Save",
       "issue": "Issue",
       "cancel": "Cancel"
+    },
+    "logs": {
+      "title": "Recent usage",
+      "empty": "No usage recorded yet",
+      "table": {
+        "time": "Time",
+        "method": "Method",
+        "path": "Path",
+        "status": "Status",
+        "latency": "Latency"
+      }
     }
   },
   "operationPermissionTable": {
@@ -233,5 +266,36 @@
   },
   "ui": {
     "loading": "Loading..."
+  },
+  "account": {
+    "title": "Account",
+    "description": "Change the password for the currently logged-in account.",
+    "form": {
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm new password",
+      "mismatchError": "The new passwords don't match",
+      "saveError": "Failed to change the password",
+      "save": "Change password",
+      "saving": "Changing...",
+      "success": "Password changed."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "description": "List, add, and remove users who can log in to the admin console.",
+    "form": {
+      "emailLabel": "Email address",
+      "passwordLabel": "Password",
+      "saveError": "Failed to create the user",
+      "create": "Add user",
+      "saving": "Creating..."
+    },
+    "table": {
+      "email": "Email",
+      "createdAt": "Created at"
+    },
+    "delete": "Delete",
+    "deleteError": "Failed to delete the user"
   }
 }
