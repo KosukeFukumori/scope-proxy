@@ -7,7 +7,12 @@ from app.auth.password import hash_password, verify_password
 from app.auth.rate_limiter import login_rate_limiter
 from app.deps import CurrentUserDep, SessionDep
 from app.models.user import User
-from app.schemas.auth import LoginRequest, PasswordChangeRequest, UserRead
+from app.schemas.auth import (
+    LoginRequest,
+    PasswordChangeRequest,
+    UsernameChangeRequest,
+    UserRead,
+)
 
 logger = logging.getLogger("scope_proxy")
 
@@ -18,26 +23,26 @@ router = APIRouter(prefix="/api", tags=["auth"])
 def login(payload: LoginRequest, request: Request, session: SessionDep) -> User:
     client_ip = request.client.host if request.client else "unknown"
     ip_key = f"ip:{client_ip}"
-    email_key = f"email:{payload.email.lower()}"
+    username_key = f"username:{payload.username.lower()}"
 
-    if login_rate_limiter.is_blocked(ip_key) or login_rate_limiter.is_blocked(email_key):
+    if login_rate_limiter.is_blocked(ip_key) or login_rate_limiter.is_blocked(username_key):
         logger.warning(
-            "Login blocked by rate limit for email=%s from ip=%s", payload.email, client_ip
+            "Login blocked by rate limit for username=%s from ip=%s", payload.username, client_ip
         )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many login attempts. Please try again later.",
         )
 
-    user = session.exec(select(User).where(User.email == payload.email)).first()
+    user = session.exec(select(User).where(User.username == payload.username)).first()
     if user is None or not verify_password(payload.password, user.password_hash):
         login_rate_limiter.record_failure(ip_key)
-        login_rate_limiter.record_failure(email_key)
-        logger.warning("Failed login attempt for email=%s from ip=%s", payload.email, client_ip)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+        login_rate_limiter.record_failure(username_key)
+        logger.warning("Failed login attempt for username=%s from ip=%s", payload.username, client_ip)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
     login_rate_limiter.reset(ip_key)
-    login_rate_limiter.reset(email_key)
+    login_rate_limiter.reset(username_key)
     request.session["user_id"] = user.id
     return user
 
@@ -60,3 +65,12 @@ def change_password(payload: PasswordChangeRequest, session: SessionDep, current
     current_user.password_hash = hash_password(payload.new_password)
     session.add(current_user)
     session.commit()
+
+
+@router.patch("/me/username", response_model=UserRead)
+def change_username(payload: UsernameChangeRequest, session: SessionDep, current_user: CurrentUserDep) -> User:
+    current_user.username = payload.username
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+    return current_user

@@ -15,7 +15,7 @@ from app.config import settings
 
 
 class LoginRateLimiter:
-    """Tracks failed attempts per key (e.g. an IP address or email) within a
+    """Tracks failed attempts per key (e.g. an IP address or username) within a
     sliding time window and reports whether a key should currently be blocked.
     """
 

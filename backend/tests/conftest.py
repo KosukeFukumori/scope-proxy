@@ -78,7 +78,7 @@ async def client() -> AsyncGenerator[AsyncClient]:
 
 @pytest.fixture
 def test_user(session: Session) -> User:
-    user = User(email="test@example.com", password_hash=hash_password("testpass123"))
+    user = User(username="testuser", password_hash=hash_password("testpass123"))
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -89,7 +89,7 @@ def test_user(session: Session) -> User:
 async def logged_in_client(client: AsyncClient, test_user: User) -> AsyncClient:
     response = await client.post(
         "/_admin/api/login",
-        json={"email": test_user.email, "password": "testpass123"},
+        json={"username": test_user.username, "password": "testpass123"},
     )
     assert response.status_code == 200
     return client

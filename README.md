@@ -55,7 +55,7 @@ This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQL
 docker compose exec app .venv/bin/python scripts/create_admin_user.py
 ```
 
-The script also supports a non-interactive mode: set both `ADMIN_EMAIL` and `ADMIN_PASSWORD` (e.g. as environment variables on the `app` service in `docker-compose.yml`) and it will create the user without prompting, skipping silently if that user already exists. This makes it safe to run automatically on every container startup.
+The script also supports a non-interactive mode: set both `ADMIN_USERNAME` and `ADMIN_PASSWORD` (e.g. as environment variables on the `app` service in `docker-compose.yml`) and it will create the user without prompting, skipping silently if that user already exists. This makes it safe to run automatically on every container startup.
 
 Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
 

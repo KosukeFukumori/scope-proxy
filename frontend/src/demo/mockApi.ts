@@ -7,7 +7,6 @@ import type {
   TokenCreateResponse,
   TokenDetail,
   User,
-  UserSummary,
 } from '../types/api'
 
 /**
@@ -17,9 +16,9 @@ import type {
  * reloads within a tab but resets for a fresh visitor.
  */
 
-export const DEMO_CREDENTIALS = { email: 'admin@example.com', password: 'demo-password' }
+export const DEMO_CREDENTIALS = { username: 'admin', password: 'demo-password' }
 
-interface DemoUser extends UserSummary {
+interface DemoUser extends User {
   password: string
 }
 
@@ -34,7 +33,6 @@ interface DemoState {
   operations: Operation[]
   snapshots: SchemaSnapshot[]
   tokens: DemoToken[]
-  nextUserId: number
   nextTokenId: number
   nextSnapshotId: number
 }
@@ -118,10 +116,7 @@ function seedState(): DemoState {
 
   return {
     loggedIn: false,
-    users: [
-      { id: 1, email: DEMO_CREDENTIALS.email, created_at: daysAgo(120), password: DEMO_CREDENTIALS.password },
-      { id: 2, email: 'reviewer@example.com', created_at: daysAgo(10), password: 'irrelevant' },
-    ],
+    users: [{ id: 1, username: DEMO_CREDENTIALS.username, password: DEMO_CREDENTIALS.password }],
     backendConfig: {
       id: 1,
       endpoint_url: 'https://petstore.example.com',
@@ -148,7 +143,6 @@ function seedState(): DemoState {
       },
     ],
     tokens,
-    nextUserId: 3,
     nextTokenId: 1,
     nextSnapshotId: 3,
   }
@@ -187,8 +181,8 @@ export function resetDemoState() {
 }
 
 function currentUser(s: DemoState): User {
-  const admin = s.users.find((u) => u.email === DEMO_CREDENTIALS.email)!
-  return { id: admin.id, email: admin.email }
+  const admin = s.users[0]
+  return { id: admin.id, username: admin.username }
 }
 
 function toSummary(token: DemoToken): TokenDetail {
@@ -215,9 +209,10 @@ const ROUTES: {
     method: 'POST',
     pattern: /^\/_admin\/api\/login$/,
     handler: (s, _m, body) => {
-      const { email, password } = (body ?? {}) as { email?: string; password?: string }
-      if (email !== DEMO_CREDENTIALS.email || password !== DEMO_CREDENTIALS.password) {
-        throw new ApiError(401, 'Invalid email or password')
+      const { username, password } = (body ?? {}) as { username?: string; password?: string }
+      const admin = s.users[0]
+      if (username !== admin.username || password !== admin.password) {
+        throw new ApiError(401, 'Invalid username or password')
       }
       s.loggedIn = true
       return currentUser(s)
@@ -244,11 +239,27 @@ const ROUTES: {
     pattern: /^\/_admin\/api\/me\/password$/,
     handler: (s, _m, body) => {
       requireLogin(s)
-      const { current_password } = (body ?? {}) as { current_password?: string }
-      if (current_password !== DEMO_CREDENTIALS.password) {
+      const admin = s.users[0]
+      const { current_password, new_password } = (body ?? {}) as {
+        current_password?: string
+        new_password?: string
+      }
+      if (current_password !== admin.password) {
         throw new ApiError(400, 'Current password is incorrect')
       }
+      if (new_password) admin.password = new_password
       return undefined
+    },
+  },
+  {
+    method: 'PATCH',
+    pattern: /^\/_admin\/api\/me\/username$/,
+    handler: (s, _m, body) => {
+      requireLogin(s)
+      const admin = s.users[0]
+      const { username } = (body ?? {}) as { username?: string }
+      if (username) admin.username = username
+      return currentUser(s)
     },
   },
   {
@@ -422,42 +433,6 @@ const ROUTES: {
       const before = s.tokens.length
       s.tokens = s.tokens.filter((t) => t.id !== m[1])
       if (s.tokens.length === before) throw new ApiError(404, 'Token not found')
-      return undefined
-    },
-  },
-  {
-    method: 'GET',
-    pattern: /^\/_admin\/api\/users$/,
-    handler: (s) => {
-      requireLogin(s)
-      return s.users.map(({ id, email, created_at }) => ({ id, email, created_at }))
-    },
-  },
-  {
-    method: 'POST',
-    pattern: /^\/_admin\/api\/users$/,
-    handler: (s, _m, body) => {
-      requireLogin(s)
-      const { email, password } = (body ?? {}) as { email?: string; password?: string }
-      if (!email || !password) throw new ApiError(422, 'email and password are required')
-      if (s.users.some((u) => u.email === email)) throw new ApiError(409, 'A user with this email already exists')
-      const user: DemoUser = { id: s.nextUserId++, email, password, created_at: isoNow() }
-      s.users = [...s.users, user]
-      return { id: user.id, email: user.email, created_at: user.created_at }
-    },
-  },
-  {
-    method: 'DELETE',
-    pattern: /^\/_admin\/api\/users\/(\d+)$/,
-    handler: (s, m) => {
-      requireLogin(s)
-      const id = Number(m[1])
-      const target = s.users.find((u) => u.id === id)
-      if (!target) throw new ApiError(404, 'User not found')
-      if (target.email === DEMO_CREDENTIALS.email) {
-        throw new ApiError(400, "Can't delete the currently logged-in user")
-      }
-      s.users = s.users.filter((u) => u.id !== id)
       return undefined
     },
   },

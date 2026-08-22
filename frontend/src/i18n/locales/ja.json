@@ -8,7 +8,7 @@
   "demo": {
     "banner": "デモモード — この画面はモックデータのみで動作しており、実際のバックエンドは呼び出されません。",
     "reset": "デモデータをリセット",
-    "credentialsHint": "デモ用ログイン: {{email}} / {{password}}"
+    "credentialsHint": "デモ用ログイン: {{username}} / {{password}}"
   },
   "diffSummary": {
     "noChanges": "変更なし",
@@ -23,7 +23,6 @@
       "operations": "オペレーション",
       "snapshots": "変更履歴",
       "tokens": "トークン",
-      "users": "ユーザー",
       "usage": "使い方",
       "account": "アカウント"
     },
@@ -32,11 +31,11 @@
   },
   "login": {
     "subtitle": "管理画面にログイン",
-    "email": "メールアドレス",
+    "username": "ユーザー名",
     "password": "パスワード",
     "submit": "ログイン",
     "submitting": "ログイン中...",
-    "error": "ログインに失敗しました"
+    "error": "ユーザー名またはパスワードが違います"
   },
   "dashboard": {
     "title": "接続先設定",
@@ -273,7 +272,14 @@
   },
   "account": {
     "title": "アカウント",
-    "description": "ログイン中のアカウントのパスワードを変更します。",
+    "description": "ログイン中のアカウントのユーザー名・パスワードを変更します。",
+    "usernameForm": {
+      "label": "ユーザー名",
+      "saveError": "ユーザー名の変更に失敗しました",
+      "save": "ユーザー名を変更",
+      "saving": "変更中...",
+      "success": "ユーザー名を変更しました。"
+    },
     "form": {
       "currentPasswordLabel": "現在のパスワード",
       "newPasswordLabel": "新しいパスワード",
@@ -284,22 +290,5 @@
       "saving": "変更中...",
       "success": "パスワードを変更しました。"
     }
-  },
-  "users": {
-    "title": "ユーザー",
-    "description": "管理画面にログインできるユーザーの一覧・追加・削除を行います。",
-    "form": {
-      "emailLabel": "メールアドレス",
-      "passwordLabel": "パスワード",
-      "saveError": "ユーザーの作成に失敗しました",
-      "create": "ユーザーを追加",
-      "saving": "作成中..."
-    },
-    "table": {
-      "email": "メールアドレス",
-      "createdAt": "作成日時"
-    },
-    "delete": "削除",
-    "deleteError": "ユーザーの削除に失敗しました"
   }
 }

@@ -23,7 +23,6 @@ from app.routers import (
     schema_snapshots,
     tokens,
     usage,
-    users,
 )
 from app.services.schema_sync import schema_sync_loop
 
@@ -104,7 +103,6 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
     app.include_router(operations.router, prefix="/_admin")
     app.include_router(schema_snapshots.router, prefix="/_admin")
     app.include_router(usage.router, prefix="/_admin")
-    app.include_router(users.router, prefix="/_admin")
 
     if FRONTEND_DIST.is_dir():
 

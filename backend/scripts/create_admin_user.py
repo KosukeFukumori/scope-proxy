@@ -2,7 +2,7 @@
 
 Usage: uv run scripts/create_admin_user.py
 
-Non-interactive mode: if both the ADMIN_EMAIL and ADMIN_PASSWORD environment
+Non-interactive mode: if both the ADMIN_USERNAME and ADMIN_PASSWORD environment
 variables are set, the script runs without prompting (useful for Docker
 Compose initialization). Otherwise it falls back to the interactive prompts.
 """
@@ -24,32 +24,32 @@ from app.models.user import User
 def main() -> None:
     init_db()
 
-    env_email = os.environ.get("ADMIN_EMAIL")
+    env_username = os.environ.get("ADMIN_USERNAME")
     env_password = os.environ.get("ADMIN_PASSWORD")
-    non_interactive = bool(env_email and env_password)
+    non_interactive = bool(env_username and env_password)
 
-    if non_interactive and env_email is not None and env_password is not None:
-        email = env_email.strip()
+    if non_interactive and env_username is not None and env_password is not None:
+        username = env_username.strip()
         password = env_password
     else:
-        email = input("Email: ").strip()
+        username = input("Username: ").strip()
         password = getpass.getpass("Password: ")
 
     with Session(engine) as session:
-        existing = session.exec(select(User).where(User.email == email)).first()
+        existing = session.exec(select(User).where(User.username == username)).first()
         if existing is not None:
             # In non-interactive mode this script may run on every container
             # startup, so an existing user is not an error: skip silently.
             if non_interactive:
-                print(f"User {email} already exists; skipping.")
+                print(f"User {username} already exists; skipping.")
                 return
-            print(f"User {email} already exists.", file=sys.stderr)
+            print(f"User {username} already exists.", file=sys.stderr)
             sys.exit(1)
 
-        user = User(email=email, password_hash=hash_password(password))
+        user = User(username=username, password_hash=hash_password(password))
         session.add(user)
         session.commit()
-        print(f"Created user {email}.")
+        print(f"Created user {username}.")
 
 
 if __name__ == "__main__":
