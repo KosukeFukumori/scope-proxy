@@ -32,6 +32,39 @@ async def test_upsert_and_get_backend_config(logged_in_client: AsyncClient) -> N
     assert response.json()["openapi_url"] == "https://api.example.com/openapi.json"
 
 
+async def test_upsert_backend_config_without_sync_interval_falls_back_to_env_default(
+    logged_in_client: AsyncClient,
+) -> None:
+    payload = {
+        "endpoint_url": "https://api.example.com",
+        "openapi_url": "https://api.example.com/openapi.json",
+    }
+    response = await logged_in_client.put("/_admin/api/backend-config", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_sync_interval_seconds"] is None
+    # settings.schema_sync_interval_seconds defaults to 0 (disabled) in the test app.
+    assert body["effective_schema_sync_interval_seconds"] == 0
+
+
+async def test_upsert_backend_config_with_sync_interval_overrides_env_default(
+    logged_in_client: AsyncClient,
+) -> None:
+    payload = {
+        "endpoint_url": "https://api.example.com",
+        "openapi_url": "https://api.example.com/openapi.json",
+        "schema_sync_interval_seconds": 120,
+    }
+    response = await logged_in_client.put("/_admin/api/backend-config", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_sync_interval_seconds"] == 120
+    assert body["effective_schema_sync_interval_seconds"] == 120
+
+    response = await logged_in_client.get("/_admin/api/backend-config")
+    assert response.json()["effective_schema_sync_interval_seconds"] == 120
+
+
 async def test_upsert_backend_config_updates_existing(logged_in_client: AsyncClient) -> None:
     first = {
         "endpoint_url": "https://api.example.com",
