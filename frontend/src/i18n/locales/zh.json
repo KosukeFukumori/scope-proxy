@@ -5,6 +5,13 @@
     "close": "关闭",
     "unset": "—"
   },
+  "diffSummary": {
+    "noChanges": "无变更",
+    "added": "新增",
+    "updated": "更新",
+    "removed": "删除",
+    "skippedAdminConflict": "因与管理界面冲突而跳过"
+  },
   "layout": {
     "nav": {
       "dashboard": "后端配置",

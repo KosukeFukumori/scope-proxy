@@ -5,6 +5,13 @@
     "close": "閉じる",
     "unset": "—"
   },
+  "diffSummary": {
+    "noChanges": "変更なし",
+    "added": "追加",
+    "updated": "更新",
+    "removed": "削除",
+    "skippedAdminConflict": "管理画面と競合のためスキップ"
+  },
   "layout": {
     "nav": {
       "dashboard": "接続先設定",
