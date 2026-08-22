@@ -5,6 +5,11 @@
     "close": "閉じる",
     "unset": "—"
   },
+  "demo": {
+    "banner": "デモモード — この画面はモックデータのみで動作しており、実際のバックエンドは呼び出されません。",
+    "reset": "デモデータをリセット",
+    "credentialsHint": "デモ用ログイン: {{email}} / {{password}}"
+  },
   "diffSummary": {
     "noChanges": "変更なし",
     "added": "追加",

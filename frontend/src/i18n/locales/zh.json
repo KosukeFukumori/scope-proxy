@@ -5,6 +5,11 @@
     "close": "关闭",
     "unset": "—"
   },
+  "demo": {
+    "banner": "演示模式 — 此界面仅使用模拟数据，不会调用真实后端。",
+    "reset": "重置演示数据",
+    "credentialsHint": "演示登录信息：{{email}} / {{password}}"
+  },
   "diffSummary": {
     "noChanges": "无变更",
     "added": "新增",

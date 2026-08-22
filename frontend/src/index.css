@@ -145,6 +145,18 @@ pre {
   min-height: 100vh;
 }
 
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-warning) 25%, transparent);
+}
+
 .app-header {
   position: sticky;
   top: 0;

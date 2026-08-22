@@ -1,13 +1,16 @@
-export class ApiError extends Error {
-  status: number
+import { ApiError } from './errors'
 
-  constructor(status: number, message: string) {
-    super(message)
-    this.status = status
-  }
-}
+export { ApiError } from './errors'
+
+// Static string so Vite can dead-code-eliminate whichever branch isn't used per build mode.
+const DEMO_MODE = import.meta.env.MODE === 'demo'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (DEMO_MODE) {
+    const { mockRequest } = await import('../demo/mockApi')
+    return mockRequest<T>(path, init)
+  }
+
   const response = await fetch(path, {
     ...init,
     credentials: 'include',

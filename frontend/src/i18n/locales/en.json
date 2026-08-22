@@ -5,6 +5,11 @@
     "close": "Close",
     "unset": "—"
   },
+  "demo": {
+    "banner": "Demo mode — this UI is backed by mock data only, no real backend is called.",
+    "reset": "Reset demo data",
+    "credentialsHint": "Demo login: {{email}} / {{password}}"
+  },
   "diffSummary": {
     "noChanges": "No changes",
     "added": "Added",
