@@ -114,7 +114,6 @@
     "table": {
       "method": "Method",
       "path": "Path",
-      "operationId": "参考ID",
       "summary": "Summary",
       "status": "状态"
     },

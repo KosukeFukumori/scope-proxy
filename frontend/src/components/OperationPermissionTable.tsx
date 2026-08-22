@@ -106,7 +106,6 @@ function OperationPermissionByMethod({
               />
               <span className="permission-item__path">{op.path}</span>
               {!op.is_active && <Badge tone="danger">{t('operationPermissionTable.inactive')}</Badge>}
-              <span className="permission-item__id">{op.openapi_operation_id ?? ''}</span>
             </label>
           ))}
         </section>
@@ -304,7 +303,6 @@ export function OperationPermissionTable({
                       <MethodBadge method={op.method} />
                       <span className="permission-item__path">{op.path}</span>
                       {!op.is_active && <Badge tone="danger">{t('operationPermissionTable.inactive')}</Badge>}
-                      <span className="permission-item__id">{op.openapi_operation_id ?? ''}</span>
                     </label>
                   ))}
               </section>
