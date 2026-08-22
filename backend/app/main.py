@@ -39,6 +39,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
 app = FastAPI(title="scope-proxy", lifespan=lifespan)
 
+assert settings.secret_key is not None  # generated in app.config if not set via env
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
 app.include_router(auth.router, prefix="/_admin")

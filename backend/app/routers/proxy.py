@@ -31,7 +31,7 @@ REQUEST_ONLY_STRIPPED_HEADERS = {"host", "authorization", "content-length"}
 RESPONSE_ONLY_STRIPPED_HEADERS = {"content-length"}
 
 
-def strip_hop_by_hop(headers: Headers, extra: set[str]) -> list[tuple[str, str]]:
+def strip_hop_by_hop(headers: Headers | httpx.Headers, extra: set[str]) -> list[tuple[str, str]]:
     excluded = HOP_BY_HOP_HEADERS | extra
     return [(key, value) for key, value in headers.items() if key.lower() not in excluded]
 

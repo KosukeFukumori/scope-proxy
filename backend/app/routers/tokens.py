@@ -45,6 +45,7 @@ def list_tokens(session: SessionDep, current_user: CurrentUserDep) -> list[Token
 @router.post("", response_model=TokenCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_token(payload: TokenCreate, session: SessionDep, current_user: CurrentUserDep) -> TokenCreateResponse:
     raw, token_hash = generate_token()
+    assert current_user.id is not None  # current_user is always a persisted row
     token = Token(
         user_id=current_user.id,
         name=payload.name,
