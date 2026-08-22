@@ -3,6 +3,12 @@ export interface User {
   email: string
 }
 
+export interface UserSummary {
+  id: number
+  email: string
+  created_at: string
+}
+
 export interface BackendConfig {
   id: number
   endpoint_url: string

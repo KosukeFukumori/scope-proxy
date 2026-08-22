@@ -34,7 +34,11 @@ docker compose up --build
 docker compose exec app .venv/bin/python scripts/create_admin_user.py
 ```
 
+このスクリプトは非対話モードにも対応しています。`ADMIN_EMAIL` と `ADMIN_PASSWORD` の両方を(例えば `docker-compose.yml` の `app` サービスの環境変数として)設定すると、プロンプトなしでユーザーを作成し、既に存在する場合は何もせずスキップします。これによりコンテナ起動のたびに自動実行しても安全です。
+
 本番運用では `docker-compose.yml` 内で `SECRET_KEY` を固定値に設定してください。未設定の場合は再起動のたびにランダム生成され、セッションが毎回無効になります。
+
+ログイン後は、管理画面の「アカウント」ページから自分のパスワードを変更でき、「ユーザー」ページから他のユーザーの追加・削除もできます。上記のCLIスクリプトは最初の1人目のユーザーを作成する場合にのみ必要です。
 
 ### 開発実行
 

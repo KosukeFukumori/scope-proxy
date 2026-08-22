@@ -11,7 +11,9 @@
       "operations": "操作列表",
       "snapshots": "变更历史",
       "tokens": "令牌",
-      "usage": "使用说明"
+      "users": "用户",
+      "usage": "使用说明",
+      "account": "账户"
     },
     "logout": "退出登录",
     "language": "语言"
@@ -177,5 +179,36 @@
   },
   "ui": {
     "loading": "加载中..."
+  },
+  "account": {
+    "title": "账户",
+    "description": "修改当前登录账户的密码。",
+    "form": {
+      "currentPasswordLabel": "当前密码",
+      "newPasswordLabel": "新密码",
+      "confirmPasswordLabel": "确认新密码",
+      "mismatchError": "两次输入的新密码不一致",
+      "saveError": "修改密码失败",
+      "save": "修改密码",
+      "saving": "修改中...",
+      "success": "密码已修改。"
+    }
+  },
+  "users": {
+    "title": "用户",
+    "description": "查看、添加和删除可登录管理后台的用户。",
+    "form": {
+      "emailLabel": "电子邮箱",
+      "passwordLabel": "密码",
+      "saveError": "创建用户失败",
+      "create": "添加用户",
+      "saving": "创建中..."
+    },
+    "table": {
+      "email": "电子邮箱",
+      "createdAt": "创建时间"
+    },
+    "delete": "删除",
+    "deleteError": "删除用户失败"
   }
 }
