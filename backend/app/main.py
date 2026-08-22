@@ -1,4 +1,5 @@
 import logging
+import secrets
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -48,7 +49,10 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(title="scope-proxy", lifespan=lifespan)
 
-    app.add_middleware(SessionMiddleware, secret_key=app_settings.secret_key)
+    # Fall back to a freshly generated key when the caller didn't provide one
+    # (mirrors the generation the process-wide `settings` singleton does at import time).
+    secret_key = app_settings.secret_key or secrets.token_urlsafe(32)
+    app.add_middleware(SessionMiddleware, secret_key=secret_key)
 
     # CORS is disabled by default (empty allowlist): every request, including
     # preflight OPTIONS, then falls through to the normal auth flow and is denied
