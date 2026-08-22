@@ -16,7 +16,7 @@ A wrapper server that sits in front of an existing API server (one that publishe
 
 **[Try the admin UI demo](https://kosukefukumori.github.io/scope-proxy/)** — login: `admin` / `demo-password`
 
-This is a static build of the admin UI hosted on GitHub Pages, with all API calls answered by mock data in the browser (see `frontend/src/demo/mockApi.ts`). There is no real backend behind it — nothing you do there is persisted beyond your browser tab, and it exists only to let you click through the screens. To try scope-proxy itself, use the [Docker Compose setup](#setup) below.
+This is a static build of the admin UI hosted on GitHub Pages, with all API calls answered by mock data in the browser (see `frontend/src/demo/mockApi.ts`). There is no real backend behind it — nothing you do there is persisted beyond your browser tab, and it exists only to let you click through the screens. To try scope-proxy itself, see [Quick start](#quick-start-pre-built-image) below.
 
 ## Why scope-proxy?
 
@@ -41,15 +41,31 @@ This is a static build of the admin UI hosted on GitHub Pages, with all API call
 
 ## Setup
 
-### Docker Compose (quickest way to try it out)
+### Quick start (pre-built image)
 
-For a single-port setup, build the frontend into the backend image and run it with Docker Compose:
+The fastest way to try scope-proxy is to pull the pre-built image from GHCR and run it directly — no need to clone this repo. Multi-arch (`linux/amd64`, `linux/arm64`) images are published on every tagged release via `.github/workflows/docker-publish.yml`.
+
+```bash
+docker pull ghcr.io/kosukefukumori/scope-proxy:latest
+
+docker run -d --name scope-proxy \
+  -p 8000:8000 \
+  -v scope_proxy_db:/app/backend/data \
+  -e DATABASE_URL=sqlite:////app/backend/data/scope_proxy.db \
+  ghcr.io/kosukefukumori/scope-proxy:latest
+```
+
+This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQLite database is persisted in the `scope_proxy_db` named volume. Open `http://localhost:8000/_admin/` — as long as no account exists yet, you'll be shown a setup screen to create the admin username and password on the spot.
+
+For production use, also set a fixed `SECRET_KEY` (via `-e SECRET_KEY=...`); otherwise a random one is generated on every restart and sessions are invalidated each time.
+
+### Docker Compose
+
+If you've cloned this repo, Docker Compose gives you a config file to keep your settings in instead of a long `docker run` command. `docker-compose.yml` builds the image locally by default; to use the pre-built image from GHCR instead, replace the `build:` block with `image: ghcr.io/kosukefukumori/scope-proxy:latest`.
 
 ```bash
 docker compose up --build
 ```
-
-This serves the whole app (admin UI + proxy) on `http://localhost:8000`. The SQLite database is persisted in the `scope_proxy_db` named volume.
 
 There are two ways to create the initial admin account:
 
@@ -65,16 +81,6 @@ There are two ways to create the initial admin account:
 Set a fixed `SECRET_KEY` in `docker-compose.yml` for production use; otherwise a random one is generated on every restart and sessions are invalidated each time.
 
 scope-proxy has a single admin account; once logged in, it can be renamed and have its password changed from the "Account" page — `ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` and the setup screen are only used to bootstrap that initial account.
-
-### Using the pre-built image
-
-Multi-arch (`linux/amd64`, `linux/arm64`) images are published to GHCR on every tagged release via `.github/workflows/docker-publish.yml`:
-
-```bash
-docker pull ghcr.io/kosukefukumori/scope-proxy:latest
-```
-
-To use it with Docker Compose instead of building locally, replace the `build:` block in `docker-compose.yml` with `image: ghcr.io/kosukefukumori/scope-proxy:latest`.
 
 ### Development
 
