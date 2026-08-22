@@ -10,6 +10,7 @@ import { UsagePage } from './pages/UsagePage'
 import { AccountPage } from './pages/AccountPage'
 import { UsersPage } from './pages/UsersPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { RedirectIfAuthenticated } from './components/RedirectIfAuthenticated'
 
 /** List of pages that require login. */
 const PROTECTED_ROUTES: { path: string; element: ReactNode }[] = [
@@ -27,7 +28,14 @@ const PROTECTED_ROUTES: { path: string; element: ReactNode }[] = [
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/login"
+        element={
+          <RedirectIfAuthenticated>
+            <LoginPage />
+          </RedirectIfAuthenticated>
+        }
+      />
       {PROTECTED_ROUTES.map((route) => (
         <Route key={route.path} path={route.path} element={<ProtectedRoute>{route.element}</ProtectedRoute>} />
       ))}
